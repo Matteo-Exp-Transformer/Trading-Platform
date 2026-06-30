@@ -19,7 +19,9 @@
 ## Quando scrivere un report (riepilogo — dettaglio nella Bussola §6)
 
 - **light** (fix piccolo, 1 zona, basso rischio): NIENTE file report → 1 riga in `sessioni/SESSION_LOG.md`.
-- **standard / deep**: file `Report-*.md` in `sessioni/GG-MM-AA/` con le sezioni sotto.
+- **standard / deep**: file `Report-*.md` in **`_sessioni-lavoro/AAAA-MM-GG/`** (cartella gitignored a root,
+  data ISO) con le sezioni sotto. Crea la cartella del giorno se non esiste. L'indice `sessioni/SESSION_LOG.md`
+  (committato) prende 1 riga che punta al report. Si scrive su **«lavoro ok»** o **«report finale»**.
 
 La modalità la assegna l'agente di consulto a monte (se c'è) e la scrive nel prompt; altrimenti la
 deduce l'agente di lavoro dai trigger della Bussola §6. Nel dubbio: standard.
@@ -205,9 +207,9 @@ aggiornala **ora**, non dopo il merge. Approvare un merge con la skill stale las
   ripristino indipendenti).
 - Conventional Commits: `feat(scope):` · `fix(scope):` · `docs(scope):`.
 - Corpo del commit: sezione **`Review:`** con i path per revisionare (report, SESSION_LOG, skill toccati).
-- **Trappola gitignore:** se la cartella della documentazione (o delle sessioni) è gitignored, i file
-  **nuovi** lì dentro richiedono `git add -f`; i file **già tracciati** si committano normali. Se un
-  `git add` misto fallisce con «paths are ignored», forza con `-f` il file nuovo e ripeti.
+- **Report di sessione = locali, NON committati:** i `Report-*.md` vivono in `_sessioni-lavoro/` (gitignored)
+  e **restano lì** — non forzarli con `git add -f`. Si committano solo: l'indice `sessioni/SESSION_LOG.md`,
+  il follow-up `sessioni/FOLLOW_UP.md` e le skill toccate (già tracciati → commit normale).
 - Aggiungi SOLO i tuoi file: non includere modifiche/untracked altrui nel commit del task.
 
 ## 3. Allineamento branch di lavoro → branch principale (se richiesto)

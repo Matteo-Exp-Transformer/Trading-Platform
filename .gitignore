@@ -31,6 +31,10 @@ server/uploads/*
 _private/
 _lavoro/
 
+# Report di sessione (lavoro locale, cartelle datate AAAA-MM-GG) — NON versionati.
+# L'indice leggero resta in docs/.../sessioni/SESSION_LOG.md (committato).
+_sessioni-lavoro/
+
 # Database locale (se mai usato in dev)
 *.db
 *.sqlite

@@ -1,10 +1,12 @@
 # Report fine sessione — {{titolo}}
 
-**Data:** {{GG-MM-AA}}
+**Data:** {{AAAA-MM-GG}}
 **Profilo agente:** {{Esecuzione | Verifica | Meta}}
 **Modalità:** {{light | standard | deep}} {{(+ nota se alzata in corsa e perché)}}
 **Test:** {{esito validate / N/A}}
 
+> **Dove salvare:** copia questo modello in `_sessioni-lavoro/{{AAAA-MM-GG}}/Report-{{tema}}.md` (cartella
+> gitignored a root — crea quella del giorno se manca), poi aggiungi 1 riga in `SESSION_LOG.md`.
 > **light** → questo file non serve: basta 1 riga in `SESSION_LOG.md`. Compila il report solo per **standard**/**deep**.
 > **Come compilare ogni sezione (fonte unica):** `comunicazione/CHIUSURA_SESSIONE.md` Parte A.
 

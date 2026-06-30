@@ -158,10 +158,11 @@ Trading-Platform/                 (repo: freedom-trading-system)
 │   ├── CONTESTO_PRODOTTO.md      fonte di verità del prodotto
 │   ├── PIANO_LAVORO.md           piano a milestone
 │   └── skill-system-trading-platform/   (questo sistema)
-├── client/                       React + Vite (da costruire)
-├── server/                       Node + Express + agente (da costruire)
+├── client/                       React+Vite+Tailwind+Zustand (scaffold M0 ✅, zone da costruire)
+├── server/                       Node+Express ESM (scaffold M0 ✅, agente da costruire)
 ├── kit/                          metodo Aware Trader (LOCK, lato server)
-└── _private/                     gitignored, non-obbligatorio per gli agenti
+├── _private/                     gitignored, non-obbligatorio per gli agenti
+└── _sessioni-lavoro/             gitignored — report di lavoro datati AAAA-MM-GG (indice in sessioni/SESSION_LOG.md)
 ```
 
 > Regola: le **skill** stanno in `docs/skill-system-trading-platform/` (casa unica). Il **privato**
@@ -185,9 +186,10 @@ node --check <file.js> # check sintassi dopo modifiche JS
 
 - **A inizio sessione**, l'agente carica `comunicazione/COMUNICAZIONE_SKILL.md` e — se userà il
   vocabolario o farà domande — mostra all'utente la **checklist di apertura**. Vedi quella skill.
-- **A fine sessione** (se l'utente conferma successo), l'agente esegue il protocollo di chiusura
-  **secondo la modalità del task** (§6): report in `sessioni/`, aggiornamento `SESSION_LOG.md` +
-  `FOLLOW_UP.md`, raccolta dati comunicazione, checklist di chiusura. **Fonte unica:**
+- **A fine sessione** (se l'utente conferma successo, su «lavoro ok» o «report finale»), l'agente esegue
+  il protocollo di chiusura **secondo la modalità del task** (§6): report in `_sessioni-lavoro/AAAA-MM-GG/`
+  (gitignored), aggiornamento dell'indice `sessioni/SESSION_LOG.md` + `FOLLOW_UP.md`, raccolta dati
+  comunicazione, checklist di chiusura. **Fonte unica:**
   `comunicazione/CHIUSURA_SESSIONE.md` (Parte A = report; Parte B = commit/push/branch/DB/terminali).
   Lo stile sta in `comunicazione/COMUNICAZIONE_SKILL.md`; il modello in `sessioni/_TEMPLATE_REPORT.md`.
   Se è installato l'hook `stop` (`hooks/`), a fine chat ti rilancia per completare il report.

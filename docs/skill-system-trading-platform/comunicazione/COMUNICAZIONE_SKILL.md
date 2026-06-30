@@ -102,7 +102,7 @@ rispondi guardando invece che immaginando.
 ✅ Chiusura sessione — checklist skill system
 
 A carico dell'AGENTE:
-- [ ] Report scritto in sessioni/GG-MM-AA/Report-*.md
+- [ ] Report scritto in _sessioni-lavoro/AAAA-MM-GG/Report-*.md (gitignored)
 - [ ] SESSION_LOG.md aggiornato (riga one-liner)
 - [ ] FOLLOW_UP.md aggiornato (nuovi FU-NNN o chiusure)
 - [ ] Dati comunicazione raccolti (esiti voci Liv.2 in VOCABOLARIO + OSSERVAZIONI)

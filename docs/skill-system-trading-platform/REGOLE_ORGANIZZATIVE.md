@@ -31,9 +31,10 @@ due posti: si disallinea.
 
 ### 3. Il privato è gitignored e dichiarato
 
-I file con prezzi, dati sensibili, bozze personali vanno in una cartella **gitignored**
-(es. `_lavoro/`, `_private/`) ed è scritto a chiare lettere nella bussola che NON sono contesto
-obbligatorio per gli agenti. Mai referenziarli come fonte in una skill versionata.
+I file con prezzi, dati sensibili, bozze personali e **report di lavoro** vanno in una cartella
+**gitignored** (es. `_lavoro/`, `_private/`, `_sessioni-lavoro/`) ed è scritto a chiare lettere nella
+bussola che NON sono contesto obbligatorio per gli agenti. Mai referenziarli come fonte in una skill
+versionata. (I report stanno in `_sessioni-lavoro/AAAA-MM-GG/`; in git resta solo l'indice `SESSION_LOG.md`.)
 
 > **Esempio — sottosistema didattico (se attivo):** i file vivi (`{{GLOSSARIO_VIVO}}`,
 > `{{PROFILO_SCOLASTICO}}`, `{{ROADMAP_SKILL}}`, `materiale-didattico/`) stanno qui, nella cartella
@@ -65,7 +66,8 @@ al report —
 
 ```markdown
 > **Divieto:** NON reintrodurre {{cosa rimossa}}.
-> Dettaglio storico: [Report {{tema}} GG-MM-AA](sessioni/.../Report-….md).
+> Dettaglio storico: riga in `sessioni/SESSION_LOG.md` (indice committato) → report locale in
+> `_sessioni-lavoro/AAAA-MM-GG/Report-….md`.
 ```
 
 Le tabelle operative («Se hai modificato X → aggiorna Y») restano: sono procedura, non cronologia.

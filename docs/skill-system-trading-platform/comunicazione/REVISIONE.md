@@ -108,4 +108,4 @@ generica (togliendo i riferimenti specifici al progetto).
 - Voci promosse/regredite in `VOCABOLARIO.md` (con data ed esito).
 - Parole nuove coniate per la routing + Bussola aggiornata.
 - `PROPOSTE.md` svuotato delle voci decise (spostate in Archivio).
-- Report Meta in `sessioni/` (stesso template, profilo Meta).
+- Report Meta in `_sessioni-lavoro/AAAA-MM-GG/` (gitignored; stesso template, profilo Meta) + riga in `sessioni/SESSION_LOG.md`.
