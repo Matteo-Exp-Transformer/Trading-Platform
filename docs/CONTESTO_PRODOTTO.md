@@ -37,6 +37,8 @@ un **agente AI** li legge e li commenta applicando il metodo **Aware Trader** (u
 | L12 | Freno costi | **Nessun limite** in demo (per testare liberamente) | 2026-06-30 | La demo la prova l'utente in test; il cliente la prova solo all'intervista (controllata), non riceve un accesso proprio. **Prodotto finale (clienti): limiti d'uso previsti** — n° analisi, follow-up, screenshot per utente (Fase 2, vedi §9) |
 | L13 | Metodo (kit) | **Trade Analysis Agent Kit v3** è l'autorità; scope **intraday/scalping** (decisionale 5m/15m, contesto 1H/4H) | 2026-06-30 | Sostituisce i placeholder `kit/`. Swing/Position = estensione futura, fuori demo |
 | L14 | Avvio analisi | **Form guidato** che genera il primo prompt + slot screenshot fissi per timeframe | 2026-06-30 | Dettaglio in `context/CHAT_ANALISI_CONTEXT.md` §4 |
+| L15 | Login (M1) | **Email + password**; account creati **a mano** (no registrazione aperta); conferma email **disattivata**, email finte/interne ammesse; sessione persistente fino a «Esci» | 2026-06-30 | Niente SMTP in demo. Dettaglio in `context/AUTH_CONTEXT.md` |
+| L16 | Recupero password / validazione email | **Rimandati a dopo l'intervista cliente** (FU-002, FU-003) | 2026-06-30 | In demo: reset password a mano dall'admin. Richiederanno SMTP + email reali |
 
 ---
 
@@ -146,7 +148,7 @@ In demo restano **disattivati** per testare l'app liberamente (L12). Si attivera
 - [ ] **Deploy**: la demo si prova all'intervista in modo controllato (il cliente non riceve accesso) → può bastare locale o URL privato? Target di deploy da definire.
 - [ ] **Modelli nello switcher**: quali 2–3 Gemini nella lista curata delle Impostazioni?
 - [ ] **Estetica**: quali elementi della beta ricostruire (sfondo animato, palette, font) e con che priorità?
-- [~] **Flussi dettagliati** per schermata: **Chat + Avvio analisi (form) + follow-up** mappati (`CHAT_ANALISI_CONTEXT.md`). Restano: Auth, Sidebar/Storico, Impostazioni, Estetica.
+- [~] **Flussi dettagliati** per schermata: **Chat + Avvio analisi (form) + follow-up** (`CHAT_ANALISI_CONTEXT.md`) e **Auth** (`AUTH_CONTEXT.md`) mappati. Restano: Sidebar/Storico, Impostazioni, Estetica.
 
 ---
 

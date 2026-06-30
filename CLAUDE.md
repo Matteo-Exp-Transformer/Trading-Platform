@@ -36,7 +36,7 @@ si scrive codice di una zona prima che il suo file di `context/` esista. Dettagl
 |------|---------------------|
 | `kit/` | Metodo Aware Trader (system prompt dell'AI). LOCK: solo server, mai esposto, mai citare il nome-metodo proibito. |
 | `server/src/agent/` | Catena agente (skillLoader→promptBuilder→providerClient→orchestrator). LOCK: riusare; si adatta solo providerClient (Gemini+streaming). |
-| `.env` | Chiavi Gemini + Supabase service key. LOCK: solo server, gitignored, mai nel client. |
+| `.env.local` | Chiavi Gemini + Supabase service key (root, gitignored; modello in `.env.example`). LOCK: solo server, mai nel client. |
 | `docs/CONTESTO_PRODOTTO.md` | Fonte di verità di prodotto e decisioni LOCKED. |
 
 ## Comandi principali
@@ -60,7 +60,7 @@ node --check <file.js> # check sintassi dopo modifiche JS
 
 ## Zone delicate / LOCK
 
-Sintesi (testo pieno: Bussola §2): `kit/` · catena agente · segreti `.env` · isolamento per utente (RLS).
+Sintesi (testo pieno: Bussola §2): `kit/` · catena agente · segreti `.env.local` · isolamento per utente (RLS).
 I LOCK battono il profilo: valgono anche in un fix piccolo.
 
 ## Regole organizzative

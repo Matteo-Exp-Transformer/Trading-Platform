@@ -102,8 +102,12 @@ create trigger on_auth_user_created
 - **Server:** `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (mai nel client). Per ora serve solo ad
   admin/test; da M3 il server verificherà il **JWT** dell'utente e agirà **per suo conto** (RLS attiva),
   senza usare la service_role nei percorsi di richiesta.
-- `.env` (root) già modellato in `.env.example` (`SUPABASE_URL/ANON/SERVICE`). **M1 aggiunge** le
-  varianti client `VITE_*`. `.env` resta gitignored (LOCK segreti).
+- Il file dei segreti reali è **`.env.local`** (root, gitignored), modellato da `.env.example`
+  (`SUPABASE_URL/ANON/SERVICE` + `VITE_*`). I test lo caricano via `server/test/setup-env.js`
+  (`process.loadEnvFile`). LOCK segreti: mai in un file tracciato.
+- **Account di test** (login UI manuale / per agenti che provano l'app): `test@t.com`, password in
+  `.env.local` (`TEST_USER_EMAIL` / `TEST_USER_PASSWORD`). Creato a mano dal pannello con Auto Confirm —
+  niente registrazione aperta. Login UI verificato funzionante (2026-06-30).
 
 ## 7. Sessione, rotte e disclaimer
 
@@ -136,3 +140,8 @@ Test `server/test/auth-rls.test.js` (Vitest, lato server):
 
 - `_sessioni-lavoro/2026-06-30/Report-M1-auth-rls.md` — esecuzione M1 completa (2026-06-30):
   DB migrato, Login + AuthProvider + ProtectedRoute + Home, test RLS verde, `npm run validate` 19/19.
+- **Revisione + hardening (2026-06-30):** advisor Supabase ridotti da 5 a 1. Migrazione
+  `m1_hardening_revoke_rpc_and_rls_initplan`: `revoke execute` su `handle_new_user()` da
+  `public/anon/authenticated` (resta chiamabile solo come trigger; service_role intatto) e policy RLS
+  con `(select auth.uid())`. Resta aperto solo «leaked password protection» (interruttore pannello,
+  bassa priorità in demo) → vedi FOLLOW_UP.
