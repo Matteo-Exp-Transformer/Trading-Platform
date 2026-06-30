@@ -1,0 +1,92 @@
+# Manuale di blindatura — come testare una sezione in modo professionale
+
+> **Cos'è.** La **source of truth** del metodo di test per portare una sezione dell'app a prod-ready
+> («blindata»). Dice a un agente, dopo la mappatura: **quali test fare, in che ordine, quando il
+> controtest "rompi" è obbligatorio, e qual è il cancello per dichiarare blindato**.
+> Lo referenzia il masterplan/piano di blindatura da ogni milestone.
+>
+> **Non duplica.** Per lo *stack* (strumenti, comandi) → `TESTING_SKILL.md`. Per i *viewport standard*
+> → `TESTING_SKILL.md` (sezione QA). Qui c'è solo il **metodo**: quando applicare cosa.
+
+---
+
+## 0. Le 3 famiglie di test
+
+| Famiglia | Cosa verifica | Quando |
+|----------|---------------|--------|
+| **Copertura** | «ciò che ho pensato di testare funziona» | sempre, dopo ogni modifica |
+| **"Rompi" (controtest)** | «cosa può rompere la sezione, e cosa può fare l'utente per romperla» | quando dovuto (§2) |
+| **QA responsive** | l'UI regge sui viewport standard con un umano/automazione che la usa | quando cambia la UI servita |
+
+> **Il punto che separa un dilettante da un professionista:** il verde dei test di copertura **non**
+> dimostra che la sezione è robusta — dimostra solo che le ipotesi che hai scritto passano. La
+> robustezza si dimostra **provando attivamente a rompere** la sezione. Un controtest che non ha
+> *provato* a rompere nulla non chiude l'area. Anti-pattern curato: *falso PASSA da copertura*.
+
+---
+
+## 1. La sequenza dopo la mappatura (ciclo A→D)
+
+1. **A — Copertura.** Test che blindano i flussi mappati, con marcatore `// @{{area}}-blindatura: <fronte>`.
+   Logica pura → unit; flussi utente reali → E2E. Prima cerca un test esistente da estendere.
+2. **B — `{{comando validate}}` verde.** Gate automatico: se rosso, ci si ferma.
+3. **C — Controtest "rompi" (se dovuto, §2).** Sub-agent con mandato *trova bug* sui 4 fronti (§3).
+4. **D — QA responsive + chiusura.** Viewport standard, doc e test index aggiornati, report.
+
+---
+
+## 2. QUANDO il controtest "rompi" è obbligatorio
+
+La regola è legata a **cosa tocca il diff**, non all'importanza percepita della sezione:
+
+| Il merge/milestone… | "Rompi" | Perché |
+|---------------------|---------|--------|
+| **Tocca codice con logica/stato** (mutation, form, calcoli, flusso dati) | ✅ **OBBLIGATORIO** | c'è comportamento che l'utente può sollecitare in modi imprevisti |
+| **Tocca solo presentazione pura** (label, stile statico, riordino visivo) | 🔶 **QA responsive sì, "rompi" no** | niente stato da corrompere |
+| **NON tocca codice servito** (solo test/config/doc) | ❌ **NON dovuto** | comportamento identico → niente da rompere. Non è un debito |
+
+> **Classificazione:** `git diff --name-only <base>..<branch> -- <dir codice servito>`. Vuoto → niente
+> "rompi". Tocca hook/mutation/logica → "rompi" obbligatorio. La stessa classificazione governa anche
+> *cosa va pubblicato* (vedi Playbook merge pubblico/privato).
+
+---
+
+## 3. I 4 fronti del controtest "rompi"
+
+Mandato al sub-agent: «**prova a rompere la sezione**».
+
+1. **Flusso dati — sporcalo.** Dati nulli/mancanti, doppio click, race tra invalidazioni, azione su un
+   record già in un altro stato. Lo stato finale è quello giusto?
+2. **Flusso utente — rompilo.** Click fuori sequenza, modale chiusa a metà, navigazione durante una
+   mutation, back/refresh durante un'azione. L'utente vede un errore chiaro o una schermata rotta?
+3. **Limit test — i confini.** Testi lunghissimi, numeri 0/negativi/enormi, date limite, liste lunghe,
+   capienza al limite esatto e ±1.
+4. **Responsive — i viewport standard.** Ogni modale/azione nuova: layout, bottoni raggiungibili, niente
+   overflow, console senza errori bloccanti.
+
+---
+
+## 4. Cancello «blindata»
+
+- [ ] Intervistata + mappata (il ciclo parte dall'intervista di senso, non dal codice).
+- [ ] Test di copertura con marcatore `@{{area}}-blindatura`, verdi.
+- [ ] `{{comando validate}}` verde (rieseguito, non a memoria).
+- [ ] Controtest "rompi" eseguito **se dovuto** (§2), finding decisi (fix/follow-up/"voluto").
+- [ ] QA responsive se la UI servita cambia, console pulita.
+- [ ] Doc allineata nella stessa sessione (skill area, test index, masterplan).
+- [ ] Report sessione con esiti + decisioni.
+
+> Il cancello di **merge production** è separato e in più: pubblica solo se il diff tocca codice servito.
+
+---
+
+## 5. Rapporto con gli altri file (niente duplicati)
+
+| File | Source of truth di… |
+|------|---------------------|
+| **questo** | *metodo*: sequenza A→D, quando il "rompi" è dovuto, cancello blindato |
+| `TESTING_SKILL.md` | *stack*: strumenti, comandi, QA + viewport |
+| Playbook (`EVOLUZIONE_SKILLS.md`) | *principio* "rompi" + *regola merge* pubblico/privato |
+| `CONTROVERIFICA.md` | *sub-agente imparziale* di fine sessione |
+| `PLAN_BLINDATURA_<AREA>.md` | *applicazione per area* |
+| `<AREA>_TEST_SUITE_INDEX.md` | *inventario* test per area + buchi |

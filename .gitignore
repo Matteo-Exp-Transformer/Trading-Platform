@@ -1,0 +1,49 @@
+# Dipendenze
+node_modules/
+.pnp/
+.pnp.js
+
+# Build / output
+dist/
+build/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Segreti & ambiente — MAI committare (LOCK)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+# Chiavi/API sciolte (es. "Chiave api google.txt") — la chiave va in .env, mai in un file tracciato
+*[Cc]hiave*
+*[Aa]pi*[Kk]ey*
+*apikey*
+*api*google*
+
+# Upload utente (screenshot) — fuori dal versionamento
+uploads/
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Privato / non-obbligatorio per gli agenti
+_private/
+_lavoro/
+
+# Database locale (se mai usato in dev)
+*.db
+*.sqlite
+*.sqlite3
+
+# Log
+*.log
+npm-debug.log*
+logs/
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

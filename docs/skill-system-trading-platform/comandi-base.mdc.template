@@ -1,0 +1,49 @@
+---
+description: Grilletti di avvio chat + salvaguardie base — sempre attivi
+alwaysApply: true
+---
+
+# Comandi e salvaguardie base (sempre noti)
+
+> Rule **Cursor** di default. Rinomina in `.cursor/rules/comandi-base.mdc`. È una delle **tre porte
+> d'ingresso gemelle** (Cursor / Claude Code = `CLAUDE.md` / Codex = `AGENTS.md`): tutte nominano gli
+> stessi comandi e puntano alla stessa fonte di verità, `{{path}}/comunicazione/VOCABOLARIO.md`.
+
+Riconosci queste parole dell'utente a INIZIO chat, prima di sapere il task.
+Dettaglio + livelli delle voci: `{{path}}/comunicazione/VOCABOLARIO.md` (caricalo per le sfumature).
+
+## Grilletti di avvio
+- **«prepara» / «prepara prompt»** → NON eseguire codice. Carica la skill prepara-prompt
+  (`{{path}}/PREPARA_PROMPT_SKILL.md`) ed entra in modalità filtro: domande mirate, poi consegna
+  SOLO il prompt pronto per l'agente di lavoro.
+- **«implementa» / «fai» / «sistema» / «aggiungi» / «crea»** → profilo Esecuzione: carica la skill
+  dell'area (Bussola/routing § 0).
+- **«revisiona» / «verifica» / «debugga» / «non funziona»** → profilo Verifica: carica la skill di
+  testing + la skill area.
+- **«migliora/analizza/revisiona comunicazione»** → Meta revisore.
+- **«evolvi … senior» / «meta senior»** → Meta senior. «evolvi» SENZA «senior» → chiedi: senior o revisore?
+
+## Comandi durante/fine chat
+- **«lavoro ok»** → task accettato + SCRIVI/AGGIORNA un report COMPLETO. Come compilarlo:
+  `{{path}}/comunicazione/CHIUSURA_SESSIONE.md`. NON committa, NON fa push.
+- **«fai report finale»** → capitolo chiuso: verifica che il report sia allineato al diff reale, poi
+  proponi/esegui COMMIT + PUSH (su conferma utente).
+- **«dammi follow up»** → SOLO il prompt da incollare nella prossima chat, auto-contenuto.
+- **«spiegamelo semplice»** → effetto concreto + chi fa cosa, breve, no gergo.
+- **«ragioniamo»** → fermati a ragionare PRIMA di eseguire: spiegazione breve + effetto per te +
+  tabellina riassuntiva + checklist (case insensitive). Unico caso, con la chiusura, in cui la
+  tabella è attesa. Dettaglio: VOCABOLARIO «ragioniamo» (Liv. 1).
+
+## Zone che si confondono (chiedi PRIMA di toccare codice)
+{{Elenca qui le aree/termini dell'app che si assomigliano e che l'agente confonde — es. due pagine
+pubbliche, più zone con lo stesso nome. Per ciascuna: come distinguerle e quando chiedere Sì/No.
+Lasciare vuoto finché non emergono dai dati.}}
+
+## Salvaguardie sempre attive (a prescindere dal task)
+- **Sicurezza PROD**: prima di INSERT/UPDATE/DELETE/migrazioni verifica l'ambiente
+  ({{come — es. get_project_url}}). Se è PROD ({{id_prod}}) FERMATI e chiedi conferma. Su TEST
+  ({{id_test}}) procedi.
+- **Stile con l'utente**: parla per schermate/flussi concreti, non nomi-file isolati. Breve di
+  default, dettaglio se lo chiede.
+- **Comando non riconosciuto**: NON dedurre il profilo da solo, NON agire a caso → fai domande prima
+  di procedere. Mai inventare voci di vocabolario.

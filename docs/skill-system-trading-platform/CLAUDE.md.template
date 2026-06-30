@@ -1,0 +1,59 @@
+# CLAUDE.md — Guida per sessioni AI ({{NOME_PROGETTO}})
+
+> File master per **Claude Code**. Vive nella **root**. Rinomina questo file in `CLAUDE.md`.
+>
+> **Tre ambienti, tre porte d'ingresso gemelle — una sola fonte di verità.** Ogni ambiente legge un
+> file diverso all'avvio; tutti devono nominare il sistema e puntare al `VOCABOLARIO.md`:
+> - **Cursor** → `.cursor/rules/comandi-base.mdc` (`alwaysApply: true`)
+> - **Claude Code** → questo `CLAUDE.md`
+> - **Codex** → `AGENTS.md` in root (vedi `AGENTS.md.template`)
+>
+> Se aggiungi un grilletto in uno, aggiungilo in **tutti e tre** (sono brevi e puntano al VOCABOLARIO).
+> Lezione 06-06-26: i comandi in un solo file scattano solo nell'ambiente che lo legge.
+
+## Orientamento
+
+All'inizio di ogni sessione, l'agente carica la **Bussola** (`{{path}}/00_BUSSOLA_SKILL.md`):
+instrada al file di contesto giusto e definisce profili e LOCK.
+
+## Comandi e vocabolario (leggi a inizio sessione)
+
+> Fonte di verità: `{{path}}/comunicazione/VOCABOLARIO.md`. Applica la voce quando l'utente usa una
+> parola mappata. **Livelli:** Liv. 1 = applica subito · Liv. 2 = applica, ma se ambiguo una domanda
+> breve prima · Liv. 3 = chiedi sempre conferma salvo match identico.
+> Grilletti principali + salvaguardie: dettaglio in `.cursor/rules/comandi-base.mdc`. Include
+> **«ragioniamo»** (Liv. 1): ferma ed esponi spiegazione + effetto + tabellina + checklist.
+> **Comando non riconosciuto → non dedurre, chiedi prima.**
+
+## File critici
+
+| File | Perché è importante |
+|------|---------------------|
+| {{path}} | {{...}} |
+
+## Comandi principali
+
+```bash
+{{comando_dev}}        # dev server
+{{comando_build}}      # build
+{{comando_lint}}       # lint
+{{comando_test}}       # test
+{{comando_validate}}   # lint + typecheck + test (pre-PR)
+```
+
+## Convenzioni
+
+- **Comunicazione con l'utente:** breve, concreta, no gergo. Vedi
+  `{{path}}/comunicazione/COMUNICAZIONE_SKILL.md`.
+- **Commit:** {{convenzione, es. Conventional Commits}}.
+- **Import alias:** {{es. @/ → src/}}.
+- **Logger:** {{usare logger del progetto, mai console.log}}.
+
+## Zone delicate / LOCK
+
+- {{file/area da non toccare senza permesso e perché}}.
+
+## Regole organizzative
+
+Root pulita, skill in una sola casa, privati gitignored. Vedi
+`{{path}}/REGOLE_ORGANIZZATIVE.md`.

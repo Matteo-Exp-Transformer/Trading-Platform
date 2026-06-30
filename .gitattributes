@@ -1,0 +1,8 @@
+# Binari (mai normalizzare)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.zip binary

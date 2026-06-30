@@ -1,0 +1,59 @@
+---
+name: testing
+description: >-
+  Skill per qualsiasi lavoro su test in {{progetto}}: unit, component, E2E, CI, copertura.
+  Caricala quando il task riguarda test o quando, in profilo Verifica, devi validare un lavoro.
+---
+
+# Testing — Guida agente
+
+> Stack: {{es. Vitest + jsdom + MSW per unit/component; Playwright per E2E}}.
+
+---
+
+## 0. Quando caricare questo skill
+
+| Il task riguarda… | Skill |
+|-------------------|-------|
+| Aggiungere/modificare test | **questo** |
+| Analizzare un test che fallisce | **questo** |
+| Modificare codice app (non i test) | skill della zona |
+
+## 1. Regole d'oro
+
+- **Prima di scrivere un test nuovo, verifica se ne esiste già uno utile** ed estendilo.
+- **Nessun test tocca dati di produzione.** {{specifica ambiente test}}.
+
+## 2. Quando usare cosa
+
+```
+Logica senza browser   → {{unit runner}}
+Simuli un utente clic   → {{E2E runner}}
+```
+
+## 3. Comandi
+
+```bash
+{{comando_test}}        # unit
+{{comando_e2e}}         # E2E
+{{comando_validate}}    # gate pre-PR
+```
+
+## 4. Profilo Verifica — QA manuale (se applicabile)
+
+> Caricare quando l'utente chiede «revisiona/verifica», o a fine sessione prima di dichiarare
+> «fatto».
+
+1. **{{comando_validate}}** — gate automatico. Se fallisce, la revisione si ferma.
+2. **QA manuale** sui viewport standard del progetto: {{es. 375 / 834 / 1280}}. Ripeti gli stessi
+   passi funzionali su ogni viewport.
+3. **Registro esiti** — tabella nel report (ID · viewport · esito · nota).
+
+> Non dichiarare «verificato» con una sola larghezza schermo né con la sola lettura del codice.
+
+## 5. Tabella file di contesto
+
+| File | Cosa contiene |
+|------|---------------|
+| {{config test}} | {{...}} |
+| {{setup}} | {{...}} |
