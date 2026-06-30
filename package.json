@@ -1,0 +1,32 @@
+{
+  "name": "freedom-trading-system",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "FREEDOM TRADING SYSTEM — demo: webapp che legge screenshot di grafici e li commenta con il metodo Aware Trader.",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n client,server -c blue,green npm:dev:client npm:dev:server",
+    "dev:client": "npm run dev -w client",
+    "dev:server": "npm run dev -w server",
+    "build": "npm run build -w client",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint .",
+    "validate": "npm run lint && npm run test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.13.0"
+  }
+}

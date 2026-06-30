@@ -18,11 +18,18 @@ M0 Fondamenta ─► M1 Auth+RLS ─► M2 Chat base (no AI) ─► M3 Cervello+
 
 ---
 
-## M0 — Fondamenta repo & tooling  ⬜
+## M0 — Fondamenta repo & tooling  ✅ *(2026-06-30)*
 **Obiettivo:** repo pulita e costruibile. **Deliverable:** scaffold `client/` (React+Vite+Tailwind+Zustand)
 + `server/` (Node+Express), riporto `kit/` dall'estratto, lint + test runner + `npm run validate`, progetto
 Supabase creato, `.env` reale (non committato). **Pre-esecuzione (intervista):** stack di test, comandi.
 **Fatto quando:** `npm run dev` parte, un test d'esempio passa, `validate` verde.
+
+> **Esito M0 (2026-06-30):** monorepo **npm workspaces** (`client/` + `server/`), linguaggio **JS+JSX**,
+> test runner **Vitest** (stessa toolchain del client), lint **ESLint 9 flat config**. Comandi confermati:
+> `npm install` · `npm run dev` (Vite 5173 + server 3001 via `concurrently`) · `npm test` · `npm run validate` (lint+test).
+> Test d'esempio: `client/src/App.test.jsx` (titolo + disclaimer), `server/test/health.test.js` (`/api/health`).
+> **Node** installato (LTS 24) via winget. **Supabase + `.env` reale: spostati a M1** (decisione di intervista —
+> M0 resta scaffold puro buildabile; Supabase serve davvero con auth/RLS).
 
 ## M1 — Auth & isolamento per utente  ⬜  *(deep — auth + RLS)*
 **Obiettivo:** login funzionante con account leggeri, ogni utente vede solo i propri dati.
