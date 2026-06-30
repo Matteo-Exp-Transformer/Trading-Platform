@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": "node hooks/fine-sessione-nudge.mjs",
+        "timeout": 10,
+        "loop_limit": 3
+      }
+    ],
+    "beforeMCPExecution": [
+      {
+        "command": "node hooks/guard-prod.mjs",
+        "timeout": 10
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "node hooks/guard-prod.mjs",
+        "timeout": 10
+      }
+    ]
+  }
+}
