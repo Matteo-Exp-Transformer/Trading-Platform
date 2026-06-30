@@ -77,7 +77,7 @@ file da modificare. I file `*(da creare)*` nascono via intervista nei prossimi g
 | Sidebar / storico chat / nuova chat | `context/SIDEBAR_STORICO_CONTEXT.md` *(da creare)* |
 | Impostazioni (tema · cambio password · scelta modello) | `context/IMPOSTAZIONI_CONTEXT.md` *(da creare)* |
 | Estetica / stile UI (sfondo animato, tema verde-scuro) | `context/ESTETICA_CONTEXT.md` *(da creare)* |
-| DB / schema / migrazioni / RLS (Supabase) | `aree/DB_SUPABASE_SKILL.md` *(da creare)* ⚠️ deep (§6) |
+| DB / schema / migrazioni / RLS (Supabase) | `aree/DB_SUPABASE_SKILL.md` ✅ ⚠️ deep (§6) |
 | Test / CI | `aree/TESTING_SKILL.md` |
 | Come rispondere / report / vocabolario | `comunicazione/COMUNICAZIONE_SKILL.md` |
 | Affinare il sistema / promuovere voci | `comunicazione/REVISIONE.md` (sessione dedicata) |
