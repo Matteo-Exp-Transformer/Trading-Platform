@@ -31,11 +31,14 @@ Supabase creato, `.env` reale (non committato). **Pre-esecuzione (intervista):**
 > **Node** installato (LTS 24) via winget. **Supabase + `.env` reale: spostati a M1** (decisione di intervista —
 > M0 resta scaffold puro buildabile; Supabase serve davvero con auth/RLS).
 
-## M1 — Auth & isolamento per utente  ⬜  *(deep — auth + RLS)*
+## M1 — Auth & isolamento per utente  ✅  *(deep — auth + RLS — 2026-06-30)*
 **Obiettivo:** login funzionante con account leggeri, ogni utente vede solo i propri dati.
-**Deliverable:** Supabase Auth, pagina Login, policy RLS su tabelle utente, disclaimer in login.
-**Context da creare prima:** `AUTH_CONTEXT.md`. **Deciso:** account **su invito / a mano** (no registrazione aperta).
-**Fatto quando:** due utenti di test non vedono i dati l'uno dell'altro (verificato con test).
+**Deliverable:** Supabase Auth, pagina Login, tabella `profiles` + policy RLS, trigger di provisioning,
+guscio autenticato minimo (profilo + «Esci»), routing protetto, disclaimer in login, test d'isolamento.
+**Context:** `context/AUTH_CONTEXT.md` ✅ creato (intervista 2026-06-30, 2 giri). **Progetto Supabase:** `eezybdmdtlehcvwobhgc` (vuoto).
+**Deciso (intervista):** email+password · account a mano (no registrazione) · conferma email off · email finte ok ·
+sessione persistente · recupero password + validazione email = **FU-002/FU-003** (dopo intervista cliente).
+**Fatto quando:** due utenti di test non vedono i dati l'uno dell'altro (verificato con `server/test/auth-rls.test.js`).
 
 ## M2 — Chat base (senza AI)  ⬜
 **Obiettivo:** invio messaggio, salvataggio chat/messaggi, storico in sidebar, isolamento verificato.

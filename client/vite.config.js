@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 // Vite + React. La sezione `test` configura Vitest (stessa toolchain del client).
 export default defineConfig({
   plugins: [react()],
+  envDir: '..', // Carica .env* dalla root del monorepo (per VITE_SUPABASE_*)
   server: {
     port: 5173,
     // Proxy verso il server Express in dev: le chiamate /api vanno a localhost:3001.
