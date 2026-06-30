@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth/AuthProvider.jsx';
 import { ProtectedRoute } from './auth/ProtectedRoute.jsx';
 import Login from './pages/Login.jsx';
-import Home from './pages/Home.jsx';
+import Chat from './pages/Chat.jsx';
 
 // Rotta pubblica con redirect automatico se già autenticato.
 function LoginRoute() {
@@ -22,7 +22,7 @@ export default function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <Home />
+                <Chat />
               </ProtectedRoute>
             }
           />
