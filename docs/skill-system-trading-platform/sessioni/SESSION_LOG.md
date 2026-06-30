@@ -11,4 +11,5 @@
 | 2026-06-30 | Esecuzione (deep) | M1 Auth & RLS: Login, AuthProvider, ProtectedRoute, profiles+RLS su Supabase, test isolamento | `_sessioni-lavoro/2026-06-30/Report-M1-auth-rls.md` |
 | 2026-06-30 | Esecuzione (deep) | M2 DB: tabelle chats+messages, RLS 8 policy, 3 migrazioni hardening, test isolamento verdi | `_sessioni-lavoro/2026-06-30/Report-M2-db-chats-messages-rls.md` |
 | 2026-06-30 | Verifica (deep) | Revisione sicurezza M2: audit policy/RLS/trigger, chiusa asimmetria UPDATE messages (FU-007), test regressione, validate verde | `_sessioni-lavoro/2026-06-30/Report-M2-revisione-sicurezza-rls.md` |
+| 2026-06-30 | Esecuzione (deep) | M2 slice 2b Chat UI base: form guidato analisi, pagina chat (bolle + composer), persistenza su Supabase, 57 test client verdi | `_sessioni-lavoro/2026-06-30/Report-M2-chat-ui-base.md` |
 | {{AAAA-MM-GG}} | {{Esecuzione}} | {{cosa fatto in breve}} | `_sessioni-lavoro/{{AAAA-MM-GG}}/Report-{{tema}}.md` |

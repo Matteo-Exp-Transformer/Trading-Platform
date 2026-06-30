@@ -31,6 +31,8 @@ vuole. Hai **due momenti**:
 ## 0. Cosa carichi (e cosa no)
 
 Leggi per orientarti e stimare i rischi:
+- `docs/skill-system-trading-platform/sessioni/HANDOFF.md` — **per primo**: testimone Senior→Senior,
+  dice dove siamo e qual è il prossimo passo. È il baton tra una chat Senior e l'altra (solo Senior).
 - La **Bussola** / routing aree (profili, LOCK, TEST vs PROD).
 - `docs/skill-system-trading-platform/sessioni/FOLLOW_UP.md` — follow-up aperti (evita duplicati).
 - `docs/skill-system-trading-platform/comunicazione/VOCABOLARIO.md` — le parole-comando approvate (il tuo dizionario, § 1.B).
@@ -145,7 +147,11 @@ A esecutore finito:
    cosa ha funzionato, esiti voci Liv.2) e segnala candidati in PROPOSTE. **Non riformi** le regole.
 5. **Metriche** (standard/deep): una riga oggettiva nel registro di EVOLUZIONE_SKILLS (n° prompt ·
    correzioni · follow-up · modalità alzata sì/no). Solo numeri, niente voto.
-6. **Contesto quasi esaurito** → dai un «prompt proseguimento» invece di iniziare report/revisione.
+6. **Sempre — aggiorna l'HANDOFF (PRIMA di commit/push):** sovrascrivi `sessioni/HANDOFF.md` sez. 1-4
+   (dove siamo · prossimo passo concreto · decisioni d'intervista non ancora nei doc · questioni aperte
+   per l'utente) + la data in cima. È il baton per la prossima chat Senior: senza, il prossimo Senior
+   riparte alla cieca. **Va fatto prima della pubblicazione** (vedi `CHIUSURA_SESSIONE.md` Parte B §1).
+7. **Contesto quasi esaurito** → dai un «prompt proseguimento» invece di iniziare report/revisione.
 
 ---
 

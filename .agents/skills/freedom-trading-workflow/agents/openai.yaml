@@ -1,0 +1,7 @@
+interface:
+  display_name: "Freedom Trading Workflow"
+  short_description: "Allinea Codex al metodo operativo della repository"
+  default_prompt: "Usa $freedom-trading-workflow per avviare e svolgere questo task secondo il metodo della repository."
+
+policy:
+  allow_implicit_invocation: true

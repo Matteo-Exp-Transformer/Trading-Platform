@@ -106,4 +106,4 @@ due domande tecniche, poi opinione in prosa breve, e «lascia la palla al trader
 
 ## 8. Report di sessione collegati
 
-- _(nessuno ancora — primo codice atteso a M2/M3)_
+- `_sessioni-lavoro/2026-06-30/Report-M2-chat-ui-base.md` — slice 2b: form guidato + pagina chat base + persistenza Supabase, 57 test verdi. File principali creati: `client/src/pages/Chat.jsx`, `client/src/components/chat/NewAnalysisForm.jsx`, `client/src/components/chat/MessageBubble.jsx`, `client/src/components/chat/ChatPanel.jsx`, `client/src/lib/chatData.js`, `client/src/lib/formUtils.js`.

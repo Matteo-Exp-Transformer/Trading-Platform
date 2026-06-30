@@ -202,6 +202,11 @@ successivi). **Allinea i file di skill/context delle zone toccate** (vedi Parte 
 cambiato un layout/comportamento documentato in una skill e quella skill è ancora indietro →
 aggiornala **ora**, non dopo il merge. Approvare un merge con la skill stale lascia passare un debito.
 
+> **(Solo agente Senior) Aggiorna l'HANDOFF prima di committare.** Sovrascrivi `sessioni/HANDOFF.md`
+> (dove siamo · prossimo passo · decisioni d'intervista non ancora nei doc · questioni aperte) e la
+> data in cima, così la prossima chat Senior riparte allineata. Dettaglio in `PREPARA_PROMPT_SKILL.md §5`.
+> Gli agenti Esecuzione/Verifica saltano questo passo (non possiedono l'HANDOFF).
+
 ## 2. Commit — separati per tipo
 - **Codice** (`feat`/`fix`) e **documentazione** (`docs(...)`) in **commit distinti** (punti di
   ripristino indipendenti).
