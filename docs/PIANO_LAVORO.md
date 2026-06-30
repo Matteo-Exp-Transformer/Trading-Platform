@@ -64,8 +64,9 @@ si vedono in chat, sono isolate per utente.
 blindatura del cuore. **Context da creare prima:** `ESTETICA_CONTEXT.md`. **Fatto quando:** look coerente, zero regressioni sui test.
 
 ## M8 — Blindatura demo & deploy  ⬜  *(deep)*
-**Obiettivo:** demo «blindata» per il cliente. **Deliverable:** freno anti-runaway (limite analisi),
-gestione errori a vista ovunque, piano B per l'intervista, QA end-to-end, **deploy**.
+**Obiettivo:** demo «blindata» per il cliente. **Deliverable:** gestione errori a vista ovunque,
+piano B per l'intervista, QA end-to-end, **deploy**. *(Nessun freno costi — CONTESTO L12; resta solo
+`MAX_SCREENSHOT_PER_ANALISI` per la finestra di contesto, non per i costi.)*
 **Aperto:** target di deploy — la demo si prova all'intervista in modo controllato (il cliente non riceve
 accesso), quindi può bastare locale o URL privato. **Fatto quando:** percorso utente completo testato e stabile.
 

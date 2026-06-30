@@ -34,7 +34,7 @@ un **agente AI** li legge e li commenta applicando il metodo **Aware Trader** (u
 | L9 | Kit Aware Trader | Riusato **pari-pari** (ripulito dal nome-metodo proibito) | (eredità docs) | Valore distintivo; lato server |
 | L10 | Identità agente | L'AI si presenta come **Aware Trader**; kit riusato pari-pari | 2026-06-30 | Nome-metodo proibito ancora da raccogliere (giro kit) |
 | L11 | Account demo | **Su invito / creati a mano** (no registrazione aperta) | 2026-06-30 | Più controllato e sicuro per l'intervista |
-| L12 | Freno costi | **Nessun limite** in demo | 2026-06-30 | La demo la prova l'utente in test; il cliente la prova solo all'intervista (controllata), non riceve un accesso proprio |
+| L12 | Freno costi | **Nessun limite** in demo (per testare liberamente) | 2026-06-30 | La demo la prova l'utente in test; il cliente la prova solo all'intervista (controllata), non riceve un accesso proprio. **Prodotto finale (clienti): limiti d'uso previsti** — n° analisi, follow-up, screenshot per utente (Fase 2, vedi §9) |
 | L13 | Metodo (kit) | **Trade Analysis Agent Kit v3** è l'autorità; scope **intraday/scalping** (decisionale 5m/15m, contesto 1H/4H) | 2026-06-30 | Sostituisce i placeholder `kit/`. Swing/Position = estensione futura, fuori demo |
 | L14 | Avvio analisi | **Form guidato** che genera il primo prompt + slot screenshot fissi per timeframe | 2026-06-30 | Dettaglio in `context/CHAT_ANALISI_CONTEXT.md` §4 |
 
@@ -107,8 +107,8 @@ Agente Senior  →  intervista all'utente  →  contesto nello skill system (con
 ## 8. Rischi tecnici da presidiare
 
 1. **Qualità vision sui grafici = rischio #1.** Da testare su grafici reali **prima** di blindare il modello.
-2. **Costo per analisi.** ~4 screenshot per analisi → input pesante. Serve un **freno anti-runaway**
-   (limite analisi per utente/sessione) anche in demo.
+2. **Costo per analisi.** Fino a 3 screenshot per analisi → input pesante. **Nessun freno costi in demo**
+   (L12); l'unico limite è `MAX_SCREENSHOT_PER_ANALISI` per la **finestra di contesto**, non per i costi (§11).
 3. **Streaming + immagini.** Risposta a pezzi senza crash; decidere quante immagini/messaggi passati rimandare al modello.
 4. **Isolamento dati per utente.** Un utente non deve mai vedere le chat di un altro → RLS, verificato esplicitamente.
 5. **Segreti.** Chiave AI/Supabase solo lato server.
@@ -119,6 +119,9 @@ Agente Senior  →  intervista all'utente  →  contesto nello skill system (con
 
 ❌ Pagamenti / fatturazione / abbonamenti · ❌ Crediti / token a consumo · ❌ Self-host del modello su GPU ·
 ❌ White-label / branding del cliente · ❌ Funzioni extra fuori dalla spec. Arrivano **dopo** l'intervista col cliente.
+
+🔭 **Fase 2 (prodotto finale, NON demo):** limiti d'uso per utente — **n° analisi**, **follow-up**, **screenshot** per analisi.
+In demo restano **disattivati** per testare l'app liberamente (L12). Si attiveranno per i clienti finali.
 
 ---
 
