@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth/AuthProvider.jsx';
 import { ProtectedRoute } from './auth/ProtectedRoute.jsx';
 import Login from './pages/Login.jsx';
+import Home from './pages/Home.jsx';
 import Chat from './pages/Chat.jsx';
 import Settings from './pages/Settings.jsx';
 
@@ -21,6 +22,14 @@ export default function App() {
           <Route path="/login" element={<LoginRoute />} />
           <Route
             path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/nuova-analisi"
             element={
               <ProtectedRoute>
                 <Chat />

@@ -52,3 +52,70 @@ body {
   background-color: rgb(var(--color-surface));
   box-shadow: 0 0 2rem rgb(0 0 0 / 35%);
 }
+
+/* --- Home immersiva (M7-bis) ---------------------------------------------------------------
+   Decori dello sfondo animato e microinterazioni della Home. La Home forza il tema scuro
+   localmente (wrapper .dark), quindi qui i token valgono sempre slate+ciano. Tutte le animazioni
+   si spengono con prefers-reduced-motion (blocco in fondo): la Home resta statica ma leggibile.
+*/
+.home-grid {
+  /* Griglia finanziaria leggera: resta visibile anche se il <canvas> non è disponibile. */
+  background-image:
+    linear-gradient(to right, rgb(var(--color-line) / 0.6) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--color-line) / 0.6) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 80%);
+  mask-image: radial-gradient(ellipse at center, black 25%, transparent 80%);
+  opacity: 0.35;
+}
+
+.home-vignette {
+  /* Vignettatura scura ai bordi per contrasto/leggibilità del contenuto. */
+  background: radial-gradient(ellipse at center, transparent 30%, rgb(var(--color-app) / 0.92) 100%);
+}
+
+.home-blob {
+  will-change: transform;
+}
+.home-blob--cyan {
+  animation: home-drift-a 22s ease-in-out infinite alternate;
+}
+.home-blob--slate {
+  animation: home-drift-b 28s ease-in-out infinite alternate;
+}
+
+@keyframes home-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(3rem, 2rem, 0) scale(1.12); }
+}
+@keyframes home-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(-2.5rem, -1.5rem, 0) scale(1.08); }
+}
+
+/* Decoro a candele nell'hero: oscillazione lentissima e discreta. */
+.home-candle {
+  transform-origin: bottom center;
+  animation: home-candle-sway 6s ease-in-out infinite alternate;
+}
+@keyframes home-candle-sway {
+  from { transform: translateY(0); opacity: 0.6; }
+  to   { transform: translateY(-4px); opacity: 0.85; }
+}
+
+/* Entrata morbida e progressiva dei contenuti dell'hero. */
+.home-fade-up {
+  animation: home-fade-up 600ms ease-out both;
+}
+@keyframes home-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-blob,
+  .home-candle,
+  .home-fade-up {
+    animation: none !important;
+  }
+}

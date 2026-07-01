@@ -77,6 +77,7 @@ file da modificare. I file `*(da creare)*` nascono via intervista nei prossimi g
 | Sidebar / storico chat / nuova chat | `context/SIDEBAR_STORICO_CONTEXT.md` ✅ |
 | Impostazioni (tema · cambio password · modello AI per-account) | `context/IMPOSTAZIONI_CONTEXT.md` ✅ ⚠️ deep (§6) |
 | Estetica / stile UI (palette slate + accento ciano, sobrio) | `context/ESTETICA_CONTEXT.md` ✅ |
+| Home / landing dopo login (sfondo animato, hero, CTA) | `context/HOME_CONTEXT.md` ✅ (+ `ESTETICA_CONTEXT` per i token) |
 | DB / schema / migrazioni / RLS (Supabase) | `aree/DB_SUPABASE_SKILL.md` ✅ ⚠️ deep (§6) |
 | Test / CI | `aree/TESTING_SKILL.md` |
 | Come rispondere / report / vocabolario | `comunicazione/COMUNICAZIONE_SKILL.md` |
@@ -173,11 +174,13 @@ Trading-Platform/                 (repo: freedom-trading-system)
 ## 4. Comandi principali
 
 ```bash
-# Provvisori — da finalizzare quando parte il codice (vedi PIANO_LAVORO M0)
-npm run dev            # dev server (client + server)
-npm test               # test unitari (test per ogni funzione)
-npm run validate       # lint + typecheck + test (pre-PR)
-node --check <file.js> # check sintassi dopo modifiche JS
+# Confermati da M0. ESEGUIRE SEMPRE DALLA ROOT (monorepo npm workspaces): gli script stanno
+# nel package.json di root, NON in client/ o server/ (lì `npm run validate` non esiste → falso allarme).
+npm run dev            # dev server (client 5173 + server 3001)
+npm test               # test unitari (client + server, per ogni funzione)
+npm run validate       # gate pre-PR = lint + test (NON typecheck: è JS)
+npm run build          # build produzione del client
+node --check <file.js> # check sintassi dopo modifiche JS (solo .js, non .jsx)
 ```
 
 ---
@@ -195,8 +198,8 @@ node --check <file.js> # check sintassi dopo modifiche JS
   Se è installato l'hook `stop` (`hooks/`), a fine chat ti rilancia per completare il report.
 - **Sottosistema didattico:** NON attivo in questo progetto (gli agenti di lavoro non danno lezioni).
 
-> ⚠️ TEMPORANEA (rimuovere quando esiste codice e i comandi §4 sono confermati): finché la repo è
-> in setup documentale, gli entry point (§1) e i comandi (§4) sono **previsti**, non verificati.
+> ✅ Codice reale presente (M0–M7 + Home): gli entry point (§1) e i comandi (§4) sono **confermati e
+> verificati**, non più "previsti". Eseguire i comandi **dalla root** (monorepo workspaces).
 
 ---
 

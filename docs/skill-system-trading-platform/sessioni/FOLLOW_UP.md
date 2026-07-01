@@ -28,4 +28,13 @@
 
 | FU-017 | 2026-07-01 | **M7 — Verifica visiva live in browser reale**: in questa sessione ho verificato i valori dei token nel CSS compilato e la suite `npm run validate`/`npm run build`, ma non ho potuto aprire un browser reale (nessuno strumento di automazione — `chromium-cli`/Playwright — disponibile in questo ambiente). Da controllare a occhio: tema chiaro E scuro su Login/Chat (bolle, composer, form nuova analisi, dropzone screenshot)/Sidebar/Impostazioni, desktop e mobile; nessun flash all'avvio; disclaimer leggibile in entrambi i temi. | `_sessioni-lavoro/2026-07-01/Report-M7-estetica-slate-ciano.md` | aperto |
 
+| FU-018 | 2026-07-01 | **Home — MarketStatusBar**: orologio live + stato mercati Londra/New York/Tokyo (pallino verde aperto / grigio chiuso). Richiede logica orari mercati. | intervista Home (utente) | aperto |
+| FU-019 | 2026-07-01 | **Home — MarketOverview**: griglia ~9 asset (BTC, ETH, Oro, S&P500, Nasdaq, EUR/USD, GBP/USD, Petrolio, DAX) con prezzo/variazione/sparkline. Serve **fonte dati reale** (niente mock dove ci sono dati veri). | intervista Home (utente) | aperto |
+| FU-020 | 2026-07-01 | **Home — TradingCalendar**: calendario mensile stile dashboard, giorno corrente evidenziato in accento. | intervista Home (utente) | aperto |
+| FU-021 | 2026-07-01 | **Home — FeatureCards "panoramica app"**: card Analisi assistita · Memoria sessioni · Journal · Monitoraggio mercati (icona + descrizione + micro-hover). | intervista Home (utente) | aperto |
+| FU-022 | 2026-07-01 | **Home — ActiveSessionCard**: se esiste una sessione/chat aperta, card "riapri sessione" (asset, ultimo aggiornamento, stato). | intervista Home (utente) | aperto |
+| FU-023 | 2026-07-01 | **Pagina Journal** (funzionalità nuova, non solo estetica): serve definizione di prodotto prima di costruirla. CTA Home collegabile quando esiste. | intervista Home (utente) | aperto |
+| FU-024 | 2026-07-01 | **Pagina Trading Live** (funzionalità nuova): scope/dati da definire. CTA Home collegabile quando esiste. | intervista Home (utente) | aperto |
+| FU-025 | 2026-07-01 | **Home — font Space Grotesk** per i titoli (accento "premium" dal prompt). Opzionale; oggi font di sistema per coerenza con l'app. | intervista Home (utente) | aperto |
+
 > Stati: `aperto` · `in corso` · `fatto` (con data di chiusura) · `scartato` (con motivo).

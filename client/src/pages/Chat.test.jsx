@@ -4,9 +4,9 @@ import { MemoryRouter } from 'react-router-dom';
 import Chat from './Chat.jsx';
 
 // La Chat monta la Sidebar, che contiene un <Link> (ingresso Impostazioni): serve un Router.
-function renderChat() {
+function renderChat(entries) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={entries}>
       <Chat />
     </MemoryRouter>,
   );
@@ -65,6 +65,19 @@ describe('Chat (pagina)', () => {
     await waitFor(() => {
       expect(screen.getByText('Storico chat')).toBeInTheDocument();
     });
+  });
+
+  it('apre lo storico all\'arrivo dalla Home con lo stato openStorico', async () => {
+    renderChat([{ pathname: '/nuova-analisi', state: { openStorico: true } }]);
+    expect(mockListChats).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByText('Storico chat')).toBeInTheDocument();
+    });
+  });
+
+  it('senza stato di navigazione lo storico resta chiuso all\'avvio', () => {
+    renderChat();
+    expect(screen.queryByText('Storico chat')).not.toBeInTheDocument();
   });
 
   it('chiude la sidebar al click su chiudi', async () => {

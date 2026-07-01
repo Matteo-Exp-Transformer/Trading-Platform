@@ -123,7 +123,7 @@ export default function Settings() {
     <div className="min-h-screen flex flex-col bg-app text-content">
       <header className="flex items-center gap-3 px-6 py-4 border-b border-line shrink-0">
         <Link
-          to="/"
+          to="/nuova-analisi"
           aria-label="Torna alla chat"
           className="text-muted hover:text-content"
         >

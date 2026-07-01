@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { NewAnalysisForm } from '../components/chat/NewAnalysisForm.jsx';
 import { ChatPanel } from '../components/chat/ChatPanel.jsx';
@@ -11,6 +12,7 @@ const DISCLAIMER =
 
 export default function Chat() {
   const { profile, session, logout } = useAuth();
+  const location = useLocation();
   const [currentChatId, setCurrentChatId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [showForm, setShowForm] = useState(true);
@@ -56,6 +58,13 @@ export default function Chat() {
   useEffect(() => {
     if (currentChatId) fetchMessages(currentChatId);
   }, [currentChatId, fetchMessages]);
+
+  // Arrivo dalla Home col CTA «Le mie analisi»: apre lo storico (drawer) all'ingresso. Solo al
+  // mount, leggendo lo stato di navigazione una volta (non riapre sui re-render successivi).
+  useEffect(() => {
+    if (location.state?.openStorico) handleOpenSidebar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Esegue un turno di analisi in STREAMING (M5): la prosa scorre a schermo man mano che arriva;
   // a fine risposta si salva il messaggio con la scheda JSON (M4). Se lo stream si interrompe, il

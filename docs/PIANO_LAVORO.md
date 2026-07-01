@@ -123,6 +123,21 @@ M6 intatti, disclaimer visibile in entrambi i temi, **zero regressioni** (`npm r
 **FU-017** (la fa l'utente). **Aperto collegato:** pagina **Home** con sfondo animato (nuova richiesta) —
 non presente in `Esempio/`, da decidere separatamente.
 
+## M7-bis — Home (landing dopo login)  ✅ *(revisione passata, validate 156+78 + build verdi — 2026-07-01)*  *(deep — nuovo componente + nuova rotta; solo client)*
+**Richiesta d'intervista (2026-07-01):** una **Home immersiva** come pagina d'arrivo dopo il login (oggi
+si entra dritti in Chat). Nasce da un prompt descrittivo dell'app vecchia (codice non più disponibile).
+**Decisioni:** palette **slate+ciano dell'app** (non il verde-smeraldo del prompt) · Home **sempre scura**
+(ignora il toggle M6) · font di sistema · Home su `/`, Chat su rotta propria (`/nuova-analisi`).
+**Scope ORA (solo estetica + pagina):** rotta+landing ricablati, **`AnimatedTradingBackground`** (particelle
+ciano, linee, griglia, gradienti, vignettatura, `prefers-reduced-motion`→statico, meno particelle su mobile),
+header minimale, **hero** (badge/titolo/descrizione/disclaimer) con **CTA solo verso rotte esistenti**
+(Nuova analisi, Le mie analisi), decoro a candele CSS/SVG, micro-interazioni. **Context:** `context/HOME_CONTEXT.md` ✅.
+**Fuori scope → FU-018…FU-025:** mercati live, calendario, orologio/stato mercati, feature card con dati,
+active-session card, pagine Journal e Trading Live, font Space Grotesk.
+**Fatto quando:** dopo il login si arriva in Home; i CTA aprono Chat/storico; flussi esistenti intatti; Home
+scura+immersiva anche con toggle chiaro; sfondo animato fluido e non bloccante (statico con reduced-motion);
+responsive senza overflow; disclaimer visibile; `npm run validate` verde e build OK.
+
 ## M8 — Blindatura demo & deploy  ⬜  *(deep)*
 **Obiettivo:** demo «blindata» per il cliente. **Deliverable:** gestione errori a vista ovunque,
 piano B per l'intervista, QA end-to-end, **deploy**. *(Nessun freno costi — CONTESTO L12; resta solo

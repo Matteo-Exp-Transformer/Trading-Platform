@@ -9,14 +9,14 @@
 > Gli agenti Esecuzione/Verifica **non** leggono né scrivono questo file: ricevono il loro contesto dal
 > prompt preparato. È il baton del Senior.
 >
-> **Ultimo aggiornamento:** 2026-07-01 — **M3·M4·M5·M6·M7 COMPLETI e COMMITTATI**. M6 verificato live
-> dall'utente (tema/password/Flash OK) e committato. **M7 — Estetica ✅**: replica di `Esempio/` (dark
-> slate + accento ciano al posto del verde) su tutta l'app, riscrivendo i **valori** dei token M6 (nessun
-> hardcoded nuovo); revisione dedicata passata, `validate` verde (137+78). Aggiunte due skill: `aree/
-> TESTING_SKILL.md` e project skill `.claude/skills/avvia-app/`. **Aperto:** FU-017 (verifica visiva M7 in
-> browser, la fa l'utente) e la **decisione su `Esempio/`** legata a una nuova **pagina Home** richiesta
-> dall'utente (sfondo animato stile app vecchia — vedi §4). Prossimo: **M8 — blindatura + deploy** (o la
-> Home come mini-milestone prima, se l'utente la conferma).
+> **Ultimo aggiornamento:** 2026-07-01 — **M3…M7 + M7-bis (Home) COMPLETI e COMMITTATI**. M7 (estetica
+> slate+ciano). **M7-bis — Home ✅**: nuova landing dopo login (`pages/Home.jsx` + `components/home/*` con
+> sfondo animato canvas, reduced-motion→statico), routing ricablato (Home su `/`, Chat su `/nuova-analisi`),
+> Home sempre scura, CTA solo verso rotte esistenti, palette slate+ciano. Revisione dedicata passata,
+> `validate` verde (156+78) e build OK. Viste dall'utente ("per ora va bene così"). Aggiunte skill `aree/
+> TESTING_SKILL.md` + project skill `avvia-app`; comandi npm confermati in `CLAUDE.md`/Bussola (eseguire
+> dalla root). **Aperto:** FU-017 (verifica visiva live M7/Home), FU-018→025 (elementi Home rimandati),
+> e la **decisione su `Esempio/`** (l'animazione NON era lì — §4). Prossimo: **decisione Esempio + M8**.
 
 ---
 
@@ -27,12 +27,12 @@
 - **In chiusura:** **prima di commit e push** aggiorna le sezioni 1-4 (è un passo obbligatorio dello
   schema di lavoro — vedi `PREPARA_PROMPT_SKILL.md §5` e `CHIUSURA_SESSIONE.md` Parte B).
 
-## 0-bis. STATO GIT — allineato a M7
+## 0-bis. STATO GIT — allineato a M7-bis
 
-M3·M4·M5·**M6·M7 committati e pushati**. M6: `fcbf0a6`/`088b2e8`/`e29b19c`. Poi doc M6/M7 (`58070ae`,
-`7d0ebca`) e la chiusura M7 (estetica + skill) in cima. `npm run validate` **verde: 137 client + 78 server**
-(incluse le RLS live), build OK. Working tree pulito **tranne `Esempio/`** (untracked, non gitignorata):
-è la fonte di riferimento visiva, **decisione in sospeso** (§4) — non committata, non cancellata.
+M3…M7 e **M7-bis (Home) committati e pushati**. M6: `fcbf0a6`/`088b2e8`/`e29b19c`; M7: `a1f4a11`+`65faf6d`;
+M7-bis (Home + fix comandi) in cima. `npm run validate` **verde: 156 client + 78 server** (incluse le RLS
+live), `npm run build` OK. Working tree pulito **tranne `Esempio/`** (untracked, non gitignorata): fonte di
+riferimento visiva, **decisione in sospeso** (§4) — non committata, non cancellata.
 
 ## 0-ter. ✅ L'estratto può essere cancellato
 
@@ -93,15 +93,12 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 2. Prossimo passo concreto
 
-1. **Decisione Home + `Esempio/` [PROSSIMO — con l'utente]:** l'utente vuole una **pagina Home** (oggi
-   all'avvio si entra diretti in «nuova analisi») con **sfondo animato** in stile app vecchia (oggetti/righe
-   in movimento, elementi moderni). Ha chiesto: quello sfondo/quella Home sono dentro `Esempio/`? **Verificato:
-   NON ci sono** (Esempio ha solo Dashboard/Workspace/Journal statiche, `index.css` minimale, nessun componente
-   di animazione). Quindi: o si recupera l'animazione da un'altra fonte, o si costruisce nuova. Da qui dipende
-   se `Esempio/` si tiene o si cancella. **Non toccare `Esempio/` finché l'utente non decide.**
-2. **FU-017 — verifica visiva M7:** l'utente apre l'app e controlla a occhio tema chiaro/scuro su
-   Login/Chat/Sidebar/Impostazioni (desktop+mobile), niente flash, disclaimer leggibile.
-3. **M8 (blindatura + deploy)** secondo `PIANO_LAVORO.md`.
+1. **Decisione `Esempio/` [PROSSIMO — con l'utente]:** la Home è **fatta** (M7-bis), costruita da zero
+   (l'animazione **non** era in `Esempio/`). Resta da decidere se `Esempio/` si **cancella** (scopo esaurito:
+   è servita solo come riferimento palette/forme per M7) o si tiene. **Non toccarla finché l'utente non decide.**
+2. **FU-017 — verifica visiva live M7 + Home:** l'utente apre l'app e controlla a occhio Login/Chat/Sidebar/
+   Impostazioni (tema chiaro/scuro) **e la Home** (sfondo animato, sempre scura, responsive), desktop+mobile.
+3. **M8 (blindatura + deploy)** secondo `PIANO_LAVORO.md`. Valutare se prima portare in scope alcune FU-018→025 (elementi Home).
 4. **FU-016 — console super-admin:** quando servirà, UI admin per assegnare `ai_model` (oggi a mano dal DB) +
    statistiche per-utente. Modello è già blindato lato DB (solo `service_role` scrive `ai_model`).
 
