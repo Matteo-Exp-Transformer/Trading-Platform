@@ -4,6 +4,7 @@ import { ProtectedRoute } from './auth/ProtectedRoute.jsx';
 import Login from './pages/Login.jsx';
 import Home from './pages/Home.jsx';
 import Chat from './pages/Chat.jsx';
+import Journal from './pages/Journal.jsx';
 import Settings from './pages/Settings.jsx';
 
 // Rotta pubblica con redirect automatico se già autenticato.
@@ -33,6 +34,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/journal"
+            element={
+              <ProtectedRoute>
+                <Journal />
               </ProtectedRoute>
             }
           />

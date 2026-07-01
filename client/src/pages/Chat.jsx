@@ -1,21 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { NewAnalysisForm } from '../components/chat/NewAnalysisForm.jsx';
 import { ChatPanel } from '../components/chat/ChatPanel.jsx';
 import { AppHeader } from '../components/layout/AppHeader.jsx';
 import { Sidebar } from '../components/layout/Sidebar.jsx';
 import { useStorico } from '../components/layout/useStorico.js';
-import { createChat, addMessage, loadMessages } from '../lib/chatData.js';
+import { createChat, addMessage, loadMessages, getChat } from '../lib/chatData.js';
 import { analyzeChatStream } from '../lib/agentApi.js';
 import { followUpLimitReached } from '../lib/followUp.js';
+import { prefillFromChat } from '../lib/journalFields.js';
 
 const DISCLAIMER =
   "Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.";
 
 export default function Chat() {
   const location = useLocation();
+  const navigate = useNavigate();
   const storico = useStorico();
   const [currentChatId, setCurrentChatId] = useState(null);
+  const [chatContext, setChatContext] = useState(null); // chat corrente (per il pre-fill journal)
   const [messages, setMessages] = useState([]);
   const [showForm, setShowForm] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
@@ -42,6 +45,25 @@ export default function Chat() {
   useEffect(() => {
     if (currentChatId) fetchMessages(currentChatId);
   }, [currentChatId, fetchMessages]);
+
+  // Carica il form_context della chat corrente per pre-compilare il journal («Salva nel journal»).
+  // Vale sia per una chat appena creata sia per una riaperta dallo storico. Errori ignorati: il
+  // pulsante funziona comunque (senza pre-fill di asset/posizione).
+  useEffect(() => {
+    if (!currentChatId) {
+      setChatContext(null);
+      return;
+    }
+    let cancelled = false;
+    getChat(currentChatId)
+      .then((c) => {
+        if (!cancelled) setChatContext(c);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [currentChatId]);
 
   // Arrivo dalla Home/Impostazioni selezionando una chat dello storico: la rotta porta
   // `openChatId` nello stato di navigazione → apri quella chat all'ingresso. Solo al mount
@@ -140,6 +162,13 @@ export default function Chat() {
     storico.closeSidebar();
   }
 
+  // «Salva nel journal»: porta alla pagina Journal col form pre-compilato dai dati dell'analisi
+  // (asset, timeframe decisionale e, se dichiarata, la posizione). Il resto lo completa l'utente.
+  function handleSalvaNelJournal() {
+    const prefill = prefillFromChat(chatContext ?? { id: currentChatId });
+    navigate('/journal', { state: { newEntry: prefill } });
+  }
+
   return (
     <div className="h-screen bg-app text-content flex flex-col">
       <AppHeader onOpenSidebar={storico.openSidebar} className="border-b border-line shrink-0" />
@@ -158,16 +187,27 @@ export default function Chat() {
             </div>
           </div>
         ) : (
-          <ChatPanel
-            messages={messages}
-            onSendMessage={handleSendMessage}
-            loading={messagesLoading}
-            error={messagesError}
-            analyzing={analyzing}
-            analysisError={analysisError}
-            streamingText={streamingText}
-            limitReached={followUpLimit}
-          />
+          <div className="flex flex-1 min-h-0 flex-col">
+            <div className="flex justify-end px-4 py-2 border-b border-line shrink-0">
+              <button
+                type="button"
+                onClick={handleSalvaNelJournal}
+                className="text-sm text-freedom-accent hover:text-freedom-accentHover transition-colors"
+              >
+                + Salva nel journal
+              </button>
+            </div>
+            <ChatPanel
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              loading={messagesLoading}
+              error={messagesError}
+              analyzing={analyzing}
+              analysisError={analysisError}
+              streamingText={streamingText}
+              limitReached={followUpLimit}
+            />
+          </div>
         )}
       </main>
 

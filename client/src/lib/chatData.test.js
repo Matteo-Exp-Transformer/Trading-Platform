@@ -19,7 +19,7 @@ vi.mock('./supabaseClient.js', () => ({
   },
 }));
 
-import { createChat, addMessage, loadMessages, listChats, updateChatTitle } from './chatData.js';
+import { createChat, addMessage, loadMessages, listChats, updateChatTitle, getChat } from './chatData.js';
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -183,6 +183,24 @@ describe('listChats', () => {
     const capturedSelect = vi.fn().mockReturnValue({ order: capturedOrder });
     mockFrom.mockReturnValue({ select: capturedSelect });
     await expect(listChats()).rejects.toThrow('list fail');
+  });
+});
+
+describe('getChat', () => {
+  it('legge una chat per id (per il pre-fill journal)', async () => {
+    const single = vi.fn().mockResolvedValue({ data: { id: 'c1', form_context: {} }, error: null });
+    const eq = vi.fn().mockReturnValue({ single });
+    mockFrom.mockReturnValue({ select: vi.fn().mockReturnValue({ eq }) });
+    const chat = await getChat('c1');
+    expect(mockFrom).toHaveBeenCalledWith('chats');
+    expect(eq).toHaveBeenCalledWith('id', 'c1');
+    expect(chat.id).toBe('c1');
+  });
+
+  it('rilancia se Supabase restituisce errore', async () => {
+    const single = vi.fn().mockResolvedValue({ data: null, error: new Error('get fail') });
+    mockFrom.mockReturnValue({ select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single }) }) });
+    await expect(getChat('c1')).rejects.toThrow('get fail');
   });
 });
 

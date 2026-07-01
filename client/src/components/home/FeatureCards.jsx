@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 // Icone inline (stroke = currentColor → prendono l'accento ciano via il testo del contenitore).
 // Puramente decorative (aria-hidden). Niente librerie: SVG semplici a 24×24.
 const iconProps = {
@@ -49,9 +51,9 @@ function IconMercati(props) {
   );
 }
 
-// Panoramica dell'app (FU-021): 4 card statiche e DESCRITTIVE (non link) — riassumono cosa fa la
-// piattaforma. Nessun dato/licenza di terzi. Le azioni reali stanno nei CTA dell'hero; qui niente
-// navigazione (Journal è ancora un follow-up → "in arrivo", niente finta pagina).
+// Panoramica dell'app (FU-021): 4 card che riassumono cosa fa la piattaforma. Le card con `to`
+// sono navigabili verso una pagina reale (Journal, FU-023); le altre restano descrittive. Nessun
+// dato/licenza di terzi. Le azioni principali stanno nei CTA dell'hero.
 const FEATURES = [
   {
     key: 'analisi',
@@ -68,8 +70,9 @@ const FEATURES = [
   {
     key: 'journal',
     title: 'Journal',
-    desc: 'Uno spazio per annotare operazioni e riflessioni sul tuo percorso. In arrivo.',
+    desc: 'Annota operazioni, esiti ed emozioni: costruisci il diario del tuo percorso.',
     Icon: IconJournal,
+    to: '/journal',
   },
   {
     key: 'mercati',
@@ -78,6 +81,22 @@ const FEATURES = [
     Icon: IconMercati,
   },
 ];
+
+const cardClass =
+  'home-fade-up group flex h-full flex-col rounded-2xl border border-line bg-surface/60 p-5 transition-all duration-200 hover:border-freedom-accent';
+
+function FeatureBody({ title, desc, Icon, to }) {
+  return (
+    <>
+      <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-app/40 text-freedom-accent">
+        <Icon className="h-5 w-5" />
+      </span>
+      <h3 className="text-base font-semibold text-content">{title}</h3>
+      <p className="mt-1 text-sm leading-relaxed text-muted">{desc}</p>
+      {to && <span className="mt-3 text-sm font-medium text-freedom-accent">Apri →</span>}
+    </>
+  );
+}
 
 export function FeatureCards() {
   return (
@@ -89,16 +108,17 @@ export function FeatureCards() {
         Cosa puoi fare
       </h2>
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {FEATURES.map(({ key, title, desc, Icon }) => (
-          <li
-            key={key}
-            className="home-fade-up group flex flex-col rounded-2xl border border-line bg-surface/60 p-5 transition-all duration-200 hover:border-freedom-accent"
-          >
-            <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-app/40 text-freedom-accent">
-              <Icon className="h-5 w-5" />
-            </span>
-            <h3 className="text-base font-semibold text-content">{title}</h3>
-            <p className="mt-1 text-sm leading-relaxed text-muted">{desc}</p>
+        {FEATURES.map(({ key, title, desc, Icon, to }) => (
+          <li key={key}>
+            {to ? (
+              <Link to={to} className={cardClass}>
+                <FeatureBody title={title} desc={desc} Icon={Icon} to={to} />
+              </Link>
+            ) : (
+              <div className={cardClass}>
+                <FeatureBody title={title} desc={desc} Icon={Icon} />
+              </div>
+            )}
           </li>
         ))}
       </ul>

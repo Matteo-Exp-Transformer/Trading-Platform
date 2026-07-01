@@ -134,6 +134,14 @@ export function Sidebar({
           >
             <span aria-hidden="true">＋</span> Nuova analisi
           </button>
+          <Link
+            to="/journal"
+            onClick={onClose}
+            aria-current={pathname === '/journal' ? 'page' : undefined}
+            className={navItemClass(pathname === '/journal')}
+          >
+            <span aria-hidden="true">▤</span> Journal
+          </Link>
         </nav>
 
         {/* Storico */}

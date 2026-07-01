@@ -44,6 +44,18 @@ export async function loadMessages(chatId) {
   return data;
 }
 
+// Legge una singola chat (per il pre-fill del journal serve il suo form_context). RLS filtra alle
+// sole proprie chat: su una chat altrui/inesistente `single()` restituisce errore.
+export async function getChat(chatId) {
+  const { data, error } = await supabase
+    .from('chats')
+    .select('*')
+    .eq('id', chatId)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function listChats() {
   const { data, error } = await supabase
     .from('chats')

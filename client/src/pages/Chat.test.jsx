@@ -22,6 +22,7 @@ vi.mock('../lib/chatData.js', () => ({
   loadMessages: mockLoadMessages,
   listChats: mockListChats,
   updateChatTitle: vi.fn(),
+  getChat: vi.fn().mockResolvedValue({ id: 'c1', form_context: {} }),
 }));
 
 vi.mock('../lib/agentApi.js', () => ({
@@ -95,6 +96,13 @@ describe('Chat (pagina)', () => {
     await screen.findByRole('complementary', { name: 'Menu' });
     fireEvent.click(screen.getByRole('button', { name: 'Chiudi menu' }));
     expect(screen.queryByRole('complementary', { name: 'Menu' })).not.toBeInTheDocument();
+  });
+
+  it('mostra «Salva nel journal» quando una chat è aperta', async () => {
+    renderChat([{ pathname: '/nuova-analisi', state: { openChatId: 'c1' } }]);
+    expect(
+      await screen.findByRole('button', { name: /Salva nel journal/i }),
+    ).toBeInTheDocument();
   });
 
   it('apre una chat dello storico restando nella pagina Chat', async () => {
