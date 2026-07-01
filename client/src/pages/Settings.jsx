@@ -6,9 +6,6 @@ import { AppHeader } from '../components/layout/AppHeader.jsx';
 import { Sidebar } from '../components/layout/Sidebar.jsx';
 import { useStorico } from '../components/layout/useStorico.js';
 
-const DISCLAIMER =
-  "Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.";
-
 // Lunghezza minima password (allineata al default Supabase). Controllo lato client per un
 // messaggio immediato; il server resta l'autorità (l'errore server è comunque gestito).
 const MIN_PASSWORD = 6;
@@ -237,13 +234,6 @@ export default function Settings() {
           </section>
         </div>
       </main>
-
-      <footer
-        role="contentinfo"
-        className="border-t border-line px-6 py-3 text-xs text-muted text-center shrink-0"
-      >
-        {DISCLAIMER}
-      </footer>
 
       <Sidebar
         open={storico.open}

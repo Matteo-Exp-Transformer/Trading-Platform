@@ -29,12 +29,6 @@ beforeEach(() => {
 });
 
 describe('Login', () => {
-  it('mostra il disclaimer (non è consulenza finanziaria)', () => {
-    renderLogin();
-    const disclaimers = screen.getAllByText(/non è consulenza finanziaria/i);
-    expect(disclaimers.length).toBeGreaterThan(0);
-  });
-
   it('mostra il campo email', () => {
     renderLogin();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();

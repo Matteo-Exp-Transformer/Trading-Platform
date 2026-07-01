@@ -12,9 +12,6 @@ import {
 } from '../../lib/formUtils.js';
 import { compressImageToDataUrl } from '../../lib/imageCompression.js';
 
-const DISCLAIMER =
-  "Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.";
-
 const INITIAL = {
   asset: '',
   altroAsset: '',
@@ -416,8 +413,6 @@ export function NewAnalysisForm({ onSubmit, loading }) {
             </>
           )}
         </fieldset>
-
-        <p className="text-xs text-faint text-center">{DISCLAIMER}</p>
 
         <button
           type="submit"

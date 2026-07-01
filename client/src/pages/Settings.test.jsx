@@ -71,11 +71,6 @@ beforeEach(() => {
 });
 
 describe('Settings — struttura', () => {
-  it('mostra sempre il disclaimer', () => {
-    renderSettings();
-    expect(screen.getByText(/non è consulenza finanziaria/i)).toBeInTheDocument();
-  });
-
   it('mostra header condiviso e titolo pagina, senza freccia indietro', () => {
     renderSettings();
     expect(screen.getByRole('button', { name: 'Apri menu' })).toBeInTheDocument();

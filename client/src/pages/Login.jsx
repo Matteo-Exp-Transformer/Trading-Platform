@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
 
-const DISCLAIMER =
-  "Strumento di supporto all’analisi tecnica. Non è consulenza finanziaria.";
-
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,8 +31,6 @@ export default function Login() {
           <h1 className="text-2xl font-bold text-freedom-accent text-center">
             FREEDOM TRADING SYSTEM
           </h1>
-
-          <p className="text-muted text-sm text-center">{DISCLAIMER}</p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
@@ -86,13 +81,6 @@ export default function Login() {
           </form>
         </div>
       </main>
-
-      <footer
-        role="contentinfo"
-        className="border-t border-line px-6 py-3 text-xs text-muted text-center"
-      >
-        {DISCLAIMER}
-      </footer>
     </div>
   );
 }

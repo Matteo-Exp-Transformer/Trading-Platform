@@ -140,13 +140,15 @@ export default function Chat() {
       {/* area principale */}
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {showForm || !currentChatId ? (
-          <div className="flex-1 overflow-y-auto flex flex-col justify-center">
+          <div className="flex-1 overflow-y-auto flex flex-col">
             {formError && (
               <p role="alert" className="text-red-600 dark:text-red-400 text-sm text-center px-4 mb-2">
                 {formError}
               </p>
             )}
-            <NewAnalysisForm onSubmit={handleFormSubmit} loading={formLoading} />
+            <div className="my-auto">
+              <NewAnalysisForm onSubmit={handleFormSubmit} loading={formLoading} />
+            </div>
           </div>
         ) : (
           <ChatPanel

@@ -3,11 +3,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { NewAnalysisForm } from './NewAnalysisForm.jsx';
 
 describe('NewAnalysisForm', () => {
-  it('mostra il disclaimer fisso', () => {
-    render(<NewAnalysisForm onSubmit={vi.fn()} loading={false} />);
-    expect(screen.getByText(/non è consulenza finanziaria/i)).toBeInTheDocument();
-  });
-
   it('mostra il campo asset', () => {
     render(<NewAnalysisForm onSubmit={vi.fn()} loading={false} />);
     expect(screen.getByText(/quale asset/i)).toBeInTheDocument();

@@ -1,4 +1,4 @@
-// Test d'integrazione leggero: senza sessione l'app redirige a /login (titolo + disclaimer);
+// Test d'integrazione leggero: senza sessione l'app redirige a /login (titolo);
 // con sessione la landing è la Home (rotta «/»), non più la Chat.
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -40,13 +40,6 @@ describe('<App /> — non autenticato', () => {
     });
   });
 
-  it('mostra sempre il disclaimer (non è consulenza finanziaria)', async () => {
-    render(<App />);
-    await waitFor(() => {
-      // Login mostra il disclaimer sia nel body sia nel footer: getAllByText è corretto.
-      expect(screen.getAllByText(/non è consulenza finanziaria/i).length).toBeGreaterThan(0);
-    });
-  });
 });
 
 describe('<App /> — autenticato', () => {
