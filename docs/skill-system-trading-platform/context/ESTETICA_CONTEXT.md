@@ -2,8 +2,9 @@
 
 > Mappa di dettaglio della zona **Estetica**: come deve apparire l'app. M7 è una **rifinitura
 > additiva** sopra la base di M6: **non tocca** la catena agente, il kit, la persistenza o l'auth —
-> cambia solo l'aspetto. Zona **standard** (nessun LOCK del cuore), ma con una regola d'oro:
-> **zero regressioni sui test** (è il «fatto quando» di M7). Fonte prodotto: `docs/CONTESTO_PRODOTTO.md`
+> cambia solo l'aspetto. Nessun LOCK del cuore, ma zona **deep** per protocollo (tocca **più di una
+> view**: Chat, Login, Impostazioni, Sidebar), regola d'oro: **zero regressioni sui test** (è il
+> «fatto quando» di M7). Fonte prodotto: `docs/CONTESTO_PRODOTTO.md`
 > (L4, L19) · piano: `docs/PIANO_LAVORO.md` (M7).
 >
 > **Trigger di routing:** «estetica», «stile», «look», «palette», «colori», «tema visivo», «restyle»,

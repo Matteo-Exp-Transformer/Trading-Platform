@@ -107,7 +107,7 @@ la scheda JSON continua a salvarsi (M4) e non compare mai; validate verde.
 un account con `ai_model='gemini-2.5-pro'` usa Pro, `null`/errato usa il default Flash; validate verde.
 **✅ Verificato live (2026-07-01):** tema, cambio password e modello per-account provati a mano, tutto OK.
 
-## M7 — Estetica (rifinitura additiva)  ⬜  *(standard — solo client, nessun LOCK del cuore)*
+## M7 — Estetica (rifinitura additiva)  ⬜  *(deep — tocca più di una view; solo client, nessun LOCK del cuore)*
 **Svolta d'intervista (2026-07-01):** l'estetica definitiva è la **replica fedele della vecchia app**
 (cartella `Esempio/`): **dark su slate + accento ciano**, sobrio, **statico**, font di sistema — *non* più
 "verde-scuro + sfondo animato" (CONTESTO L19). Il tema chiaro/scuro di M6 resta.
