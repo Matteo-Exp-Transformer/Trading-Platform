@@ -42,11 +42,13 @@ si scrive codice di una zona prima che il suo file di `context/` esista. Dettagl
 ## Comandi principali
 
 ```bash
-# Provvisori — da finalizzare quando parte il codice (PIANO_LAVORO M0)
-npm run dev            # dev server (client + server)
-npm test               # test unitari (test per ogni funzione)
-npm run validate       # lint + typecheck + test (pre-PR)
-node --check <file.js> # check sintassi dopo modifiche JS
+# Confermati da M0. ESEGUIRE SEMPRE DALLA ROOT del repo (monorepo npm workspaces):
+# gli script vivono nel package.json di root, non nelle sottocartelle client/ o server/.
+npm run dev            # dev server (client 5173 + server 3001)
+npm test               # test unitari (client + server, per ogni funzione)
+npm run validate       # gate pre-PR = lint + test (NON typecheck: JS, non TS)
+npm run build          # build produzione del client
+node --check <file.js> # check sintassi dopo modifiche JS (solo .js, non .jsx)
 ```
 
 ## Convenzioni
