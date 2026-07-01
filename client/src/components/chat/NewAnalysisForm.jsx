@@ -6,7 +6,22 @@ import {
   validateForm,
   buildTitle,
   buildSummary,
+  buildFormContext,
+  timeframesFor,
+  dataUrlToImagePart,
 } from '../../lib/formUtils.js';
+
+const MAX_IMAGES = 3;
+
+// Suggerimento timeframe in base a stile × obiettivo (fedele al kit / CHAT_ANALISI_CONTEXT §4).
+function screenshotHint(stile, obiettivo) {
+  const tf = timeframesFor(stile);
+  if (!tf.decisionale) return 'Carica gli screenshot del grafico (max 3).';
+  if (obiettivo === 'Lettura operativa') {
+    return `Carica il decisionale ${tf.decisionale} attuale (e, se vuoi, il contesto ${tf.contesto}).`;
+  }
+  return `Carica il contesto ${tf.contesto} e il decisionale ${tf.decisionale} (max ${MAX_IMAGES}).`;
+}
 
 const DISCLAIMER =
   "Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.";
@@ -48,6 +63,41 @@ function ToggleGroup({ options, value, onChange, labelMap }) {
 export function NewAnalysisForm({ onSubmit, loading }) {
   const [values, setValues] = useState(INITIAL);
   const [errors, setErrors] = useState({});
+  const [images, setImages] = useState([]); // [{ name, mimeType, data, preview }]
+  const [imageError, setImageError] = useState(null);
+
+  async function handleFiles(fileList) {
+    const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
+    if (files.length === 0) return;
+    const room = MAX_IMAGES - images.length;
+    if (room <= 0) {
+      setImageError(`Massimo ${MAX_IMAGES} screenshot.`);
+      return;
+    }
+    const parts = await Promise.all(
+      files.slice(0, room).map(
+        (file) =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const part = dataUrlToImagePart(reader.result);
+              resolve(part ? { ...part, name: file.name, preview: reader.result } : null);
+            };
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+          }),
+      ),
+    );
+    const valid = parts.filter(Boolean);
+    if (valid.length) {
+      setImages((prev) => [...prev, ...valid]);
+      setImageError(null);
+    }
+  }
+
+  function removeImage(idx) {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+  }
 
   function set(field, value) {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -67,11 +117,18 @@ export function NewAnalysisForm({ onSubmit, loading }) {
   function handleSubmit(e) {
     e.preventDefault();
     const result = validateForm(values);
-    if (!result.valid) {
+    const noImages = images.length === 0;
+    if (noImages) setImageError('Carica almeno uno screenshot del grafico.');
+    if (!result.valid || noImages) {
       setErrors(result.errors);
       return;
     }
-    onSubmit({ title: buildTitle(values), summary: buildSummary(values) });
+    onSubmit({
+      title: buildTitle(values),
+      summary: buildSummary(values),
+      formContext: buildFormContext(values),
+      images: images.map(({ mimeType, data }) => ({ mimeType, data })),
+    });
   }
 
   const richiedePosizione = values.obiettivo === 'Lettura operativa';
@@ -239,6 +296,58 @@ export function NewAnalysisForm({ onSubmit, loading }) {
             rows={2}
             className="bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm resize-none focus:outline-none focus:border-freedom-accent"
           />
+        </fieldset>
+
+        {/* Screenshot — vision obbligatoria nel primo turno */}
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-sm text-white/70">Screenshot del grafico</legend>
+          <p className="text-xs text-white/40">
+            {screenshotHint(values.stileOperativo, values.obiettivo)}
+          </p>
+
+          {images.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {images.map((img, idx) => (
+                <div key={idx} className="relative">
+                  <img
+                    src={img.preview}
+                    alt={img.name}
+                    className="h-20 w-20 object-cover rounded border border-white/20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    aria-label={`Rimuovi ${img.name}`}
+                    className="absolute -top-2 -right-2 bg-black/80 text-white rounded-full w-5 h-5 text-xs leading-none border border-white/30"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {images.length < MAX_IMAGES && (
+            <label className="cursor-pointer text-sm text-freedom-accent hover:brightness-110 w-fit">
+              + Aggiungi screenshot
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  handleFiles(e.target.files);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+          )}
+
+          {imageError && (
+            <p role="alert" className="text-red-400 text-xs">
+              {imageError}
+            </p>
+          )}
         </fieldset>
 
         <p className="text-xs text-white/40 text-center">{DISCLAIMER}</p>

@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { validateForm, buildTitle, buildSummary } from './formUtils.js';
+import {
+  validateForm,
+  buildTitle,
+  buildSummary,
+  buildFormContext,
+  timeframesFor,
+  dataUrlToImagePart,
+} from './formUtils.js';
 
 const BASE = {
   asset: 'Oro XAU/USD',
@@ -158,5 +165,66 @@ describe('buildSummary', () => {
   it('omette posizione se hasPosizione non è si', () => {
     const s = buildSummary({ ...BASE, hasPosizione: 'no' });
     expect(s).not.toContain('Posizione');
+  });
+});
+
+describe('timeframesFor', () => {
+  it('Scalping → 1H / 5m', () => {
+    expect(timeframesFor('Scalping')).toEqual({ contesto: '1H', decisionale: '5m' });
+  });
+  it('Intraday → 4H / 15m', () => {
+    expect(timeframesFor('Intraday')).toEqual({ contesto: '4H', decisionale: '15m' });
+  });
+  it('stile ignoto → null', () => {
+    expect(timeframesFor('')).toEqual({ contesto: null, decisionale: null });
+  });
+});
+
+describe('buildFormContext', () => {
+  it('struttura base con timeframe derivati e posizione null', () => {
+    const ctx = buildFormContext(BASE);
+    expect(ctx).toMatchObject({
+      asset: 'Oro XAU/USD',
+      stile: 'Intraday',
+      obiettivo: 'Studiare',
+      timeframe: { contesto: '4H', decisionale: '15m' },
+      posizione: null,
+    });
+  });
+
+  it('include la posizione quando aperta', () => {
+    const ctx = buildFormContext({
+      ...BASE,
+      obiettivo: 'Lettura operativa',
+      hasPosizione: 'si',
+      tipoPosizione: 'Short',
+      prezzoApertura: '2350',
+      sl: '2360',
+      tp: '',
+    });
+    expect(ctx.posizione).toEqual({
+      tipo: 'Short',
+      prezzoApertura: '2350',
+      sl: '2360',
+      tp: null,
+    });
+  });
+
+  it('usa altroAsset per __altro__', () => {
+    const ctx = buildFormContext({ ...BASE, asset: '__altro__', altroAsset: 'USOIL' });
+    expect(ctx.asset).toBe('USOIL');
+  });
+});
+
+describe('dataUrlToImagePart', () => {
+  it('estrae mimeType e base64 da un data URL', () => {
+    expect(dataUrlToImagePart('data:image/png;base64,AAAB')).toEqual({
+      mimeType: 'image/png',
+      data: 'AAAB',
+    });
+  });
+  it('null se non è un data URL valido', () => {
+    expect(dataUrlToImagePart('non-un-data-url')).toBeNull();
+    expect(dataUrlToImagePart(null)).toBeNull();
   });
 });

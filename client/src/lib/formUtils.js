@@ -59,6 +59,39 @@ export function buildTitle(values) {
   return `${asset} · ${values.obiettivo}`;
 }
 
+// Timeframe derivati dallo stile operativo (fedeli al kit / CHAT_ANALISI_CONTEXT §4).
+const TF_BY_STILE = {
+  Scalping: { contesto: '1H', decisionale: '5m' },
+  Intraday: { contesto: '4H', decisionale: '15m' },
+};
+
+export function timeframesFor(stile) {
+  return TF_BY_STILE[stile] ?? { contesto: null, decisionale: null };
+}
+
+// Contesto strutturato salvato su chats.form_context (jsonb). Resta valido per tutta la chat.
+export function buildFormContext(values) {
+  const ctx = {
+    asset: resolveAsset(values) || null,
+    stile: values.stileOperativo || null,
+    obiettivo: values.obiettivo || null,
+    timeframe: timeframesFor(values.stileOperativo),
+    idea: (values.idea ?? '').trim() || null,
+    posizione: null,
+  };
+
+  if (values.hasPosizione === 'si') {
+    ctx.posizione = {
+      tipo: values.tipoPosizione || null,
+      prezzoApertura: (values.prezzoApertura ?? '').trim() || null,
+      sl: (values.sl ?? '').trim() || null,
+      tp: (values.tp ?? '').trim() || null,
+    };
+  }
+
+  return ctx;
+}
+
 export function buildSummary(values) {
   const asset = resolveAsset(values) || 'Asset';
   const parts = [
@@ -78,4 +111,13 @@ export function buildSummary(values) {
   if (idea) parts.push(`Idea: ${idea}`);
 
   return parts.join(' · ');
+}
+
+// Estrae { mimeType, data } (base64 senza prefisso) da un data URL prodotto da
+// FileReader.readAsDataURL. Le immagini viaggiano inline verso Gemini (M3, niente Storage).
+export function dataUrlToImagePart(dataUrl) {
+  if (typeof dataUrl !== 'string') return null;
+  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/s);
+  if (!match) return null;
+  return { mimeType: match[1], data: match[2] };
 }

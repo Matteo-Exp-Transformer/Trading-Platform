@@ -6,22 +6,24 @@ async function getUserId() {
   return user.id;
 }
 
-export async function createChat(title) {
+export async function createChat(title, formContext = {}) {
   const userId = await getUserId();
   const { data, error } = await supabase
     .from('chats')
-    .insert({ title, user_id: userId })
+    .insert({ title, user_id: userId, form_context: formContext })
     .select()
     .single();
   if (error) throw error;
   return data;
 }
 
-export async function addMessage(chatId, content) {
+// role generalizzato: 'user' (default) per i messaggi del trader, 'assistant' per le
+// risposte dell'agente AI (salvate dal client dopo la chiamata alla route, vedi agentApi).
+export async function addMessage(chatId, content, role = 'user') {
   const userId = await getUserId();
   const { data, error } = await supabase
     .from('messages')
-    .insert({ chat_id: chatId, user_id: userId, role: 'user', content })
+    .insert({ chat_id: chatId, user_id: userId, role, content })
     .select()
     .single();
   if (error) throw error;
@@ -34,6 +36,26 @@ export async function loadMessages(chatId) {
     .select('*')
     .eq('chat_id', chatId)
     .order('created_at', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function listChats() {
+  const { data, error } = await supabase
+    .from('chats')
+    .select('*')
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function updateChatTitle(chatId, title) {
+  const { data, error } = await supabase
+    .from('chats')
+    .update({ title })
+    .eq('id', chatId)
+    .select()
+    .single();
   if (error) throw error;
   return data;
 }

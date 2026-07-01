@@ -1,19 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageBubble } from './MessageBubble.jsx';
 
-export function ChatPanel({ messages, onSendMessage, onNuovaAnalisi, loading, error }) {
+export function ChatPanel({ messages, onSendMessage, loading, error, analyzing, analysisError }) {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState(null);
   const bottomRef = useRef(null);
 
+  const busy = sending || analyzing;
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, analyzing]);
 
   async function handleSend(e) {
     e.preventDefault();
-    if (!text.trim() || sending) return;
+    if (!text.trim() || busy) return;
     setSendError(null);
     setSending(true);
     try {
@@ -41,6 +43,16 @@ export function ChatPanel({ messages, onSendMessage, onNuovaAnalisi, loading, er
         {messages.map((m) => (
           <MessageBubble key={m.id} message={m} />
         ))}
+        {analyzing && (
+          <p className="text-white/60 text-sm text-center animate-pulse" aria-live="polite">
+            L'agente sta analizzando…
+          </p>
+        )}
+        {analysisError && (
+          <p role="alert" className="text-red-400 text-sm text-center">
+            {analysisError}
+          </p>
+        )}
         <div ref={bottomRef} />
       </div>
 
@@ -56,24 +68,18 @@ export function ChatPanel({ messages, onSendMessage, onNuovaAnalisi, loading, er
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Scrivi un messaggio…"
-            className="flex-1 bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-freedom-accent"
+            disabled={busy}
+            placeholder={analyzing ? 'L’agente sta analizzando…' : 'Scrivi un messaggio…'}
+            className="flex-1 bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-freedom-accent disabled:opacity-50"
           />
           <button
             type="submit"
-            disabled={!text.trim() || sending}
+            disabled={!text.trim() || busy}
             className="bg-freedom-accent text-black px-4 py-2 rounded-full text-sm font-semibold disabled:opacity-50 hover:brightness-110 transition-opacity"
           >
             Invia
           </button>
         </form>
-        <button
-          type="button"
-          onClick={onNuovaAnalisi}
-          className="text-xs text-white/40 hover:text-white/70 transition-colors text-left"
-        >
-          + Nuova analisi
-        </button>
       </div>
     </div>
   );

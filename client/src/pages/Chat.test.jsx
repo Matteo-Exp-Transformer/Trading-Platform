@@ -1,5 +1,5 @@
 import { vi, describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Chat from './Chat.jsx';
 
 vi.mock('../auth/AuthProvider.jsx', () => ({
@@ -10,10 +10,20 @@ vi.mock('../auth/AuthProvider.jsx', () => ({
   }),
 }));
 
+const { mockListChats } = vi.hoisted(() => ({
+  mockListChats: vi.fn().mockResolvedValue([]),
+}));
+
 vi.mock('../lib/chatData.js', () => ({
   createChat: vi.fn(),
   addMessage: vi.fn(),
   loadMessages: vi.fn().mockResolvedValue([]),
+  listChats: mockListChats,
+  updateChatTitle: vi.fn(),
+}));
+
+vi.mock('../lib/agentApi.js', () => ({
+  analyzeChat: vi.fn().mockResolvedValue('Analisi'),
 }));
 
 describe('Chat (pagina)', () => {
@@ -36,5 +46,24 @@ describe('Chat (pagina)', () => {
   it('mostra il pulsante Esci', () => {
     render(<Chat />);
     expect(screen.getByRole('button', { name: /esci/i })).toBeInTheDocument();
+  });
+
+  it('apre la sidebar e carica lo storico al click sull\'icona menu', async () => {
+    render(<Chat />);
+    fireEvent.click(screen.getByRole('button', { name: /apri storico chat/i }));
+    expect(mockListChats).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByText('Storico chat')).toBeInTheDocument();
+    });
+  });
+
+  it('chiude la sidebar al click su chiudi', async () => {
+    render(<Chat />);
+    fireEvent.click(screen.getByRole('button', { name: /apri storico chat/i }));
+    await waitFor(() => {
+      expect(screen.getByText('Storico chat')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('button', { name: /chiudi storico chat/i }));
+    expect(screen.queryByText('Storico chat')).not.toBeInTheDocument();
   });
 });
