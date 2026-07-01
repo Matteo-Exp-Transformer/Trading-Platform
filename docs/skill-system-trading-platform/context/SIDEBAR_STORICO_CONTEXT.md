@@ -29,7 +29,7 @@ CTA contestuale della Home approvato in `HOME_CONTEXT.md`; `ChatPanel` non conti
 | `client/src/components/layout/useStorico.js` | Stato, caricamento, rinomina e navigazioni del drawer condivisi |
 | `client/src/components/layout/Sidebar.jsx` | Drawer: Home, Nuova analisi, lista chat, Impostazioni, Esci |
 | `client/src/components/layout/SidebarChatRow.jsx` *(nuovo, opzionale)* | Singola riga: titolo + data + menu rinomina |
-| `client/src/pages/Home.jsx` | Apre il drawer da hamburger o CTA «Le mie analisi» |
+| `client/src/pages/Home.jsx` | Apre il drawer dall’hamburger; la hero non duplica l’ingresso allo storico |
 | `client/src/pages/Chat.jsx` | Usa header/drawer condivisi e gestisce selezione/nuova analisi in-place |
 | `client/src/pages/Settings.jsx` | Usa header/drawer condivisi; da qui una chat apre `/nuova-analisi` |
 | `client/src/components/chat/ChatPanel.jsx` | **Rimuove** il bottone «+ Nuova analisi» (riga 70-76) e la prop `onNuovaAnalisi` |

@@ -47,16 +47,16 @@ funzioni nuove** è rimandato a follow-up.
 - **Header condiviso:** hamburger nella posizione della precedente icona decorativa + nome
   **FREEDOM TRADING SYSTEM** cliccabile verso `/`. Lo stesso header è usato da Home, Chat e
   Impostazioni. **Impostazioni ed Esci non compaiono nell’header**: vivono solo nella Sidebar.
-- **Hero:** badge (es. "Trading Intelligence Workspace"), titolo grande, breve descrizione, disclaimer
-  visibile, e **CTA solo verso rotte esistenti**:
-  - **Nuova analisi** = CTA primario (gradiente ciano, bagliore discreto, hover raffinato) → apre la Chat/nuova analisi;
-  - **Le mie analisi** → apre lo **storico direttamente sulla Home**, nello stesso drawer
-    dell’hamburger, senza passare dalla Chat.
+- **Hero:** badge (es. "Trading Intelligence Workspace"), titolo **«Il tuo agente di analisi
+  tecnica»**, descrizione breve **«Studia i mercati con FREEDOM TRADING SYSTEM.»**, disclaimer
+  visibile e un solo CTA:
+  - **Nuova analisi** = CTA primario (gradiente ciano, bagliore discreto, hover raffinato) → apre la Chat/nuova analisi.
+  - Lo **storico non ha più un CTA nella hero** e resta accessibile dal menu laterale condiviso.
   - *(Journal e Trading Live NON esistono → non messi ora, vedi FU.)*
 - **Elemento decorativo a candele** (CSS/SVG) animato molto lentamente nella composizione dell'hero.
 - **Interazioni:** entrata morbida/progressiva, leggero movimento delle card in hover, bordi più ciano
   in hover, transizioni 200–400ms, focus visibili (accessibilità). Niente animazioni lampeggianti.
-- **Responsive:** desktop/tablet/smartphone; su mobile impila, CTA in griglia compatta, niente overflow
+- **Responsive:** desktop/tablet/smartphone; su mobile il CTA resta ben dimensionato, niente overflow
   orizzontale, meno particelle, nascondi solo i decori non essenziali.
 
 ## 4. Invarianti / LOCK locali
@@ -85,7 +85,7 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 - **FU-018** MarketStatusBar: ~~stato mercati Londra/New York/Tokyo (aperto/chiuso)~~ **fatto (2026-07-01)** — stato mercati in alto a destra nella Home (vedi §6). **Orologio live** non incluso (utente: solo stato mercati) → eventuale FU futura.
 - **FU-019** MarketOverview: griglia ~9 asset con prezzo/variazione/sparkline. **PARCHEGGIATA (2026-07-01)** — fuori dalla demo per **licenze commerciali**: dati azioni/indici real-time richiedono licenze di display delle borse (costose/per-utente); crypto/forex integrabili solo con piano commerciale a pagamento (CoinGecko ~$35/mese + attribuzione). Regola utente = niente licenze commerciali → non integrata. La card "Monitoraggio mercati" (in FU-021) resta **descrittiva**, senza ticker. Dettaglio in `FOLLOW_UP.md` FU-019.
 - **FU-020** TradingCalendar: calendario mensile con giorno corrente evidenziato. *(Aperta, non in scope demo: decorativa senza dati dietro.)*
-- **FU-021** FeatureCards "panoramica app" (Analisi assistita · Memoria sessioni · Journal · Monitoraggio mercati). **FATTO (2026-07-01)** — 4 card statiche descrittive (nessun link), sotto l'hero (vedi §6). Journal = "in arrivo".
+- **FU-021** FeatureCards "panoramica app" (Analisi assistita · Memoria sessioni · Journal · Monitoraggio mercati). **FATTO (2026-07-01)** — sezione introdotta dal titolo **«Cosa puoi fare»**, con 4 card statiche descrittive (nessun link), sotto l'hero (vedi §6). Journal = "in arrivo".
 - **FU-022** ActiveSessionCard: card "riapri sessione" (chat più recente dell'utente). **FATTO (2026-07-01)** — dati interni via `listChats()` (RLS), sopra le FeatureCards. **Se non c'è sessione (o loading/errore) → la card non compare** (vedi §6).
 - **FU-023** Pagina **Journal** (funzionalità nuova, non solo estetica).
 - **FU-024** Pagina **Trading Live** (funzionalità nuova).
@@ -102,9 +102,9 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 | `client/src/components/layout/useStorico.js` | Stato e azioni condivise del drawer; da Home/Impostazioni apre la Chat corretta. | **IMPLEMENTATO** |
 | `client/src/components/layout/Sidebar.jsx` | Navigazione Home/Nuova analisi, storico, Impostazioni ed Esci. | **IMPLEMENTATO** |
 | `client/src/components/home/AnimatedTradingBackground.jsx` | Sfondo animato (canvas+rAF, reduced-motion→statico, meno particelle su mobile). | **IMPLEMENTATO** |
-| `client/src/components/home/{Hero,HomeCta}.jsx` | Sotto-componenti piccoli. | **IMPLEMENTATO** |
+| `client/src/components/home/{Hero,HomeCta}.jsx` | Hero centrata sull’agente di analisi tecnica e unico CTA «Nuova analisi»; storico nel menu laterale. | **IMPLEMENTATO** |
 | `client/src/components/home/ActiveSessionCard.jsx` + `useActiveSession.js` | Card "Riprendi sessione" (FU-022): chat più recente via `listChats()` (RLS); sparisce se nessuna sessione/loading/errore. | **IMPLEMENTATO (FU-022)** |
-| `client/src/components/home/FeatureCards.jsx` | Panoramica app (FU-021): 4 card statiche descrittive (icone SVG inline, hover ciano), nessun link. | **IMPLEMENTATO (FU-021)** |
+| `client/src/components/home/FeatureCards.jsx` | Sezione «Cosa puoi fare» e panoramica app (FU-021): 4 card statiche descrittive (icone SVG inline, hover ciano), nessun link. | **IMPLEMENTATO (FU-021)** |
 | `client/src/lib/dateFormat.js` | `relativeDayLabel()`: etichetta "oggi/ieri/N giorni fa/data breve" per l'ultimo aggiornamento della sessione. | **IMPLEMENTATO (FU-022)** |
 | `client/src/components/home/useMarketStatus.js` | Stato aperto/chiuso di Londra/New York/Tokyo: orari **locali** per piazza via `Intl`+fuso IANA (DST-safe, solo lun–ven), refresh 60s. | **IMPLEMENTATO (FU-018)** |
 | `client/src/components/home/MarketStatus.jsx` | Stato mercati nella Home; pallino **verde** aperto / grigio chiuso. Desktop: inline a destra dell'header. Mobile: riga orizzontale a tutta larghezza **sopra** il nome app. | **IMPLEMENTATO (FU-018)** |
@@ -123,9 +123,10 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 
 ## 7. Come si verifica (il «fatto quando»)
 
-- Dopo il login si arriva sulla **Home** (non più dritti in Chat); da lì "Nuova analisi" apre la Chat e
-  "Le mie analisi" apre lo storico sulla Home. Hamburger e nome app restano coerenti su Home, Chat e
-  Impostazioni; una chat scelta dal drawer si apre correttamente. Impostazioni ed Esci compaiono solo lì.
+- Dopo il login si arriva sulla **Home** (non più dritti in Chat); da lì "Nuova analisi" apre la Chat.
+  Lo storico resta accessibile dal menu laterale aperto con l’hamburger. Hamburger e nome app restano
+  coerenti su Home, Chat e Impostazioni; una chat scelta dal drawer si apre correttamente.
+  Impostazioni ed Esci compaiono solo lì.
 - La Home è **scura e immersiva** anche se il toggle è su "chiaro"; palette **slate+ciano** coerente con l'app.
 - Lo **sfondo animato** gira fluido dietro ai contenuti, non blocca i click; con `prefers-reduced-motion`
   attivo diventa **statico**; su mobile ha meno particelle e nessun overflow orizzontale.

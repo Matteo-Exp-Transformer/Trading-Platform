@@ -130,8 +130,9 @@ si entra dritti in Chat). Nasce da un prompt descrittivo dell'app vecchia (codic
 (ignora il toggle M6) · font di sistema · Home su `/`, Chat su rotta propria (`/nuova-analisi`).
 **Scope ORA (solo estetica + pagina):** rotta+landing ricablati, **`AnimatedTradingBackground`** (particelle
 ciano, linee, griglia, gradienti, vignettatura, `prefers-reduced-motion`→statico, meno particelle su mobile),
-header minimale, **hero** (badge/titolo/descrizione/disclaimer) con **CTA solo verso rotte esistenti**
-(Nuova analisi, Le mie analisi), decoro a candele CSS/SVG, micro-interazioni. **Context:** `context/HOME_CONTEXT.md` ✅.
+header minimale, **hero** (badge/titolo/descrizione/disclaimer) con il solo CTA **Nuova analisi**;
+lo storico resta nel drawer condiviso. Sotto la hero, la sezione **«Cosa puoi fare»** introduce le
+quattro card descrittive. Decoro a candele CSS/SVG e micro-interazioni. **Context:** `context/HOME_CONTEXT.md` ✅.
 **Fuori scope → FU-018…FU-025:** mercati live, calendario, orologio/stato mercati, feature card con dati,
 active-session card, pagine Journal e Trading Live, font Space Grotesk.
 **Fatto quando:** dopo il login si arriva in Home; i CTA aprono Chat/storico; flussi esistenti intatti; Home
