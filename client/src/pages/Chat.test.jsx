@@ -1,6 +1,16 @@
 import { vi, describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import Chat from './Chat.jsx';
+
+// La Chat monta la Sidebar, che contiene un <Link> (ingresso Impostazioni): serve un Router.
+function renderChat() {
+  return render(
+    <MemoryRouter>
+      <Chat />
+    </MemoryRouter>,
+  );
+}
 
 vi.mock('../auth/AuthProvider.jsx', () => ({
   useAuth: () => ({
@@ -28,28 +38,28 @@ vi.mock('../lib/agentApi.js', () => ({
 
 describe('Chat (pagina)', () => {
   it('mostra il nome prodotto nell\'header', () => {
-    render(<Chat />);
+    renderChat();
     expect(screen.getByText('FREEDOM TRADING SYSTEM')).toBeInTheDocument();
   });
 
   it('mostra il form di nuova analisi al primo caricamento', () => {
-    render(<Chat />);
+    renderChat();
     expect(screen.getByText('Nuova analisi')).toBeInTheDocument();
   });
 
   it('mostra il disclaimer fisso nel footer', () => {
-    render(<Chat />);
+    renderChat();
     const disclaimers = screen.getAllByText(/non è consulenza finanziaria/i);
     expect(disclaimers.length).toBeGreaterThan(0);
   });
 
   it('mostra il pulsante Esci', () => {
-    render(<Chat />);
+    renderChat();
     expect(screen.getByRole('button', { name: /esci/i })).toBeInTheDocument();
   });
 
   it('apre la sidebar e carica lo storico al click sull\'icona menu', async () => {
-    render(<Chat />);
+    renderChat();
     fireEvent.click(screen.getByRole('button', { name: /apri storico chat/i }));
     expect(mockListChats).toHaveBeenCalled();
     await waitFor(() => {
@@ -58,7 +68,7 @@ describe('Chat (pagina)', () => {
   });
 
   it('chiude la sidebar al click su chiudi', async () => {
-    render(<Chat />);
+    renderChat();
     fireEvent.click(screen.getByRole('button', { name: /apri storico chat/i }));
     await waitFor(() => {
       expect(screen.getByText('Storico chat')).toBeInTheDocument();

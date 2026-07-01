@@ -42,10 +42,12 @@ async function prepareTurn(supabase, chatId, images) {
 // Ritorna { text, transcript }: `text` è la prosa mostrata all'utente; `transcript` è la scheda
 // JSON dell'analisi (M4) da salvare in messages.attachments, oppure null (follow-up testuale, o
 // scheda mancante/illeggibile — mai bloccante). Percorso NON-streaming (fallback).
-export async function runAnalysis({ supabase, chatId, images = [] }) {
+// `model` (M6): modello AI per-account risolto dalla route; inoltrato tale e quale a providerClient
+//   (LOCK catena: il modello si innesta SOLO passando `model` giù). undefined → default .env.
+export async function runAnalysis({ supabase, chatId, images = [], model }) {
   const { system, messages } = await prepareTurn(supabase, chatId, images);
 
-  const response = await requestCompletion({ system, messages });
+  const response = await requestCompletion({ system, messages, model });
   const text = parseCompletionResponse(response);
   if (!text) {
     throw new Error('Il modello non ha restituito una risposta valida.');
@@ -62,12 +64,13 @@ export async function runAnalysis({ supabase, chatId, images = [] }) {
 //   { type: 'delta', text }  — pezzi di PROSA (marcatore/scheda già nascosti dal prose-streamer)
 //   { type: 'done', transcript } — a fine risposta, la scheda JSON (o null)
 // Lancia se il modello non produce alcuna prosa (la route lo traduce in evento d'errore).
-export async function* runAnalysisStream({ supabase, chatId, images = [] }) {
+// `model` (M6): modello AI per-account risolto dalla route, inoltrato a providerClient (LOCK catena).
+export async function* runAnalysisStream({ supabase, chatId, images = [], model }) {
   const { system, messages } = await prepareTurn(supabase, chatId, images);
 
   const streamer = createProseStreamer();
   let emittedLen = 0;
-  for await (const delta of streamGeminiText({ system, messages })) {
+  for await (const delta of streamGeminiText({ system, messages, model })) {
     const prose = streamer.push(delta);
     if (prose) {
       emittedLen += prose.length;

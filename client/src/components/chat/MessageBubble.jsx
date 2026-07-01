@@ -6,7 +6,7 @@ export function MessageBubble({ message }) {
         className={`max-w-[85%] sm:max-w-[70%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
           isUser
             ? 'bg-freedom-accent text-black rounded-br-sm'
-            : 'bg-white/10 text-white rounded-bl-sm'
+            : 'bg-surface-strong text-content rounded-bl-sm'
         }`}
       >
         {message.content}

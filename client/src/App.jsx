@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './auth/AuthProvider.jsx';
 import { ProtectedRoute } from './auth/ProtectedRoute.jsx';
 import Login from './pages/Login.jsx';
 import Chat from './pages/Chat.jsx';
+import Settings from './pages/Settings.jsx';
 
 // Rotta pubblica con redirect automatico se già autenticato.
 function LoginRoute() {
@@ -23,6 +24,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Chat />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/impostazioni"
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />

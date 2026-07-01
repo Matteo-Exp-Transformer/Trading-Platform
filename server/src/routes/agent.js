@@ -8,6 +8,7 @@
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { runAnalysis, runAnalysisStream } from '../agent/orchestrator.js';
+import { resolveUserModel } from '../agent/models.js';
 
 export const agentRouter = Router();
 
@@ -75,7 +76,21 @@ async function authorizeAnalyze(req, res) {
     return null;
   }
 
-  return { supabase, chatId, imgs };
+  // Modello AI per-account (M6): letto dalla riga profilo dell'utente (la RLS torna SOLO la sua).
+  // resolveUserModel filtra sulla lista curata; fuori lista/null → undefined (default .env).
+  // RULE fallback mai-crash: se la lettura del profilo fallisce, si degrada al default, non si blocca.
+  let model;
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('ai_model')
+      .maybeSingle();
+    model = resolveUserModel(profile?.ai_model);
+  } catch {
+    model = undefined;
+  }
+
+  return { supabase, chatId, imgs, model };
 }
 
 agentRouter.post('/analyze', async (req, res) => {
@@ -87,6 +102,7 @@ agentRouter.post('/analyze', async (req, res) => {
       supabase: ctx.supabase,
       chatId: ctx.chatId,
       images: ctx.imgs,
+      model: ctx.model,
     });
     return res.json({ text, transcript });
   } catch (err) {
@@ -115,6 +131,7 @@ agentRouter.post('/analyze/stream', async (req, res) => {
       supabase: ctx.supabase,
       chatId: ctx.chatId,
       images: ctx.imgs,
+      model: ctx.model,
     })) {
       write(event);
     }

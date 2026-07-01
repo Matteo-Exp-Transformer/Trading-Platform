@@ -14,27 +14,32 @@ export default function Login() {
     e.preventDefault();
     setErrore('');
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      setErrore('Email o password non validi. Riprova.');
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        setErrore('Email o password non validi. Riprova.');
+      }
+      // Se ok: onAuthStateChange aggiorna la sessione → LoginRoute in App.jsx redireziona a /
+    } catch {
+      setErrore('Rete non raggiungibile. Riprova tra poco.');
+    } finally {
+      setLoading(false);
     }
-    // Se ok: onAuthStateChange aggiorna la sessione → LoginRoute in App.jsx redireziona a /
   }
 
   return (
-    <div className="min-h-screen bg-freedom-bg text-white flex flex-col">
+    <div className="min-h-screen bg-app text-content flex flex-col">
       <main className="flex-1 flex flex-col items-center justify-center px-6">
         <div className="w-full max-w-sm flex flex-col gap-6">
           <h1 className="text-2xl font-bold text-freedom-accent text-center">
             FREEDOM TRADING SYSTEM
           </h1>
 
-          <p className="text-white/70 text-sm text-center">{DISCLAIMER}</p>
+          <p className="text-muted text-sm text-center">{DISCLAIMER}</p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <label htmlFor="email" className="text-sm text-white/70">
+              <label htmlFor="email" className="text-sm text-muted">
                 Email
               </label>
               <input
@@ -44,13 +49,13 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="bg-white/10 border border-white/20 rounded px-3 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-freedom-accent"
+                className="bg-surface-strong border border-line rounded px-3 py-2 text-content placeholder:text-faint focus:outline-none focus:border-freedom-accent"
                 placeholder="email@esempio.com"
               />
             </div>
 
             <div className="flex flex-col gap-1">
-              <label htmlFor="password" className="text-sm text-white/70">
+              <label htmlFor="password" className="text-sm text-muted">
                 Password
               </label>
               <input
@@ -60,13 +65,13 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="bg-white/10 border border-white/20 rounded px-3 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-freedom-accent"
+                className="bg-surface-strong border border-line rounded px-3 py-2 text-content placeholder:text-faint focus:outline-none focus:border-freedom-accent"
                 placeholder="••••••••"
               />
             </div>
 
             {errore && (
-              <p role="alert" className="text-red-400 text-sm">
+              <p role="alert" className="text-red-600 dark:text-red-400 text-sm">
                 {errore}
               </p>
             )}
@@ -84,7 +89,7 @@ export default function Login() {
 
       <footer
         role="contentinfo"
-        className="border-t border-white/10 px-6 py-3 text-xs text-white/60 text-center"
+        className="border-t border-line px-6 py-3 text-xs text-muted text-center"
       >
         {DISCLAIMER}
       </footer>

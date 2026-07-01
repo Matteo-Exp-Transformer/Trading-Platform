@@ -155,27 +155,27 @@ export default function Chat() {
   }
 
   return (
-    <div className="h-screen bg-freedom-bg text-white flex flex-col">
+    <div className="h-screen bg-app text-content flex flex-col">
       {/* header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-line shrink-0">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={handleOpenSidebar}
             aria-label="Apri storico chat"
-            className="text-white/70 hover:text-white"
+            className="text-muted hover:text-content"
           >
             ☰
           </button>
           <span className="font-bold text-freedom-accent">FREEDOM TRADING SYSTEM</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-white/50 hidden sm:inline">
+          <span className="text-sm text-muted hidden sm:inline">
             {profile?.display_name ?? session?.user?.email}
           </span>
           <button
             onClick={logout}
-            className="text-sm text-white/70 hover:text-white"
+            className="text-sm text-muted hover:text-content"
           >
             Esci
           </button>
@@ -187,7 +187,7 @@ export default function Chat() {
         {showForm || !currentChatId ? (
           <div className="flex-1 overflow-y-auto flex flex-col justify-center">
             {formError && (
-              <p role="alert" className="text-red-400 text-sm text-center px-4 mb-2">
+              <p role="alert" className="text-red-600 dark:text-red-400 text-sm text-center px-4 mb-2">
                 {formError}
               </p>
             )}
@@ -209,7 +209,7 @@ export default function Chat() {
       {/* disclaimer fisso */}
       <footer
         role="contentinfo"
-        className="border-t border-white/10 px-6 py-3 text-xs text-white/60 text-center shrink-0"
+        className="border-t border-line px-6 py-3 text-xs text-muted text-center shrink-0"
       >
         {DISCLAIMER}
       </footer>

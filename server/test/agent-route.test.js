@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 
-const { mockRun, mockRunStream, mockMaybeSingle, mockCreateClient } = vi.hoisted(() => ({
-  mockRun: vi.fn(),
-  mockRunStream: vi.fn(),
-  mockMaybeSingle: vi.fn(),
-  mockCreateClient: vi.fn(),
-}));
+const { mockRun, mockRunStream, mockMaybeSingle, mockProfileMaybeSingle, mockCreateClient } =
+  vi.hoisted(() => ({
+    mockRun: vi.fn(),
+    mockRunStream: vi.fn(),
+    mockMaybeSingle: vi.fn(), // ownership chat: from('chats').select('id').eq('id',id).maybeSingle()
+    mockProfileMaybeSingle: vi.fn(), // modello M6: from('profiles').select('ai_model').maybeSingle()
+    mockCreateClient: vi.fn(),
+  }));
 
 vi.mock('@supabase/supabase-js', () => ({ createClient: mockCreateClient }));
 vi.mock('../src/agent/orchestrator.js', () => ({
@@ -33,12 +35,18 @@ import { messaggioErrore } from '../src/routes/agent.js';
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // Catena ownership: from('chats').select('id').eq('id', id).maybeSingle()
-  const eq = vi.fn(() => ({ maybeSingle: mockMaybeSingle }));
-  const select = vi.fn(() => ({ eq }));
-  const from = vi.fn(() => ({ select }));
+  // Il client per-richiesta è usato per due letture RLS distinte:
+  //  - from('chats').select('id').eq('id', id).maybeSingle()  → ownership della chat
+  //  - from('profiles').select('ai_model').maybeSingle()      → modello per-account (M6)
+  const from = vi.fn((table) => {
+    if (table === 'profiles') {
+      return { select: vi.fn(() => ({ maybeSingle: mockProfileMaybeSingle })) };
+    }
+    return { select: vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle: mockMaybeSingle })) })) };
+  });
   mockCreateClient.mockReturnValue({ from });
   mockMaybeSingle.mockResolvedValue({ data: { id: 'chat-1' }, error: null });
+  mockProfileMaybeSingle.mockResolvedValue({ data: { ai_model: null }, error: null });
   mockRun.mockResolvedValue({ text: 'Analisi in prosa', transcript: null });
   mockRunStream.mockReturnValue(
     asEventStream([
@@ -88,6 +96,36 @@ describe('POST /api/agent/analyze', () => {
     expect(mockRun).toHaveBeenCalledWith(
       expect.objectContaining({ chatId: 'chat-1', images: [] }),
     );
+  });
+
+  it('passa il modello per-account all’orchestrator quando valido (M6)', async () => {
+    mockProfileMaybeSingle.mockResolvedValue({ data: { ai_model: 'gemini-2.5-flash' }, error: null });
+    await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(mockRun).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'gemini-2.5-flash' }),
+    );
+  });
+
+  it('modello fuori lista → undefined (fallback al default .env, mai crash)', async () => {
+    mockProfileMaybeSingle.mockResolvedValue({ data: { ai_model: 'modello-inventato' }, error: null });
+    await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(mockRun.mock.calls[0][0].model).toBeUndefined();
+  });
+
+  it('se la lettura del profilo fallisce, l’analisi procede col default (fallback mai-crash)', async () => {
+    mockProfileMaybeSingle.mockRejectedValue(new Error('profilo non leggibile'));
+    const res = await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(200);
+    expect(mockRun.mock.calls[0][0].model).toBeUndefined();
   });
 
   it('502 con messaggio gestito se l’analisi fallisce (mai eccezione a vista)', async () => {

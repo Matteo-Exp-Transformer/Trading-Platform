@@ -39,7 +39,7 @@ function ToggleGroup({ options, value, onChange, labelMap }) {
           className={`px-4 py-2 rounded border text-sm transition-colors ${
             value === opt
               ? 'bg-freedom-accent border-freedom-accent text-black font-semibold'
-              : 'border-white/20 text-white/70 hover:border-white/50'
+              : 'border-line text-muted hover:border-muted'
           }`}
         >
           {labelMap ? labelMap[opt] : opt}
@@ -52,18 +52,18 @@ function ToggleGroup({ options, value, onChange, labelMap }) {
 // Uno slot screenshot etichettato per timeframe: o mostra l'anteprima caricata, o il picker.
 function ScreenshotSlot({ slot, image, busy, error, onPick, onRemove }) {
   return (
-    <div className="flex items-center gap-3 p-2 rounded bg-white/5 border border-white/10">
+    <div className="flex items-center gap-3 p-2 rounded bg-surface border border-line">
       <div className="flex-1 min-w-0">
-        <div className="text-sm text-white">
+        <div className="text-sm text-content">
           {slot.label}
           {slot.required ? (
             <span className="text-freedom-accent ml-1" aria-label="obbligatorio">*</span>
           ) : (
-            <span className="text-white/40 ml-1 text-xs">(opzionale)</span>
+            <span className="text-faint ml-1 text-xs">(opzionale)</span>
           )}
         </div>
         {error && (
-          <p role="alert" className="text-red-400 text-xs mt-1">{error}</p>
+          <p role="alert" className="text-red-600 dark:text-red-400 text-xs mt-1">{error}</p>
         )}
       </div>
 
@@ -72,21 +72,21 @@ function ScreenshotSlot({ slot, image, busy, error, onPick, onRemove }) {
           <img
             src={image.preview}
             alt={`${slot.label} — ${image.name}`}
-            className="h-16 w-16 object-cover rounded border border-white/20"
+            className="h-16 w-16 object-cover rounded border border-line"
           />
           <button
             type="button"
             onClick={onRemove}
             aria-label={`Rimuovi ${slot.label}`}
-            className="absolute -top-2 -right-2 bg-black/80 text-white rounded-full w-5 h-5 text-xs leading-none border border-white/30"
+            className="absolute -top-2 -right-2 bg-black/80 text-white rounded-full w-5 h-5 text-xs leading-none border border-line"
           >
             ×
           </button>
         </div>
       ) : (
         <label
-          className={`cursor-pointer text-sm px-3 py-2 rounded border border-white/20 shrink-0 ${
-            busy ? 'text-white/40' : 'text-freedom-accent hover:brightness-110'
+          className={`cursor-pointer text-sm px-3 py-2 rounded border border-line shrink-0 ${
+            busy ? 'text-faint' : 'text-freedom-accent hover:brightness-110'
           }`}
         >
           {busy ? 'Carico…' : '+ Carica'}
@@ -222,25 +222,25 @@ export function NewAnalysisForm({ onSubmit, loading }) {
 
   return (
     <div className="w-full max-w-lg mx-auto px-4 py-6 flex flex-col gap-5">
-      <h2 className="text-lg font-semibold text-white">Nuova analisi</h2>
+      <h2 className="text-lg font-semibold text-content">Nuova analisi</h2>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
 
         {/* Asset */}
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm text-white/70">Quale asset?</legend>
+          <legend className="text-sm text-muted">Quale asset?</legend>
           <select
             value={values.asset}
             onChange={(e) => set('asset', e.target.value)}
-            className="bg-white/10 border border-white/20 rounded px-3 py-2 text-white focus:outline-none focus:border-freedom-accent"
+            className="bg-surface-strong border border-line rounded px-3 py-2 text-content focus:outline-none focus:border-freedom-accent"
           >
-            <option value="" className="bg-freedom-bg text-white">— Seleziona —</option>
+            <option value="" className="bg-app text-content">— Seleziona —</option>
             {ASSET_OPTIONS.map((a) => (
-              <option key={a} value={a} className="bg-freedom-bg text-white">
+              <option key={a} value={a} className="bg-app text-content">
                 {a}
               </option>
             ))}
-            <option value="__altro__" className="bg-freedom-bg text-white">Altro (scrivi il simbolo)</option>
+            <option value="__altro__" className="bg-app text-content">Altro (scrivi il simbolo)</option>
           </select>
           {values.asset === '__altro__' && (
             <input
@@ -248,11 +248,11 @@ export function NewAnalysisForm({ onSubmit, loading }) {
               placeholder="Es. USOIL, GBPJPY…"
               value={values.altroAsset}
               onChange={(e) => set('altroAsset', e.target.value)}
-              className="bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-freedom-accent"
+              className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
             />
           )}
           {errors.asset && (
-            <p role="alert" className="text-red-400 text-xs">
+            <p role="alert" className="text-red-600 dark:text-red-400 text-xs">
               {errors.asset}
             </p>
           )}
@@ -260,14 +260,14 @@ export function NewAnalysisForm({ onSubmit, loading }) {
 
         {/* Come operi */}
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm text-white/70">Come operi?</legend>
+          <legend className="text-sm text-muted">Come operi?</legend>
           <ToggleGroup
             options={STILE_OPTIONS}
             value={values.stileOperativo}
             onChange={handleStileChange}
           />
           {errors.stileOperativo && (
-            <p role="alert" className="text-red-400 text-xs">
+            <p role="alert" className="text-red-600 dark:text-red-400 text-xs">
               {errors.stileOperativo}
             </p>
           )}
@@ -275,14 +275,14 @@ export function NewAnalysisForm({ onSubmit, loading }) {
 
         {/* Obiettivo */}
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm text-white/70">Cosa vuoi da questa analisi?</legend>
+          <legend className="text-sm text-muted">Cosa vuoi da questa analisi?</legend>
           <ToggleGroup
             options={OBIETTIVO_OPTIONS}
             value={values.obiettivo}
             onChange={handleObiettivoChange}
           />
           {errors.obiettivo && (
-            <p role="alert" className="text-red-400 text-xs">
+            <p role="alert" className="text-red-600 dark:text-red-400 text-xs">
               {errors.obiettivo}
             </p>
           )}
@@ -290,7 +290,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
 
         {/* Posizione */}
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm text-white/70">
+          <legend className="text-sm text-muted">
             Hai una posizione aperta?
             {richiedePosizione && (
               <span className="text-freedom-accent ml-1" aria-label="obbligatorio">
@@ -305,23 +305,23 @@ export function NewAnalysisForm({ onSubmit, loading }) {
             labelMap={{ si: 'Sì', no: 'No' }}
           />
           {errors.hasPosizione && (
-            <p role="alert" className="text-red-400 text-xs">
+            <p role="alert" className="text-red-600 dark:text-red-400 text-xs">
               {errors.hasPosizione}
             </p>
           )}
 
           {values.hasPosizione === 'si' && (
-            <div className="flex flex-col gap-3 mt-1 p-3 rounded bg-white/5 border border-white/10">
+            <div className="flex flex-col gap-3 mt-1 p-3 rounded bg-surface border border-line">
               {/* Direzione */}
               <div className="flex flex-col gap-1">
-                <span className="text-xs text-white/60">Direzione</span>
+                <span className="text-xs text-muted">Direzione</span>
                 <ToggleGroup
                   options={['Long', 'Short']}
                   value={values.tipoPosizione}
                   onChange={(v) => set('tipoPosizione', v)}
                 />
                 {errors.tipoPosizione && (
-                  <p role="alert" className="text-red-400 text-xs">
+                  <p role="alert" className="text-red-600 dark:text-red-400 text-xs">
                     {errors.tipoPosizione}
                   </p>
                 )}
@@ -329,7 +329,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
 
               {/* Prezzo apertura */}
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-white/60">
+                <label className="text-xs text-muted">
                   Prezzo apertura <span className="text-freedom-accent">*</span>
                 </label>
                 <input
@@ -337,10 +337,10 @@ export function NewAnalysisForm({ onSubmit, loading }) {
                   placeholder="Es. 2350.50"
                   value={values.prezzoApertura}
                   onChange={(e) => set('prezzoApertura', e.target.value)}
-                  className="bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-freedom-accent"
+                  className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
                 />
                 {errors.prezzoApertura && (
-                  <p role="alert" className="text-red-400 text-xs">
+                  <p role="alert" className="text-red-600 dark:text-red-400 text-xs">
                     {errors.prezzoApertura}
                   </p>
                 )}
@@ -349,23 +349,23 @@ export function NewAnalysisForm({ onSubmit, loading }) {
               {/* SL e TP */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs text-white/60">Stop Loss (opz.)</label>
+                  <label className="text-xs text-muted">Stop Loss (opz.)</label>
                   <input
                     type="text"
                     placeholder="Es. 2330"
                     value={values.sl}
                     onChange={(e) => set('sl', e.target.value)}
-                    className="bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-freedom-accent"
+                    className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs text-white/60">Take Profit (opz.)</label>
+                  <label className="text-xs text-muted">Take Profit (opz.)</label>
                   <input
                     type="text"
                     placeholder="Es. 2400"
                     value={values.tp}
                     onChange={(e) => set('tp', e.target.value)}
-                    className="bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-freedom-accent"
+                    className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
                   />
                 </div>
               </div>
@@ -375,29 +375,29 @@ export function NewAnalysisForm({ onSubmit, loading }) {
 
         {/* Idea */}
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm text-white/70">La tua idea (facoltativo)</legend>
+          <legend className="text-sm text-muted">La tua idea (facoltativo)</legend>
           <textarea
             placeholder="Breve nota personale…"
             value={values.idea}
             onChange={(e) => set('idea', e.target.value)}
             rows={2}
-            className="bg-white/10 border border-white/20 rounded px-3 py-2 text-white text-sm resize-none focus:outline-none focus:border-freedom-accent"
+            className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm resize-none focus:outline-none focus:border-freedom-accent"
           />
         </fieldset>
 
         {/* Screenshot — slot fissi per timeframe (vision obbligatoria nel primo turno) */}
         <fieldset className="flex flex-col gap-3">
-          <legend className="text-sm text-white/70">Screenshot del grafico</legend>
+          <legend className="text-sm text-muted">Screenshot del grafico</legend>
 
           {slots.length === 0 ? (
-            <p className="text-xs text-white/40">
-              Scegli <span className="text-white/60">«Come operi»</span> e{' '}
-              <span className="text-white/60">«Cosa vuoi da questa analisi»</span> per vedere quali
+            <p className="text-xs text-faint">
+              Scegli <span className="text-muted">«Come operi»</span> e{' '}
+              <span className="text-muted">«Cosa vuoi da questa analisi»</span> per vedere quali
               grafici caricare.
             </p>
           ) : (
             <>
-              <p className="text-xs text-white/40">
+              <p className="text-xs text-faint">
                 Carica lo screenshot giusto per ogni timeframe. Il decisionale è sempre obbligatorio.
               </p>
               <div className="flex flex-col gap-3">
@@ -417,7 +417,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
           )}
         </fieldset>
 
-        <p className="text-xs text-white/40 text-center">{DISCLAIMER}</p>
+        <p className="text-xs text-faint text-center">{DISCLAIMER}</p>
 
         <button
           type="submit"

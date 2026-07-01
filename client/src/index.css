@@ -2,11 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Palette semantica del tema (M6). Un solo punto-verità dei colori: i componenti usano token
+  semantici (app/surface/content/muted/faint/line) mappati in tailwind.config.js su queste variabili.
+  Base = tema CHIARO; la classe `.dark` (impostata da lib/theme.js su <html>) attiva il tema SCURO.
+  I valori sono terne "R G B" così le utility con opacità (es. text-content/70) continuano a funzionare.
+  L'accento del brand (freedom-accent, verde) resta uguale in entrambi i temi. Palette ricca = M7.
+*/
 :root {
+  /* Tema chiaro */
+  --color-app: 255 255 255;
+  --color-surface: 241 245 244;
+  --color-surface-strong: 230 236 234;
+  --color-surface-stronger: 218 226 223;
+  --color-content: 15 26 23;
+  --color-muted: 71 85 82;
+  --color-faint: 140 155 150;
+  --color-line: 219 226 223;
+  color-scheme: light;
+}
+
+.dark {
+  /* Tema scuro (default del prodotto) */
+  --color-app: 11 31 26;
+  --color-surface: 20 38 33;
+  --color-surface-strong: 31 49 44;
+  --color-surface-stronger: 44 60 55;
+  --color-content: 255 255 255;
+  --color-muted: 199 209 205;
+  --color-faint: 130 145 140;
+  --color-line: 42 58 53;
   color-scheme: dark;
 }
 
 body {
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  /* Sfondo/testo di base sempre coerenti col tema, anche fuori dai componenti. */
+  background-color: rgb(var(--color-app));
+  color: rgb(var(--color-content));
+}
+
+/*
+  Il drawer deve restare una superficie opaca e distinta dal contenuto sottostante.
+  La regola esplicita evita che il pannello dipenda soltanto dalla utility generata da Tailwind.
+*/
+.sidebar-panel {
+  background-color: rgb(var(--color-surface));
+  box-shadow: 0 0 2rem rgb(0 0 0 / 35%);
 }

@@ -103,6 +103,20 @@ describe('runAnalysis', () => {
     const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
     await expect(runAnalysis({ supabase, chatId: 'c', images: [] })).rejects.toThrow(/risposta valida/);
   });
+
+  it('inoltra `model` a providerClient (modello per-account M6)', async () => {
+    const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
+    await runAnalysis({ supabase, chatId: 'c', images: [], model: 'gemini-2.5-flash' });
+    expect(mockRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'gemini-2.5-flash' }),
+    );
+  });
+
+  it('senza `model` passa undefined (providerClient cade sul default .env)', async () => {
+    const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
+    await runAnalysis({ supabase, chatId: 'c', images: [] });
+    expect(mockRequest.mock.calls[0][0].model).toBeUndefined();
+  });
 });
 
 describe('runAnalysisStream (M5)', () => {
@@ -137,6 +151,15 @@ describe('runAnalysisStream (M5)', () => {
     const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
     await expect(collect(runAnalysisStream({ supabase, chatId: 'c', images: [] }))).rejects.toThrow(
       /risposta valida/,
+    );
+  });
+
+  it('inoltra `model` a streamGeminiText (modello per-account M6)', async () => {
+    mockStream.mockReturnValue(asStream(['ok']));
+    const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
+    await collect(runAnalysisStream({ supabase, chatId: 'c', images: [], model: 'gemini-2.5-flash' }));
+    expect(mockStream).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'gemini-2.5-flash' }),
     );
   });
 });
