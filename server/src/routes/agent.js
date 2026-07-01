@@ -69,8 +69,9 @@ agentRouter.post('/analyze', async (req, res) => {
       return res.status(404).json({ error: 'Analisi non trovata.' });
     }
 
-    const text = await runAnalysis({ supabase, chatId, images: imgs });
-    return res.json({ text });
+    // { text: prosa mostrata all'utente, transcript: scheda JSON dell'analisi (o null) — M4 }
+    const { text, transcript } = await runAnalysis({ supabase, chatId, images: imgs });
+    return res.json({ text, transcript });
   } catch (err) {
     console.error('[agent] analyze:', err?.message);
     return res.status(502).json({ error: messaggioErrore(err) });

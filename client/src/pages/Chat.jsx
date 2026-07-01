@@ -62,8 +62,11 @@ export default function Chat() {
     setAnalyzing(true);
     setAnalysisError(null);
     try {
-      const text = await analyzeChat(chatId, images);
-      const assistantMsg = await addMessage(chatId, text, 'assistant');
+      const { text, transcript } = await analyzeChat(chatId, images);
+      // M4: la scheda JSON (se presente) si salva sul messaggio assistant come elemento
+      // tipizzato dentro attachments (jsonb, sempre un array — default '[]').
+      const attachments = transcript ? [{ type: 'transcript', data: transcript }] : null;
+      const assistantMsg = await addMessage(chatId, text, 'assistant', attachments);
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (e) {
       setAnalysisError(e?.message || 'Analisi non riuscita. Riprova.');

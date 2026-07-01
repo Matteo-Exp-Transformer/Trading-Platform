@@ -126,6 +126,29 @@ lo stile-LOCK (dicevano «usa elenchi, titoli, grassetto»). Il metodo **reale**
 fisso in testa (caching). Il loader carica TUTTI i 7 file come unico system prompt (02 incluso): è il
 comportamento voluto per il nostro flusso automatico.
 
+## 4-bis. M4 — Trascrizione JSON dell'analisi (niente Storage immagini)
+
+**Decisione d'intervista (2026-07-01).** Invece di **conservare gli screenshot** (Storage + policy RLS +
+retention), a ogni analisi si salva una **scheda JSON strutturata** di ciò che i grafici mostravano. Le
+immagini restano **solo in volo** (servono a Gemini per la lettura), poi si **scartano**: dopo la
+trascrizione non servono più. Conseguenza: **niente Supabase Storage**, **FU-005 superata**.
+
+| Questione | Decisione presa | Nota LOCK |
+|-----------|-----------------|-----------|
+| Chi genera la scheda | **Gemini stesso, nella stessa chiamata d'analisi** (un solo passaggio: nessun costo/attesa extra). | Tocca la catena oltre `providerClient` (orchestrator) → adattamento ESPLICITO e circoscritto, approvato in intervista. |
+| Contenuto scheda (ricca) | `asset` · `timeframe` (per grafico) · `livelli` (supporti/resistenze) · `struttura`/`trend` · `indicatori` (RSI…) · `bias` direzionale · `posizione` (o null). | — |
+| Come si chiede senza rompere il kit | Istruzione aggiunta **in coda al turno utente corrente** (parte variabile), **mai** nei file `kit/`: il blocco-kit in testa resta identico → **caching Gemini intatto**. | Kit LOCK non toccato. |
+| Solo con immagini | La scheda si chiede **solo** nel turno con screenshot (vera analisi), mai nei follow-up testuali. | Coerente §3 "immagini solo nel primo turno". |
+| Prosa pulita | Gemini scrive l'analisi + in fondo il marcatore `===SCHEDA_JSON===` + JSON. Il **server separa**: l'utente vede solo la prosa; la scheda va in `messages.attachments` (jsonb, già predisposto). | Stile risposta kit intatto (utente non vede il JSON). |
+| Mai bloccare | Scheda mancante o JSON illeggibile → si salva l'analisi lo stesso, `transcript = null`. | RULE "mai crash a vista". |
+
+**Innesto nel codice (M4):** modulo nuovo `server/src/agent/transcript.js` (marcatore +
+`buildTranscriptInstruction()` + `splitTranscript()`, puri e testati); `orchestrator` inietta l'istruzione
+quando `images.length > 0`, separa prosa/scheda, ritorna `{ text, transcript }`; la route ritorna anche
+`transcript`; lato client `chatData.addMessage` accetta `attachments` e `Chat.jsx` salva la scheda sul
+messaggio `assistant` come **elemento tipizzato in un array**: `[{ type:'transcript', data:{…} }]` (la colonna
+jsonb ha default `[]`, quindi `attachments` resta sempre un array).
+
 ## 5. LOCK di area (invarianti locali)
 
 ```

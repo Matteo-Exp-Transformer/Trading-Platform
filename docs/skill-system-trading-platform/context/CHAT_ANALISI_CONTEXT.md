@@ -98,6 +98,14 @@ intervista M3): gli screenshot si caricano **solo nel form iniziale**; nei follo
 Il **contesto del form (asset, stile, posizione, TF) resta valido per tutta la chat** e l'agente lo ricorda.
 L'agente può fare al massimo una o due domande tecniche, poi opinione in prosa breve, e «lascia la palla al trader».
 
+### 5-bis. M4 — Persistenza: scheda JSON, non le immagini (deciso 2026-07-01)
+
+Gli screenshot **non si conservano**: vivono solo in volo per l'analisi, poi si scartano. Al loro posto,
+a ogni analisi si salva una **scheda JSON** (asset, timeframe per grafico, livelli, struttura, indicatori,
+bias, posizione) che Gemini produce nella **stessa** chiamata; il server la separa dalla prosa e la salva in
+`messages.attachments`. Riaprendo una vecchia analisi si rivede la **prosa** (le immagini non servono più).
+Conseguenza: **niente Supabase Storage** (FU-005 superata). Dettaglio catena/LOCK: `aree/AGENTE_AI_SKILL.md §4-bis`.
+
 ## 6. Questioni tecniche aperte (default proposti, da confermare in M3/M5)
 
 - **Storia conversazionale al modello (deciso M3):** ✅ implementato — tutta la storia **testuale** + immagini

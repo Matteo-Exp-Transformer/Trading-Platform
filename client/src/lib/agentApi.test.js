@@ -23,13 +23,13 @@ describe('analyzeChat', () => {
     await expect(analyzeChat('chat-1', [])).rejects.toThrow(/Sessione scaduta/);
   });
 
-  it('happy path: invia token + chatId e restituisce il testo', async () => {
+  it('happy path: invia token + chatId e restituisce { text, transcript }', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
-      json: async () => ({ text: 'Analisi' }),
+      json: async () => ({ text: 'Analisi', transcript: { asset: 'XAU/USD' } }),
     });
     const out = await analyzeChat('chat-1', [{ mimeType: 'image/png', data: 'A' }]);
-    expect(out).toBe('Analisi');
+    expect(out).toEqual({ text: 'Analisi', transcript: { asset: 'XAU/USD' } });
     const [url, opts] = fetchMock.mock.calls[0];
     expect(url).toBe('/api/agent/analyze');
     expect(opts.headers.Authorization).toBe('Bearer tok');
@@ -37,6 +37,15 @@ describe('analyzeChat', () => {
       chatId: 'chat-1',
       images: [{ mimeType: 'image/png', data: 'A' }],
     });
+  });
+
+  it('transcript assente nel payload → null (mai undefined)', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ text: 'Analisi' }),
+    });
+    const out = await analyzeChat('chat-1', []);
+    expect(out).toEqual({ text: 'Analisi', transcript: null });
   });
 
   it('propaga il messaggio di errore del server su risposta non ok', async () => {

@@ -19,11 +19,15 @@ export async function createChat(title, formContext = {}) {
 
 // role generalizzato: 'user' (default) per i messaggi del trader, 'assistant' per le
 // risposte dell'agente AI (salvate dal client dopo la chiamata alla route, vedi agentApi).
-export async function addMessage(chatId, content, role = 'user') {
+// attachments (M4): la scheda JSON dell'analisi sul messaggio assistant (o [] se assente).
+// La colonna messages.attachments è jsonb not null default '[]' (vedi DB_SUPABASE_SKILL).
+export async function addMessage(chatId, content, role = 'user', attachments = null) {
   const userId = await getUserId();
+  const row = { chat_id: chatId, user_id: userId, role, content };
+  if (attachments != null) row.attachments = attachments;
   const { data, error } = await supabase
     .from('messages')
-    .insert({ chat_id: chatId, user_id: userId, role, content })
+    .insert(row)
     .select()
     .single();
   if (error) throw error;

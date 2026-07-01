@@ -36,4 +36,19 @@ describe('buildMessages', () => {
     const { messages } = buildMessages('KIT', [], []);
     expect(messages).toEqual([]);
   });
+
+  it('userInstruction si appende SOLO al turno immagini, non al system (M4)', () => {
+    const imgs = [{ mimeType: 'image/png', data: 'AAA' }];
+    const { system, messages } = buildMessages('KIT', HISTORY, imgs, 'CHIEDI-SCHEDA');
+    expect(system).toBe('KIT'); // kit intatto → caching preservato
+    expect(messages[2].content).toContain('Esco o tengo?');
+    expect(messages[2].content).toContain('CHIEDI-SCHEDA');
+    // I turni precedenti non ricevono l'istruzione.
+    expect(messages[0].content).not.toContain('CHIEDI-SCHEDA');
+  });
+
+  it('userInstruction ignorata se non ci sono immagini (nessuna scheda nei follow-up)', () => {
+    const { messages } = buildMessages('KIT', HISTORY, [], 'CHIEDI-SCHEDA');
+    expect(messages.every((m) => !m.content.includes('CHIEDI-SCHEDA'))).toBe(true);
+  });
 });

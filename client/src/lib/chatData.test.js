@@ -122,6 +122,24 @@ describe('addMessage', () => {
     );
   });
 
+  it('salva la scheda JSON in attachments quando passata (M4)', async () => {
+    const capturedInsert = vi.fn().mockReturnValue({ select: mockSelect });
+    mockFrom.mockReturnValue({ insert: capturedInsert });
+    mockSingle.mockResolvedValue({ data: { id: 'm1' }, error: null });
+    await addMessage('chat-abc', 'risposta AI', 'assistant', { asset: 'XAU/USD' });
+    expect(capturedInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ role: 'assistant', attachments: { asset: 'XAU/USD' } }),
+    );
+  });
+
+  it('non include attachments se non passata (retro-compatibile)', async () => {
+    const capturedInsert = vi.fn().mockReturnValue({ select: mockSelect });
+    mockFrom.mockReturnValue({ insert: capturedInsert });
+    mockSingle.mockResolvedValue({ data: { id: 'm1' }, error: null });
+    await addMessage('chat-abc', 'testo');
+    expect(capturedInsert.mock.calls[0][0]).not.toHaveProperty('attachments');
+  });
+
   it('rilancia se Supabase restituisce errore', async () => {
     mockSingle.mockResolvedValue({ data: null, error: new Error('insert fail') });
     await expect(addMessage('chat-1', 'x')).rejects.toThrow('insert fail');

@@ -1,9 +1,10 @@
 import { supabase } from './supabaseClient.js';
 
 // Invia un turno di analisi alla route server (il "cervello"): la route legge la storia da
-// Supabase, chiama Gemini e restituisce il testo. La chiave AI vive SOLO lato server: qui
-// passiamo solo l'access token dell'utente (per RLS) e gli screenshot del primo turno.
-// Mai un crash a vista: ogni errore diventa un messaggio chiaro da mostrare in chat.
+// Supabase, chiama Gemini e restituisce { text, transcript }. `text` è la prosa da mostrare;
+// `transcript` è la scheda JSON dell'analisi (M4) da salvare col messaggio assistant (o null).
+// La chiave AI vive SOLO lato server: qui passiamo solo l'access token dell'utente (per RLS)
+// e gli screenshot del primo turno. Mai un crash a vista: ogni errore diventa un messaggio chiaro.
 export async function analyzeChat(chatId, images = []) {
   const {
     data: { session },
@@ -40,5 +41,5 @@ export async function analyzeChat(chatId, images = []) {
   if (!payload?.text) {
     throw new Error('Analisi non riuscita. Riprova.');
   }
-  return payload.text;
+  return { text: payload.text, transcript: payload.transcript ?? null };
 }

@@ -48,13 +48,32 @@ describe('readHistory', () => {
 });
 
 describe('runAnalysis', () => {
-  it('happy path: kit + storia -> provider -> testo', async () => {
+  it('happy path (follow-up senza immagini): ritorna prosa e transcript null', async () => {
     const supabase = fakeSupabase({ data: [{ role: 'user', content: 'Analizza' }], error: null });
-    const text = await runAnalysis({ supabase, chatId: 'chat-1', images: [] });
-    expect(text).toBe('Analisi in prosa');
+    const out = await runAnalysis({ supabase, chatId: 'chat-1', images: [] });
+    expect(out).toEqual({ text: 'Analisi in prosa', transcript: null });
     expect(mockLoad).toHaveBeenCalledOnce();
     // Il system (kit) deve arrivare al provider.
     expect(mockRequest).toHaveBeenCalledWith(expect.objectContaining({ system: 'KIT' }));
+    // Senza immagini non si chiede la scheda: nessuna istruzione appesa al turno utente.
+    const sent = mockRequest.mock.calls[0][0];
+    expect(JSON.stringify(sent.messages)).not.toContain('SCHEDA_JSON');
+  });
+
+  it('con immagini: appende l’istruzione scheda e separa prosa/transcript (M4)', async () => {
+    mockParse.mockReturnValue('Analisi in prosa\n\n===SCHEDA_JSON===\n{"asset":"XAU/USD","bias":"long"}');
+    const supabase = fakeSupabase({ data: [{ role: 'user', content: 'Analizza' }], error: null });
+    const out = await runAnalysis({
+      supabase,
+      chatId: 'chat-1',
+      images: [{ mimeType: 'image/png', data: 'A' }],
+    });
+    expect(out.text).toBe('Analisi in prosa');
+    expect(out.transcript).toEqual({ asset: 'XAU/USD', bias: 'long' });
+    // L'istruzione scheda è nel turno utente (parte variabile), non nel system/kit.
+    const sent = mockRequest.mock.calls[0][0];
+    expect(sent.system).toBe('KIT');
+    expect(JSON.stringify(sent.messages)).toContain('SCHEDA_JSON');
   });
 
   it('lancia se non c’è storia da analizzare', async () => {

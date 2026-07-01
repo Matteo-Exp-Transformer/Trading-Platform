@@ -6,6 +6,7 @@
 import { loadSkillPrompt } from './skillLoader.js';
 import { buildMessages } from './promptBuilder.js';
 import { requestCompletion, parseCompletionResponse } from './providerClient.js';
+import { buildTranscriptInstruction, splitTranscript } from './transcript.js';
 
 // Legge la storia testuale della chat (role + content) ordinata cronologicamente.
 export async function readHistory(supabase, chatId) {
@@ -18,6 +19,9 @@ export async function readHistory(supabase, chatId) {
   return data || [];
 }
 
+// Ritorna { text, transcript }: `text` è la prosa mostrata all'utente; `transcript` è la scheda
+// JSON dell'analisi (M4) da salvare in messages.attachments, oppure null (follow-up testuale, o
+// scheda mancante/illeggibile — mai bloccante). La scheda si chiede solo nel turno con immagini.
 export async function runAnalysis({ supabase, chatId, images = [] }) {
   const systemPrompt = await loadSkillPrompt();
 
@@ -26,12 +30,18 @@ export async function runAnalysis({ supabase, chatId, images = [] }) {
     throw new Error('Nessun messaggio da analizzare per questa chat.');
   }
 
-  const { system, messages } = buildMessages(systemPrompt, history, images);
+  const instruction = images.length > 0 ? buildTranscriptInstruction() : '';
+  const { system, messages } = buildMessages(systemPrompt, history, images, instruction);
 
   const response = await requestCompletion({ system, messages });
   const text = parseCompletionResponse(response);
   if (!text) {
     throw new Error('Il modello non ha restituito una risposta valida.');
   }
-  return text;
+
+  const { prose, transcript } = splitTranscript(text);
+  if (!prose) {
+    throw new Error('Il modello non ha restituito una risposta valida.');
+  }
+  return { text: prose, transcript };
 }

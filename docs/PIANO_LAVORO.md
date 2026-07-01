@@ -58,11 +58,17 @@ live). **Fatto (2026-06-30):** `aree/AGENTE_AI_SKILL.md` ✅; kit splittato in `
 lettura corretta e in stile Aware Trader. **Rischio #1 rientrato.** Rifinitura upload (FU-012: slot
 per-timeframe + compressione client) anch'essa chiusa (2026-07-01). **M3 completo.**
 
-## M4 — Upload screenshot  ⬜
-**Obiettivo:** allegati immagine robusti. **Deliverable:** upload + base64, storage Supabase, validazione
-formato/dimensione, resize lato client, max N screenshot per analisi (limite per la **finestra di contesto**,
-non per i costi — nessun freno costi in demo, vedi CONTESTO L12). **Fatto quando:** allego più immagini,
-si vedono in chat, sono isolate per utente.
+## M4 — Persistenza analisi: scheda JSON (niente Storage immagini)  🟡 *(deep — LOCK catena agente)*
+**Svolta d'intervista (2026-07-01):** invece di conservare le immagini (Storage + policy), si salva una
+**scheda JSON strutturata** dell'analisi; gli screenshot restano solo in volo e poi si scartano →
+**niente Supabase Storage** (FU-005 superata). **Deliverable:** modulo `server/src/agent/transcript.js`
+(marcatore + `buildTranscriptInstruction` + `splitTranscript`, testati); `orchestrator` chiede la scheda a
+Gemini **nella stessa chiamata** (solo col turno immagini), separa prosa/scheda, ritorna `{text, transcript}`;
+route ritorna `transcript`; client `chatData.addMessage(attachments)` + `Chat.jsx` salva la scheda in
+`messages.attachments` (jsonb, già predisposto). Resize/compressione lato client + slot per-TF già fatti (FU-012).
+Dettaglio: `aree/AGENTE_AI_SKILL.md §4-bis` · `context/CHAT_ANALISI_CONTEXT.md §5-bis`.
+**Fatto quando:** dopo un'analisi la scheda JSON è salvata sul messaggio assistant, isolata per utente,
+e la prosa si rivede riaprendo la chat; validate verde. **NB:** kit intatto, caching Gemini preservato.
 
 ## M5 — Streaming  ⬜
 **Obiettivo:** risposta a pezzi mostrata man mano, senza crash su interruzioni.

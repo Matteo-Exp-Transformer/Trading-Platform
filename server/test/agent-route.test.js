@@ -21,7 +21,7 @@ beforeEach(() => {
   const from = vi.fn(() => ({ select }));
   mockCreateClient.mockReturnValue({ from });
   mockMaybeSingle.mockResolvedValue({ data: { id: 'chat-1' }, error: null });
-  mockRun.mockResolvedValue('Analisi in prosa');
+  mockRun.mockResolvedValue({ text: 'Analisi in prosa', transcript: null });
 });
 
 describe('POST /api/agent/analyze', () => {
@@ -51,13 +51,15 @@ describe('POST /api/agent/analyze', () => {
     expect(mockRun).not.toHaveBeenCalled();
   });
 
-  it('200 happy path: restituisce il testo dell’analisi', async () => {
+  it('200 happy path: restituisce testo + transcript dell’analisi', async () => {
+    mockRun.mockResolvedValue({ text: 'Analisi in prosa', transcript: { asset: 'XAU/USD' } });
     const res = await request(app)
       .post('/api/agent/analyze')
       .set('Authorization', 'Bearer tok')
       .send({ chatId: 'chat-1', images: [] });
     expect(res.status).toBe(200);
     expect(res.body.text).toBe('Analisi in prosa');
+    expect(res.body.transcript).toEqual({ asset: 'XAU/USD' });
     expect(mockRun).toHaveBeenCalledWith(
       expect.objectContaining({ chatId: 'chat-1', images: [] }),
     );
