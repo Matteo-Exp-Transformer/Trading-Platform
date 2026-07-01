@@ -9,9 +9,10 @@
 > Gli agenti Esecuzione/Verifica **non** leggono né scrivono questo file: ricevono il loro contesto dal
 > prompt preparato. È il baton del Senior.
 >
-> **Ultimo aggiornamento:** 2026-07-01 — **M3 COMPLETO** (cervello + FU-011 test vista + FU-012 upload) e
-> **M4 COMPLETO e verificato live**: trascrizione JSON dell'analisi al posto dello Storage immagini (svolta
-> d'intervista — niente Storage, FU-005 superata). Prossimo: **M5 — Streaming**.
+> **Ultimo aggiornamento:** 2026-07-01 — **M3·M4·M5 COMPLETI e verificati live**. M3 (cervello + test vista
+> FU-011 + upload FU-012). M4 (trascrizione JSON al posto dello Storage — FU-005 superata). FU-015 (agente
+> segnala screenshot non validi). **M5 (streaming risposta a pezzi)**. Il cuore del prodotto è finito.
+> Prossimo: **M6 — Impostazioni** (tema · cambio password · selettore modello). Serve `IMPOSTAZIONI_CONTEXT.md` (da creare via intervista).
 
 ---
 
@@ -50,8 +51,16 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
   Storage immagini. Gemini emette la scheda nella stessa chiamata (istruzione in coda al turno immagini,
   kit intatto → caching preservato); il server separa prosa/scheda; la scheda va in `messages.attachments`
   come `[{type:'transcript',data:…}]`. Le immagini restano solo in volo, poi scartate → **niente Storage**
-  (FU-005 superata). Verificato su DB: analisi reale BTCUSD → scheda completa salvata. Report:
-  `_sessioni-lavoro/2026-07-01/Report-M4-trascrizione-json.md`.
+  (FU-005 superata). Report: `_sessioni-lavoro/2026-07-01/Report-M4-trascrizione-json.md`.
+- **FU-015 ✅ (2026-07-01):** l'agente **segnala gli screenshot non validi** (foto al posto del grafico) a
+  inizio risposta + avvisa che l'analisi può essere incompleta; campo `avvisi` nella scheda. Verificato live.
+- **M5 ✅ COMPLETO e verificato live (2026-07-01):** **streaming** della risposta. `providerClient.streamGeminiText`
+  (SSE) · `transcript.createProseStreamer` (nasconde marcatore/scheda anche se spezzato) · `orchestrator.runAnalysisStream`
+  (eventi delta/done) · route `POST /api/agent/analyze/stream` (NDJSON, `/analyze` resta fallback) · client
+  progressivo con interruzione=parziale+avviso. Persistenza M4 intatta. Report:
+  `_sessioni-lavoro/2026-07-01/Report-M5-streaming.md`.
+- **DB verificato (2026-07-01):** analisi in streaming → `messages.attachments` con scheda completa + `avvisi`;
+  follow-up → `attachments []`; prosa sempre pulita (marcatore mai a vista).
 - **M2** resta interamente chiuso (chat base, sidebar/storico, RLS).
 
 ## 1-bis. Decisioni importanti prese in M3 (per memoria)
@@ -70,13 +79,13 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 2. Prossimo passo concreto
 
-1. **M5 — Streaming [PROSSIMO]:** oggi la risposta arriva tutta insieme dopo l'attesa «sta analizzando…».
-   M5 la fa scorrere a pezzi (server→client), con indicatore di elaborazione e gestione errori a vista
-   (interruzione → messaggio chiaro + riprova). Tocca `providerClient` (streaming Gemini) + route + client.
-   ⚠️ Attenzione con M4: la **scheda JSON** arriva in coda alla risposta — in streaming va bufferizzata e
-   il marcatore `===SCHEDA_JSON===` **non deve comparire a schermo** (tagliare prima di mostrare). Prima
-   dell'esecuzione: intervista → aggiornare `CHAT_ANALISI_CONTEXT`/`AGENTE_AI_SKILL` → prompt esecutore.
-2. **Poi M6/M7/M8** secondo `PIANO_LAVORO.md`.
+1. **M6 — Impostazioni [PROSSIMO]:** tema chiaro/scuro (persistito per utente) · cambio password ·
+   **selettore modello** (lista curata 2-3 Gemini). ⚠️ **Serve prima `context/IMPOSTAZIONI_CONTEXT.md`**
+   (non esiste ancora): da creare via intervista, come da schema di lavoro (nessun codice della zona prima
+   del suo context). Note utili: il modello è già letto da `.env` (`AI_MODEL`) e `providerClient` è uno
+   switcher → il selettore modello si innesta lì; il tema va persistito per-utente (colonna su `profiles`
+   o preferenze). Auth/RLS già pronti (M1).
+2. **Poi M7 (estetica) e M8 (blindatura+deploy)** secondo `PIANO_LAVORO.md`.
 
 ## 3. Decisioni d'intervista prese e già nei doc
 
@@ -86,11 +95,14 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 4. Questioni aperte da portare all'utente
 
-- ~~Esito test vista (FU-011)~~ **risolto (2026-07-01):** lettura corretta su grafici reali, rischio #1 rientrato.
-- ~~`GOOGLE_API_KEY` formato inusuale (FU-014)~~ **risolto (2026-07-01):** `AQ.Ab8...` è il nuovo
-  formato ufficiale delle Google API key. Chiave valida e stabile, nessuna azione.
-- **Policy Storage allegati (FU-005):** da scrivere a M4, prima di spostare gli screenshot su Storage.
-- Più avanti: deploy target · modelli nello switcher · estetica beta — `CONTESTO_PRODOTTO.md §11`.
+- **Follow-up post-intervista cliente (FU-002/FU-003):** recupero password self-service + validazione email
+  reale (richiedono SMTP). In demo: reset a mano dell'admin, email finte ammesse.
+- **FU-004 (bassa priorità):** attivare «leaked password protection» nel pannello Supabase Auth prima del prodotto.
+- **FU-013 (leva futura):** caching esplicito gestito del blocco kit quando i volumi cresceranno (ora automatico).
+- **M6:** decidere la lista curata di modelli Gemini per il selettore (2-3) — da fissare nell'intervista M6.
+- Più avanti: deploy target · estetica beta — `CONTESTO_PRODOTTO.md §11`.
+- ~~FU-005 (Storage)~~ **superata** (M4: scheda JSON, niente file). ~~FU-011 (test vista)~~, ~~FU-014 (chiave)~~,
+  ~~FU-015 (screenshot non validi)~~ **risolte** (2026-07-01).
 
 ## 5. Puntatori (la verità vive lì, non qui)
 

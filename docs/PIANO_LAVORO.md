@@ -72,7 +72,7 @@ e la prosa si rivede riaprendo la chat; validate verde. **NB:** kit intatto, cac
 **✅ Verificato live (2026-07-01):** analisi reale su BTCUSD → `messages.attachments` popolato con scheda
 completa (asset/timeframe/livelli/struttura/indicatori/bias) come `[{type:'transcript',data:…}]`; prosa pulita.
 
-## M5 — Streaming  🟡 *(deep — LOCK catena agente: si adatta solo providerClient)*
+## M5 — Streaming  ✅ *(verificato live 2026-07-01 — deep, LOCK catena agente)*
 **Obiettivo:** risposta a pezzi mostrata man mano, senza crash su interruzioni.
 **Decisioni d'intervista (2026-07-01):** trasporto = streaming Gemini (`streamGenerateContent`, SSE) →
 server → client via risposta a flusso (NDJSON, serve l'header auth). **Persistenza invariata (M4):** la
@@ -85,6 +85,8 @@ scheda) · `orchestrator.runAnalysisStream` · route `POST /api/agent/analyze/st
 condiviso con `/analyze`) · client (display progressivo, salva a fine, interruzione=parziale+avviso).
 **Fatto quando:** la risposta scorre progressiva; un'interruzione mostra il parziale + avviso + riprova;
 la scheda JSON continua a salvarsi (M4) e non compare mai; validate verde.
+**✅ Verificato live (2026-07-01):** streaming progressivo OK, scheda mai a vista, persistenza M4 intatta
+(DB: analisi in streaming → `attachments` con scheda completa + campo `avvisi`; follow-up → `attachments []`).
 
 ## M6 — Impostazioni  ⬜
 **Obiettivo:** tema chiaro/scuro (persistito per utente) · cambio password · **selettore modello** (lista curata 2–3 Gemini).
