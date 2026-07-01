@@ -1,0 +1,98 @@
+market_id,date,status,open,close,reason,source
+XNYS,2026-01-01,closed,,,New Year's Day,NYSE/ICE official calendar
+XNYS,2026-01-19,closed,,,Martin Luther King Jr. Day,NYSE/ICE official calendar
+XNYS,2026-02-16,closed,,,Washington's Birthday,NYSE/ICE official calendar
+XNYS,2026-04-03,closed,,,Good Friday,NYSE/ICE official calendar
+XNYS,2026-05-25,closed,,,Memorial Day,NYSE/ICE official calendar
+XNYS,2026-06-19,closed,,,Juneteenth National Independence Day,NYSE/ICE official calendar
+XNYS,2026-07-03,closed,,,Independence Day observed,NYSE/ICE official calendar
+XNYS,2026-09-07,closed,,,Labor Day,NYSE/ICE official calendar
+XNYS,2026-11-26,closed,,,Thanksgiving Day,NYSE/ICE official calendar
+XNYS,2026-11-27,early_close,,13:00,Day after Thanksgiving,NYSE/ICE official calendar
+XNYS,2026-12-24,early_close,,13:00,Christmas Eve,NYSE/ICE official calendar
+XNYS,2026-12-25,closed,,,Christmas Day,NYSE/ICE official calendar
+XNYS,2027-01-01,closed,,,New Year's Day,NYSE/ICE official calendar
+XNYS,2027-01-18,closed,,,Martin Luther King Jr. Day,NYSE/ICE official calendar
+XNYS,2027-02-15,closed,,,Washington's Birthday,NYSE/ICE official calendar
+XNYS,2027-03-26,closed,,,Good Friday,NYSE/ICE official calendar
+XNYS,2027-05-31,closed,,,Memorial Day,NYSE/ICE official calendar
+XNYS,2027-06-18,closed,,,Juneteenth National Independence Day observed,NYSE/ICE official calendar
+XNYS,2027-07-05,closed,,,Independence Day observed,NYSE/ICE official calendar
+XNYS,2027-09-06,closed,,,Labor Day,NYSE/ICE official calendar
+XNYS,2027-11-25,closed,,,Thanksgiving Day,NYSE/ICE official calendar
+XNYS,2027-11-26,early_close,,13:00,Day after Thanksgiving,NYSE/ICE official calendar
+XNYS,2027-12-24,closed,,,Christmas Day observed,NYSE/ICE official calendar
+XNYS,2028-01-17,closed,,,Martin Luther King Jr. Day,NYSE/ICE official calendar
+XNYS,2028-02-21,closed,,,Washington's Birthday,NYSE/ICE official calendar
+XNYS,2028-04-14,closed,,,Good Friday,NYSE/ICE official calendar
+XNYS,2028-05-29,closed,,,Memorial Day,NYSE/ICE official calendar
+XNYS,2028-06-19,closed,,,Juneteenth National Independence Day,NYSE/ICE official calendar
+XNYS,2028-07-04,closed,,,Independence Day,NYSE/ICE official calendar
+XNYS,2028-07-03,early_close,,13:00,Day before Independence Day,NYSE/ICE official calendar
+XNYS,2028-09-04,closed,,,Labor Day,NYSE/ICE official calendar
+XNYS,2028-11-23,closed,,,Thanksgiving Day,NYSE/ICE official calendar
+XNYS,2028-11-24,early_close,,13:00,Day after Thanksgiving,NYSE/ICE official calendar
+XNYS,2028-12-25,closed,,,Christmas Day,NYSE/ICE official calendar
+XNAS,2026-01-01,closed,,,New Years Day,Nasdaq official holiday PDF/page 2026
+XNAS,2026-01-19,closed,,,"Martin Luther King, Jr. Day",Nasdaq official holiday PDF/page 2026
+XNAS,2026-02-16,closed,,,President's Day,Nasdaq official holiday PDF/page 2026
+XNAS,2026-04-03,closed,,,Good Friday,Nasdaq official holiday PDF/page 2026
+XNAS,2026-05-25,closed,,,Memorial Day,Nasdaq official holiday PDF/page 2026
+XNAS,2026-06-19,closed,,,Juneteenth,Nasdaq official holiday PDF/page 2026
+XNAS,2026-07-03,closed,,,Independence Day observed,Nasdaq official holiday PDF/page 2026
+XNAS,2026-09-07,closed,,,Labor Day,Nasdaq official holiday PDF/page 2026
+XNAS,2026-11-26,closed,,,Thanksgiving Day,Nasdaq official holiday PDF/page 2026
+XNAS,2026-11-27,early_close,,13:00,Early Close,Nasdaq official holiday PDF/page 2026
+XNAS,2026-12-24,early_close,,13:00,Early Close,Nasdaq official holiday PDF/page 2026
+XNAS,2026-12-25,closed,,,Christmas Day,Nasdaq official holiday PDF/page 2026
+XLON,2026-01-01,closed,,,New Year's Day,LSE Business days official page + cross-check
+XLON,2026-04-03,closed,,,Good Friday,LSE Business days official page + cross-check
+XLON,2026-04-06,closed,,,Easter Monday,LSE Business days official page + cross-check
+XLON,2026-05-04,closed,,,Early May Bank Holiday,LSE Business days official page + cross-check
+XLON,2026-05-25,closed,,,Spring Bank Holiday,LSE Business days official page + cross-check
+XLON,2026-08-31,closed,,,Summer Bank Holiday,LSE Business days official page + cross-check
+XLON,2026-12-24,early_close,,12:30,Christmas Eve,LSE Business days official page + cross-check
+XLON,2026-12-25,closed,,,Christmas Day,LSE Business days official page + cross-check
+XLON,2026-12-28,closed,,,Boxing Day substitute,LSE Business days official page + cross-check
+XLON,2026-12-31,early_close,,12:30,New Year's Eve,LSE Business days official page + cross-check
+XTKS,2026-01-01,closed,,,New Year's Day,JPX official Market Holidays
+XTKS,2026-01-02,closed,,,Market Holiday,JPX official Market Holidays
+XTKS,2026-01-03,closed,,,Market Holiday,JPX official Market Holidays
+XTKS,2026-01-12,closed,,,Coming of Age Day,JPX official Market Holidays
+XTKS,2026-02-11,closed,,,National Foundation Day,JPX official Market Holidays
+XTKS,2026-02-23,closed,,,Emperor's Birthday,JPX official Market Holidays
+XTKS,2026-03-20,closed,,,Vernal Equinox,JPX official Market Holidays
+XTKS,2026-04-29,closed,,,Showa Day,JPX official Market Holidays
+XTKS,2026-05-03,closed,,,Constitution Memorial Day,JPX official Market Holidays
+XTKS,2026-05-04,closed,,,Greenery Day,JPX official Market Holidays
+XTKS,2026-05-05,closed,,,Children's Day,JPX official Market Holidays
+XTKS,2026-05-06,closed,,,Constitution Memorial Day observed,JPX official Market Holidays
+XTKS,2026-07-20,closed,,,Marine Day,JPX official Market Holidays
+XTKS,2026-08-11,closed,,,Mountain Day,JPX official Market Holidays
+XTKS,2026-09-21,closed,,,Respect for the Aged Day,JPX official Market Holidays
+XTKS,2026-09-22,closed,,,Holiday under Act on National Holidays,JPX official Market Holidays
+XTKS,2026-09-23,closed,,,Autumnal Equinox,JPX official Market Holidays
+XTKS,2026-10-12,closed,,,Sports Day,JPX official Market Holidays
+XTKS,2026-11-03,closed,,,Culture Day,JPX official Market Holidays
+XTKS,2026-11-23,closed,,,Labor Thanksgiving Day,JPX official Market Holidays
+XTKS,2026-12-31,closed,,,Market Holiday,JPX official Market Holidays
+XTKS,2027-01-01,closed,,,New Year's Day,JPX official Market Holidays
+XTKS,2027-01-02,closed,,,Market Holiday,JPX official Market Holidays
+XTKS,2027-01-03,closed,,,Market Holiday,JPX official Market Holidays
+XTKS,2027-01-11,closed,,,Coming of Age Day,JPX official Market Holidays
+XTKS,2027-02-11,closed,,,National Foundation Day,JPX official Market Holidays
+XTKS,2027-02-23,closed,,,Emperor's Birthday,JPX official Market Holidays
+XTKS,2027-03-21,closed,,,Vernal Equinox,JPX official Market Holidays
+XTKS,2027-03-22,closed,,,Vernal Equinox observed,JPX official Market Holidays
+XTKS,2027-04-29,closed,,,Showa Day,JPX official Market Holidays
+XTKS,2027-05-03,closed,,,Constitution Memorial Day,JPX official Market Holidays
+XTKS,2027-05-04,closed,,,Greenery Day,JPX official Market Holidays
+XTKS,2027-05-05,closed,,,Children's Day,JPX official Market Holidays
+XTKS,2027-07-19,closed,,,Marine Day,JPX official Market Holidays
+XTKS,2027-08-11,closed,,,Mountain Day,JPX official Market Holidays
+XTKS,2027-09-20,closed,,,Respect for the Aged Day,JPX official Market Holidays
+XTKS,2027-09-23,closed,,,Autumnal Equinox,JPX official Market Holidays
+XTKS,2027-10-11,closed,,,Sports Day,JPX official Market Holidays
+XTKS,2027-11-03,closed,,,Culture Day,JPX official Market Holidays
+XTKS,2027-11-23,closed,,,Labor Thanksgiving Day,JPX official Market Holidays
+XTKS,2027-12-31,closed,,,Market Holiday,JPX official Market Holidays

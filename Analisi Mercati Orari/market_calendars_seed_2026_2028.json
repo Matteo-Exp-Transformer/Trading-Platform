@@ -1,0 +1,813 @@
+{
+  "metadata": {
+    "generated_on": "2026-07-01",
+    "purpose": "Seed informativo per calcolo disponibilita mercati in app; da validare con fonti ufficiali prima dell'uso produttivo.",
+    "timezone_database": "IANA tzdb; aggiornare periodicamente",
+    "validity_summary": {
+      "XNYS": "Calendario ufficiale NYSE cash equities validato fino al 2028 incluso.",
+      "XNAS": "Calendario ufficiale Nasdaq validato per 2026; per 2027+ usare fonte ufficiale Nasdaq/Trader Alerts o calendario NYSE solo come confronto, non come verita assoluta.",
+      "XLON": "Calendario LSE validato per 2026 con pagina official business days e fonti di controllo; 2027+ da aggiornare da LSE Business days.",
+      "XTKS": "Calendario JPX/TSE ufficiale validato fino al 2027 incluso; JPX avverte che puo cambiare per modifiche alle festivita nazionali giapponesi."
+    }
+  },
+  "markets": [
+    {
+      "market_id": "XNYS",
+      "name": "New York Stock Exchange - cash equities",
+      "country": "US",
+      "timezone": "America/New_York",
+      "scope": "equities_regular_core",
+      "regular_sessions": [
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "open": "09:30",
+          "close": "16:00",
+          "label": "core"
+        }
+      ],
+      "extended_sessions_note": "NYSE has early/core/late sessions depending on venue. For the normal 'market open' badge, use core 09:30-16:00 ET."
+    },
+    {
+      "market_id": "XNAS",
+      "name": "Nasdaq Stock Market - listed equities",
+      "country": "US",
+      "timezone": "America/New_York",
+      "scope": "equities_regular_core",
+      "regular_sessions": [
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "open": "09:30",
+          "close": "16:00",
+          "label": "core"
+        }
+      ],
+      "extended_sessions_note": "Nasdaq also supports extended-hours trading. Treat regular-market and extended-market as different availability profiles."
+    },
+    {
+      "market_id": "XLON",
+      "name": "London Stock Exchange - main equity trading",
+      "country": "GB",
+      "timezone": "Europe/London",
+      "scope": "equities_regular",
+      "regular_sessions": [
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "open": "08:00",
+          "close": "16:30",
+          "label": "regular"
+        }
+      ],
+      "extended_sessions_note": "LSE technical phases include pre-trading/opening auction/closing auction. For retail 'open' status, use continuous regular trading unless app needs auction phases."
+    },
+    {
+      "market_id": "XTKS",
+      "alt_operating_mic": "XJPX",
+      "name": "Tokyo Stock Exchange - domestic stocks",
+      "country": "JP",
+      "timezone": "Asia/Tokyo",
+      "scope": "equities_auction_regular",
+      "regular_sessions": [
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "open": "09:00",
+          "close": "11:30",
+          "label": "morning"
+        },
+        {
+          "days": [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri"
+          ],
+          "open": "12:30",
+          "close": "15:30",
+          "label": "afternoon"
+        }
+      ],
+      "breaks": [
+        {
+          "start": "11:30",
+          "end": "12:30",
+          "label": "lunch_break"
+        }
+      ],
+      "order_acceptance_note": "JPX states orders are accepted from 08:00 and from 12:05 for each session."
+    }
+  ],
+  "exceptions": [
+    {
+      "market_id": "XNYS",
+      "date": "2026-01-01",
+      "status": "closed",
+      "reason": "New Year's Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-01-19",
+      "status": "closed",
+      "reason": "Martin Luther King Jr. Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-02-16",
+      "status": "closed",
+      "reason": "Washington's Birthday",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-04-03",
+      "status": "closed",
+      "reason": "Good Friday",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-05-25",
+      "status": "closed",
+      "reason": "Memorial Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-06-19",
+      "status": "closed",
+      "reason": "Juneteenth National Independence Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-07-03",
+      "status": "closed",
+      "reason": "Independence Day observed",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-09-07",
+      "status": "closed",
+      "reason": "Labor Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-11-26",
+      "status": "closed",
+      "reason": "Thanksgiving Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-11-27",
+      "status": "early_close",
+      "close": "13:00",
+      "reason": "Day after Thanksgiving",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-12-24",
+      "status": "early_close",
+      "close": "13:00",
+      "reason": "Christmas Eve",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2026-12-25",
+      "status": "closed",
+      "reason": "Christmas Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-01-01",
+      "status": "closed",
+      "reason": "New Year's Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-01-18",
+      "status": "closed",
+      "reason": "Martin Luther King Jr. Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-02-15",
+      "status": "closed",
+      "reason": "Washington's Birthday",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-03-26",
+      "status": "closed",
+      "reason": "Good Friday",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-05-31",
+      "status": "closed",
+      "reason": "Memorial Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-06-18",
+      "status": "closed",
+      "reason": "Juneteenth National Independence Day observed",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-07-05",
+      "status": "closed",
+      "reason": "Independence Day observed",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-09-06",
+      "status": "closed",
+      "reason": "Labor Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-11-25",
+      "status": "closed",
+      "reason": "Thanksgiving Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-11-26",
+      "status": "early_close",
+      "close": "13:00",
+      "reason": "Day after Thanksgiving",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2027-12-24",
+      "status": "closed",
+      "reason": "Christmas Day observed",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-01-17",
+      "status": "closed",
+      "reason": "Martin Luther King Jr. Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-02-21",
+      "status": "closed",
+      "reason": "Washington's Birthday",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-04-14",
+      "status": "closed",
+      "reason": "Good Friday",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-05-29",
+      "status": "closed",
+      "reason": "Memorial Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-06-19",
+      "status": "closed",
+      "reason": "Juneteenth National Independence Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-07-04",
+      "status": "closed",
+      "reason": "Independence Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-07-03",
+      "status": "early_close",
+      "close": "13:00",
+      "reason": "Day before Independence Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-09-04",
+      "status": "closed",
+      "reason": "Labor Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-11-23",
+      "status": "closed",
+      "reason": "Thanksgiving Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-11-24",
+      "status": "early_close",
+      "close": "13:00",
+      "reason": "Day after Thanksgiving",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNYS",
+      "date": "2028-12-25",
+      "status": "closed",
+      "reason": "Christmas Day",
+      "source": "NYSE/ICE official calendar"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-01-01",
+      "status": "closed",
+      "reason": "New Years Day",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-01-19",
+      "status": "closed",
+      "reason": "Martin Luther King, Jr. Day",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-02-16",
+      "status": "closed",
+      "reason": "President's Day",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-04-03",
+      "status": "closed",
+      "reason": "Good Friday",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-05-25",
+      "status": "closed",
+      "reason": "Memorial Day",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-06-19",
+      "status": "closed",
+      "reason": "Juneteenth",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-07-03",
+      "status": "closed",
+      "reason": "Independence Day observed",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-09-07",
+      "status": "closed",
+      "reason": "Labor Day",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-11-26",
+      "status": "closed",
+      "reason": "Thanksgiving Day",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-11-27",
+      "status": "early_close",
+      "close": "13:00",
+      "reason": "Early Close",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-12-24",
+      "status": "early_close",
+      "close": "13:00",
+      "reason": "Early Close",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XNAS",
+      "date": "2026-12-25",
+      "status": "closed",
+      "reason": "Christmas Day",
+      "source": "Nasdaq official holiday PDF/page 2026"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-01-01",
+      "status": "closed",
+      "reason": "New Year's Day",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-04-03",
+      "status": "closed",
+      "reason": "Good Friday",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-04-06",
+      "status": "closed",
+      "reason": "Easter Monday",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-05-04",
+      "status": "closed",
+      "reason": "Early May Bank Holiday",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-05-25",
+      "status": "closed",
+      "reason": "Spring Bank Holiday",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-08-31",
+      "status": "closed",
+      "reason": "Summer Bank Holiday",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-12-24",
+      "status": "early_close",
+      "close": "12:30",
+      "reason": "Christmas Eve",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-12-25",
+      "status": "closed",
+      "reason": "Christmas Day",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-12-28",
+      "status": "closed",
+      "reason": "Boxing Day substitute",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XLON",
+      "date": "2026-12-31",
+      "status": "early_close",
+      "close": "12:30",
+      "reason": "New Year's Eve",
+      "source": "LSE Business days official page + cross-check"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-01-01",
+      "status": "closed",
+      "reason": "New Year's Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-01-02",
+      "status": "closed",
+      "reason": "Market Holiday",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-01-03",
+      "status": "closed",
+      "reason": "Market Holiday",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-01-12",
+      "status": "closed",
+      "reason": "Coming of Age Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-02-11",
+      "status": "closed",
+      "reason": "National Foundation Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-02-23",
+      "status": "closed",
+      "reason": "Emperor's Birthday",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-03-20",
+      "status": "closed",
+      "reason": "Vernal Equinox",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-04-29",
+      "status": "closed",
+      "reason": "Showa Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-05-03",
+      "status": "closed",
+      "reason": "Constitution Memorial Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-05-04",
+      "status": "closed",
+      "reason": "Greenery Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-05-05",
+      "status": "closed",
+      "reason": "Children's Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-05-06",
+      "status": "closed",
+      "reason": "Constitution Memorial Day observed",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-07-20",
+      "status": "closed",
+      "reason": "Marine Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-08-11",
+      "status": "closed",
+      "reason": "Mountain Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-09-21",
+      "status": "closed",
+      "reason": "Respect for the Aged Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-09-22",
+      "status": "closed",
+      "reason": "Holiday under Act on National Holidays",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-09-23",
+      "status": "closed",
+      "reason": "Autumnal Equinox",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-10-12",
+      "status": "closed",
+      "reason": "Sports Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-11-03",
+      "status": "closed",
+      "reason": "Culture Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-11-23",
+      "status": "closed",
+      "reason": "Labor Thanksgiving Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2026-12-31",
+      "status": "closed",
+      "reason": "Market Holiday",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-01-01",
+      "status": "closed",
+      "reason": "New Year's Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-01-02",
+      "status": "closed",
+      "reason": "Market Holiday",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-01-03",
+      "status": "closed",
+      "reason": "Market Holiday",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-01-11",
+      "status": "closed",
+      "reason": "Coming of Age Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-02-11",
+      "status": "closed",
+      "reason": "National Foundation Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-02-23",
+      "status": "closed",
+      "reason": "Emperor's Birthday",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-03-21",
+      "status": "closed",
+      "reason": "Vernal Equinox",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-03-22",
+      "status": "closed",
+      "reason": "Vernal Equinox observed",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-04-29",
+      "status": "closed",
+      "reason": "Showa Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-05-03",
+      "status": "closed",
+      "reason": "Constitution Memorial Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-05-04",
+      "status": "closed",
+      "reason": "Greenery Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-05-05",
+      "status": "closed",
+      "reason": "Children's Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-07-19",
+      "status": "closed",
+      "reason": "Marine Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-08-11",
+      "status": "closed",
+      "reason": "Mountain Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-09-20",
+      "status": "closed",
+      "reason": "Respect for the Aged Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-09-23",
+      "status": "closed",
+      "reason": "Autumnal Equinox",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-10-11",
+      "status": "closed",
+      "reason": "Sports Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-11-03",
+      "status": "closed",
+      "reason": "Culture Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-11-23",
+      "status": "closed",
+      "reason": "Labor Thanksgiving Day",
+      "source": "JPX official Market Holidays"
+    },
+    {
+      "market_id": "XTKS",
+      "date": "2027-12-31",
+      "status": "closed",
+      "reason": "Market Holiday",
+      "source": "JPX official Market Holidays"
+    }
+  ]
+}
