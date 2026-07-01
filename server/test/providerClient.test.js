@@ -146,6 +146,23 @@ describe('requestCompletion', () => {
     expect(opts.headers['x-goog-api-key']).toBe('test-key');
   });
 
+  it('senza modello configurato usa Gemini 2.5 Flash come fallback interno', async () => {
+    const savedModel = process.env.AI_MODEL;
+    process.env.GOOGLE_API_KEY = 'test-key';
+    delete process.env.AI_MODEL;
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({ candidates: [] }),
+    });
+    try {
+      await requestCompletion({ system: 'KIT', messages: [], provider: 'google' });
+      expect(fetchMock.mock.calls[0][0]).toContain('gemini-2.5-flash:generateContent');
+    } finally {
+      if (savedModel === undefined) delete process.env.AI_MODEL;
+      else process.env.AI_MODEL = savedModel;
+    }
+  });
+
   it('lancia con lo status se la risposta non è ok', async () => {
     process.env.GOOGLE_API_KEY = 'test-key';
     vi.spyOn(globalThis, 'fetch').mockResolvedValue({

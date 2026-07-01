@@ -52,7 +52,7 @@ gerarchia del kit. Priorità assolute: **qualità della lettura** (rischio #1) e
   - `orchestrator.js` — coordina: carica system prompt, legge la storia da **Supabase**, costruisce i
     messaggi, chiama il provider, restituisce il testo.
 - **Kit Aware Trader** (`kit/`) — l'autorità del metodo (LOCK). Lato server, mai esposto al client.
-- **Provider Gemini** — modello con vista; default **Gemini 2.5 Pro**, letto da `.env` (mai nel client).
+- **Provider Gemini** — modello con vista; default **Gemini 2.5 Flash**, letto da `.env` (mai nel client).
 
 ## 2-bis. Il flusso completo (percorso utente + flusso dati affiancati)
 
@@ -92,13 +92,13 @@ gerarchia del kit. Priorità assolute: **qualità della lettura** (rischio #1) e
 
 | Questione | Decisione presa | Stato |
 |-----------|-----------------|-------|
-| Modello Gemini di default | **Gemini 2.5 Pro** (lettura grafici migliore; costi non un freno in demo). Switcher, valore da `.env` (`AI_MODEL`). | **fatto** (2026-06-30, M3) — `providerClient` switcher, modello da `.env` |
+| Modello Gemini di default | **Gemini 2.5 Flash**. Il test completo sui grafici ha rispettato i requisiti dell'analisi già validata con Pro; Flash è scelto per il costo inferiore, Pro resta assegnabile per-account. Switcher, valore da `.env` (`AI_MODEL`). | **fatto** (2026-07-01) — default aggiornato dopo verifica live |
 | Attesa risposta (no streaming M3) | Indicatore **«L'agente sta analizzando…»** + input disabilitato. Streaming → M5. | **fatto** (2026-06-30, M3) — `Chat.jsx`/`ChatPanel.jsx` |
 | Persistenza contesto-form (FU-010) | **Colonna `jsonb` su `chats`** (es. `form_context`). Niente tabella dedicata: 1:1 con la chat, RLS già coperta, additivo/scale-ready. Si promuovono singoli campi a colonna solo se diventano «caldi». | **fatto** (2026-06-30, M3) — migrazione `m3_chats_form_context`, salvata da `createChat` |
 | Screenshot nei follow-up | **No**: gli screenshot si caricano solo nel form iniziale; i follow-up sono solo testo. Il composer non gestisce upload. | **fatto** (2026-06-30, M3) — composer solo testo; immagini solo nel form |
 | Storia al modello | Tutta la **storia testuale** + immagini **solo del primo turno** (form). Da riconfermare col test vista. | **fatto** (2026-06-30, M3) — da confermare col test vista (FU-011) |
 | Caching del contesto | **Automatico/implicito** (Gemini 2.5): kit come blocco fisso in testa alla chiamata. Niente caching esplicito gestito in M3 (leva futura). | **fatto** (2026-06-30, M3) — kit blocco fisso; esplicito = FU-013 |
-| Thinking budget (M3) | Gemini 2.5 Pro ragiona e i token di thinking condividono `maxOutputTokens`: budget basso → risposta vuota (`MAX_TOKENS`). **Tetto `thinkingBudget=4096` + `maxOutputTokens=8192`**. | **fatto** (2026-06-30, M3) — `providerClient.buildGeminiPayload` |
+| Thinking budget (M3) | I modelli Gemini 2.5 ragionano e i token di thinking condividono `maxOutputTokens`: budget basso → risposta vuota (`MAX_TOKENS`). **Tetto `thinkingBudget=4096` + `maxOutputTokens=8192`**. | **fatto** (2026-06-30, M3) — `providerClient.buildGeminiPayload` |
 
 **Punti di adattamento dell'estratto — ✅ TUTTI FATTI (2026-06-30, M3).** L'ossatura è stata riusata, NON
 «pari-pari». Dettaglio per memoria:

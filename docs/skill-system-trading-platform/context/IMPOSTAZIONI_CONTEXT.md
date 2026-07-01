@@ -20,8 +20,8 @@ profilo così lo ritrova su ogni dispositivo) e la **password**. Nient'altro è 
 Il **modello AI** invece **non** è una scelta dell'utente: è un **attributo dell'account deciso
 dall'admin** (tu), per differenziare i tier — es. Flash per gli account base, Pro per i clienti
 «pro». Per ora si imposta **a mano dal DB**; a regime lo gestirà una **console super-admin**
-(→ **FU-016**, fuori scope M6). Obiettivo immediato collegato: poter **testare Gemini 2.5 Flash**
-su un account e confrontarne la qualità con 2.5 Pro per decidere il default.
+(→ **FU-016**, fuori scope M6). **Gemini 2.5 Flash è il default** dopo il test completo sui grafici:
+ha rispettato i requisiti dell'analisi già validata con Pro, con un costo inferiore.
 
 ## 2. Decisioni d'intervista (2026-07-01)
 
@@ -29,8 +29,8 @@ su un account e confrontarne la qualità con 2.5 Pro per decidere il default.
 |------|--------|------|
 | **Modello — scope** | **Per-account, deciso dall'admin.** NON è una tendina per l'utente finale. | Serve a differenziare i tier (Flash base / Pro «pro»). |
 | **Modello — dove** | **Colonna `ai_model` su `profiles`**, impostata **a mano dal DB** per ora. | UI di gestione = **FU-016** (console super-admin), fuori M6. |
-| **Modello — lista curata** | **`gemini-2.5-pro`** (default) · **`gemini-2.5-flash`**. Niente Flash-Lite per ora. | Valore fuori lista o `null` → **fallback** al default `.env` (`AI_MODEL`). Mai rompere l'analisi. |
-| **Modello — default** | `gemini-2.5-pro` (via fallback a `.env` `AI_MODEL`, già così). | `ai_model` nullable: `null` = «usa il default globale». |
+| **Modello — lista curata** | **`gemini-2.5-flash`** (default) · **`gemini-2.5-pro`**. Niente Flash-Lite per ora. | Valore fuori lista o `null` → **fallback** al default `.env` (`AI_MODEL`). Mai rompere l'analisi. |
+| **Modello — default** | `gemini-2.5-flash` (via fallback a `.env` `AI_MODEL`). | Verificato live il 2026-07-01; `ai_model` nullable: `null` = «usa il default globale». |
 | **Impostazioni utente (UI)** | **Solo tema + cambio password.** Il modello non compare qui. | Meno superficie, coerente coi tier decisi dall'admin. |
 | **Tema — dove** | **Per-utente su DB** (colonna `theme` su `profiles`). | Segue l'utente su ogni dispositivo. Auth/RLS già pronti (M1). |
 | **Tema — default** | **`dark`** (l'estetica beta è verde-scuro; M7 la rifinisce). | Valori ammessi: `dark` · `light`. |
@@ -166,8 +166,9 @@ riga del proprio account (SQL/pannello), rifare un'analisi già fatta con Pro e 
   con un secondo account il tema è indipendente. Test: `applyTheme`/util tema (client).
 - **Password:** cambio con vecchia corretta → funziona e posso rifare login con la nuova; vecchia
   errata → messaggio chiaro, nessun cambio. Test: helper di validazione/flow.
-- **Modello per-utente:** con `ai_model='gemini-2.5-flash'` sul mio account, un'analisi usa Flash
-  (verificabile a video/log); `null`/valore errato → usa il default Pro (fallback). Test server:
+- **Modello per-utente:** con `ai_model='gemini-2.5-pro'` sul mio account, un'analisi usa Pro;
+  `null`/valore errato → usa il default Flash (fallback). Flash è stato verificato live su un'analisi
+  completa con grafici, mantenendo i requisiti già soddisfatti da Pro. Test server:
   `resolveUserModel` (lista curata + fallback) e che orchestrator inoltri `model`.
 - `npm run validate` verde (client + server).
 

@@ -5,7 +5,7 @@
 > file `context/` dello skill system. Regola: **nessun codice di una zona prima che esista il suo
 > `context/`**. Vedi `CONTESTO_PRODOTTO.md` §Schema di lavoro.
 >
-> Aggiornato: 2026-06-30 · Legenda stato: ⬜ da fare · 🟡 in corso · ✅ fatto · 🔒 bloccato da dipendenza.
+> Aggiornato: 2026-07-01 · Legenda stato: ⬜ da fare · 🟡 in corso · ✅ fatto · 🔒 bloccato da dipendenza.
 
 ---
 
@@ -94,15 +94,17 @@ la scheda JSON continua a salvarsi (M4) e non compare mai; validate verde.
 **Decisioni d'intervista (2026-07-01):**
 - **Modello = attributo dell'account, deciso dall'admin** (non una tendina utente): serve a differenziare
   i tier (Flash base / Pro «pro»). Colonna `profiles.ai_model` (nullable → default `.env`), impostata
-  **a mano dal DB** per ora. Lista curata: `gemini-2.5-pro` (default) · `gemini-2.5-flash`. Valore
+  **a mano dal DB** per ora. Lista curata: `gemini-2.5-flash` (default) · `gemini-2.5-pro`. Valore
   fuori lista/`null` → fallback al default (mai rompere). Innesto: route → orchestrator → providerClient
   (già accetta `model`); **kit e caching intatti**. UI di gestione = **FU-016** (console super-admin, fuori M6).
+  **Decisione live (2026-07-01):** Flash ha completato l'analisi su grafici rispettando i requisiti
+  già soddisfatti da Pro; diventa il default per ridurre il costo, mentre Pro resta assegnabile per-account.
 - **Impostazioni utente (UI) = solo tema + cambio password.** Il modello non compare qui.
 - **Tema** per-utente su DB (`profiles.theme`, default `dark`); Tailwind `darkMode:'class'`.
 - **Cambio password** richiede la password attuale (riverifica `signInWithPassword` → `updateUser`).
 
 **Fatto quando:** cambio tema/password e persistono (tema letto dal profilo, indipendente per utente);
-un account con `ai_model='gemini-2.5-flash'` usa Flash, `null`/errato usa il default Pro; validate verde.
+un account con `ai_model='gemini-2.5-pro'` usa Pro, `null`/errato usa il default Flash; validate verde.
 
 ## M7 — Estetica beta (rifinitura additiva)  ⬜
 **Obiettivo:** ricostruire lo stile ricco (sfondo animato, palette verde-scuro, font) senza intaccare la

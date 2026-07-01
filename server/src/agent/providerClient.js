@@ -5,7 +5,7 @@
 // LOCK segreti: la chiave (GOOGLE_API_KEY) vive solo lato server, mai nel client/bundle.
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-const DEFAULT_MODEL = 'gemini-2.5-pro';
+const DEFAULT_MODEL = 'gemini-2.5-flash';
 
 // Traduce i messaggi neutri nel formato `contents` di Gemini.
 // role 'assistant' -> 'model'; le immagini diventano part `inline_data` (multimodale).
@@ -24,9 +24,9 @@ export function toGeminiContents(messages = []) {
   });
 }
 
-// Gemini 2.5 Pro "ragiona" (thinking) e i token di pensiero CONDIVIDONO maxOutputTokens:
+// I modelli Gemini 2.5 "ragionano" (thinking) e i token di pensiero CONDIVIDONO maxOutputTokens:
 // un budget basso fa finire la risposta in MAX_TOKENS lasciando il testo vuoto. Diamo un tetto
-// al thinking e una riserva ampia all'output (i costi non sono un freno in demo, qualità prima).
+// al thinking e una riserva ampia all'output per preservare la qualità della risposta.
 const DEFAULT_MAX_OUTPUT_TOKENS = 8192;
 const DEFAULT_THINKING_BUDGET = 4096;
 

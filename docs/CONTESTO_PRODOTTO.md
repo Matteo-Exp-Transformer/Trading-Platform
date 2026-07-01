@@ -23,7 +23,7 @@ un **agente AI** li legge e li commenta applicando il metodo **Aware Trader** (u
 
 | # | Decisione | Valore | Data | Note |
 |---|-----------|--------|------|------|
-| L1 | Motore AI | **Google Gemini**, modello con vista; default sul **più capace** (qualità prima); switcher mantenuto | 2026-06-30 | *Aggiorna* la vecchia ipotesi OpenRouter/Claude. Test vista su grafici reali = rischio #1 |
+| L1 | Motore AI | **Google Gemini**, modello con vista; switcher mantenuto | 2026-06-30 | *Aggiorna* la vecchia ipotesi OpenRouter/Claude. Default aggiornato da L18 |
 | L2 | Dati & account | **Supabase** (Postgres + Auth + Storage) | 2026-06-30 | Account isolati per utente (RLS), online, scale-ready. Sostituisce SQLite locale |
 | L3 | Nome app / repo | **FREEDOM TRADING SYSTEM** (repo `freedom-trading-system`) | 2026-06-30 | Continuità con la beta |
 | L4 | Perimetro demo | **Minimal + estetica beta** | 2026-06-30 | Chat + Sidebar/Storico + Impostazioni; più lo stile ricco (da ricostruire) |
@@ -40,6 +40,7 @@ un **agente AI** li legge e li commenta applicando il metodo **Aware Trader** (u
 | L15 | Login (M1) | **Email + password**; account creati **a mano** (no registrazione aperta); conferma email **disattivata**, email finte/interne ammesse; sessione persistente fino a «Esci» | 2026-06-30 | Niente SMTP in demo. Dettaglio in `context/AUTH_CONTEXT.md` |
 | L16 | Recupero password / validazione email | **Rimandati a dopo l'intervista cliente** (FU-002, FU-003) | 2026-06-30 | In demo: reset password a mano dall'admin. Richiederanno SMTP + email reali |
 | L17 | Impostazioni (M6) | L'utente gestisce **tema e password**; il **modello AI è per-account e lo assegna solo l'admin** | 2026-07-01 | `profiles.ai_model` è protetto anche a livello DB; gestione manuale ora, console super-admin in FU-016 |
+| L18 | Modello AI di default | **Gemini 2.5 Flash**; Pro resta assegnabile per-account | 2026-07-01 | Test completo su grafici superato: lettura e requisiti dell'analisi già validata con Gemini 2.5 Pro rispettati. Flash scelto per il miglior costo a qualità adeguata |
 
 ---
 
@@ -148,8 +149,9 @@ In demo restano **disattivati** per testare l'app liberamente (L12). Si attivera
 - [x] ~~**Auth demo**~~: deciso 2026-06-30 → **su invito / a mano** (no registrazione aperta).
 - [x] ~~**Freno costi**~~: deciso 2026-06-30 → **nessun limite** (demo controllata). Resta solo `MAX_SCREENSHOT_PER_ANALISI` per la finestra di contesto, non per i costi.
 - [ ] **Deploy**: la demo si prova all'intervista in modo controllato (il cliente non riceve accesso) → può bastare locale o URL privato? Target di deploy da definire.
-- [x] ~~**Modelli nello switcher**~~: lista curata M6 = `gemini-2.5-pro` (default) e
-  `gemini-2.5-flash`; assegnazione admin-only per account, nessun selettore utente.
+- [x] ~~**Modelli nello switcher**~~: lista curata M6 = `gemini-2.5-flash` (default) e
+  `gemini-2.5-pro`; assegnazione admin-only per account, nessun selettore utente. Flash ha superato
+  il test completo sui grafici mantenendo i requisiti già validati con Pro (L18).
 - [ ] **Estetica**: quali elementi della beta ricostruire (sfondo animato, palette, font) e con che priorità?
 - [~] **Flussi dettagliati** per schermata: Chat, Auth, Sidebar/Storico e Impostazioni mappati.
   Resta da definire l'Estetica M7.
