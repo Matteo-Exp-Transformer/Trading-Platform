@@ -16,7 +16,7 @@
 > `validate` verde (156+78) e build OK. Viste dall'utente ("per ora va bene così"). Aggiunte skill `aree/
 > TESTING_SKILL.md` + project skill `avvia-app`; comandi npm confermati in `CLAUDE.md`/Bussola (eseguire
 > dalla root). **Aperto:** FU-017 (verifica visiva live M7/Home), FU-018→025 (elementi Home rimandati),
-> e la **decisione su `Esempio/`** (l'animazione NON era lì — §4). Prossimo: **decisione Esempio + M8**.
+> e le FU-018→025 (elementi Home rimandati). `Esempio/` **rimossa** (scopo esaurito). Prossimo: **FU-017 (verifica visiva) + M8**.
 
 ---
 
@@ -31,8 +31,8 @@
 
 M3…M7 e **M7-bis (Home) committati e pushati**. M6: `fcbf0a6`/`088b2e8`/`e29b19c`; M7: `a1f4a11`+`65faf6d`;
 M7-bis (Home + fix comandi) in cima. `npm run validate` **verde: 156 client + 78 server** (incluse le RLS
-live), `npm run build` OK. Working tree pulito **tranne `Esempio/`** (untracked, non gitignorata): fonte di
-riferimento visiva, **decisione in sospeso** (§4) — non committata, non cancellata.
+live), `npm run build` OK. Working tree **pulito**. `Esempio/` **rimossa dall'utente** (2026-07-01): era solo
+riferimento visivo per M7, scopo esaurito — decisione chiusa.
 
 ## 0-ter. ✅ L'estratto può essere cancellato
 
@@ -93,12 +93,11 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 2. Prossimo passo concreto
 
-1. **Decisione `Esempio/` [PROSSIMO — con l'utente]:** la Home è **fatta** (M7-bis), costruita da zero
-   (l'animazione **non** era in `Esempio/`). Resta da decidere se `Esempio/` si **cancella** (scopo esaurito:
-   è servita solo come riferimento palette/forme per M7) o si tiene. **Non toccarla finché l'utente non decide.**
-2. **FU-017 — verifica visiva live M7 + Home:** l'utente apre l'app e controlla a occhio Login/Chat/Sidebar/
-   Impostazioni (tema chiaro/scuro) **e la Home** (sfondo animato, sempre scura, responsive), desktop+mobile.
-3. **M8 (blindatura + deploy)** secondo `PIANO_LAVORO.md`. Valutare se prima portare in scope alcune FU-018→025 (elementi Home).
+1. **FU-017 — verifica visiva live M7 + Home [PROSSIMO — utente]:** aprire l'app e controllare a occhio
+   Login/Chat/Sidebar/Impostazioni (tema chiaro/scuro) **e la Home** (sfondo animato, sempre scura, responsive),
+   desktop+mobile.
+2. **M8 (blindatura + deploy)** secondo `PIANO_LAVORO.md`. Valutare se prima portare in scope alcune FU-018→025 (elementi Home).
+3. **`Esempio/`** — chiuso: rimossa dall'utente (scopo esaurito). Nessuna azione.
 4. **FU-016 — console super-admin:** quando servirà, UI admin per assegnare `ai_model` (oggi a mano dal DB) +
    statistiche per-utente. Modello è già blindato lato DB (solo `service_role` scrive `ai_model`).
 
@@ -118,12 +117,11 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
   per-utente. Sostituirà la gestione manuale introdotta in M6. Definire scope e sicurezza (accesso solo admin).
 - **M6 — modello per-account:** la lista curata è `gemini-2.5-flash` / `gemini-2.5-pro` (default). Aggiungerne uno
   = una riga in `server/src/agent/models.js` (nessuna migrazione: `ai_model` senza CHECK di proposito).
-- **Home + sfondo animato (nuova richiesta 2026-07-01):** l'utente vuole una Home d'ingresso con sfondo
-  animato stile app vecchia. **Non è in `Esempio/`** (verificato). Decidere: fonte dell'animazione (altra
-  cartella dell'app vecchia? da ricostruire?), scope, e se sarà una mini-milestone prima di M8. Da questa
-  decisione dipende il destino di `Esempio/` (tenere/cancellare).
+- **Home — elementi rimandati (FU-018→025):** la Home base è fatta (M7-bis); mercati live, calendario,
+  orologio/stato mercati, feature card con dati, active-session card, pagine Journal/Trading Live e font
+  Space Grotesk sono follow-up. Decidere con l'utente quali portare in scope (prima o dopo M8).
 - Più avanti: deploy target (M8) — `CONTESTO_PRODOTTO.md §11`.
-- ~~FU-005 (Storage)~~ **superata** (M4). ~~FU-011~~, ~~FU-014~~, ~~FU-015~~ **risolte**. ~~M7 estetica~~ **fatta** (2026-07-01).
+- ~~FU-005 (Storage)~~ **superata** (M4). ~~FU-011~~, ~~FU-014~~, ~~FU-015~~ **risolte**. ~~M7 estetica~~, ~~M7-bis Home~~ **fatte** (2026-07-01). ~~`Esempio/`~~ **rimossa**.
 
 ## 5. Puntatori (la verità vive lì, non qui)
 
