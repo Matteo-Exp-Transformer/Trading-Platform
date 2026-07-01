@@ -7,7 +7,7 @@
 >
 > **Trigger di routing:** «home», «landing», «pagina d'arrivo», «sfondo animato», «dashboard d'ingresso»
 > → questo file (+ `ESTETICA_CONTEXT.md` per i token).
-> Aggiornato: 2026-07-01 (intervista Senior).
+> Aggiornato: 2026-07-01 (navigazione autenticata condivisa).
 
 ---
 
@@ -29,6 +29,7 @@ funzioni nuove** è rimandato a follow-up.
 | **Font** | **Di sistema** (coerente con l'app). | Space Grotesk (dal prompt) NON incluso ora → **FU** (opzionale, solo titoli). |
 | **Landing** | La Home diventa **`/`** (post-login). La Chat si sposta su una **rotta propria** (es. `/nuova-analisi`). | Va ricablata ogni navigazione che oggi assume `/` = Chat. |
 | **Scope** | Solo **pagina + tema + sfondo animato + hero con CTA reali**. | Il resto (dati/funzioni) → §5 FU. |
+| **Navigazione autenticata** | Header condiviso con hamburger + nome app cliccabile verso Home; Sidebar disponibile su Home, Chat e Impostazioni. | Impostazioni ed Esci vivono solo nella Sidebar. Nessuna freccia indietro ora: arriverà con future pagine secondarie. |
 
 ## 3. Cosa si costruisce ORA (dentro scope)
 
@@ -43,12 +44,14 @@ funzioni nuove** è rimandato a follow-up.
   - **performante** (canvas + `requestAnimationFrame`, niente librerie pesanti);
   - **`prefers-reduced-motion`** → versione **statica** (gradiente + griglia, nessuna animazione);
   - su **mobile**: meno particelle.
-- **Header minimale della Home:** logo/simbolo astratto (candele) + nome app. **Niente** orologio o
-  stato mercati live ora (→ FU). Eventuale accesso a Impostazioni/Esci se comodo (riusa la Sidebar esistente).
+- **Header condiviso:** hamburger nella posizione della precedente icona decorativa + nome
+  **FREEDOM TRADING SYSTEM** cliccabile verso `/`. Lo stesso header è usato da Home, Chat e
+  Impostazioni. **Impostazioni ed Esci non compaiono nell’header**: vivono solo nella Sidebar.
 - **Hero:** badge (es. "Trading Intelligence Workspace"), titolo grande, breve descrizione, disclaimer
   visibile, e **CTA solo verso rotte esistenti**:
   - **Nuova analisi** = CTA primario (gradiente ciano, bagliore discreto, hover raffinato) → apre la Chat/nuova analisi;
-  - **Le mie analisi** → apre lo **storico** (Sidebar/drawer esistente).
+  - **Le mie analisi** → apre lo **storico direttamente sulla Home**, nello stesso drawer
+    dell’hamburger, senza passare dalla Chat.
   - *(Journal e Trading Live NON esistono → non messi ora, vedi FU.)*
 - **Elemento decorativo a candele** (CSS/SVG) animato molto lentamente nella composizione dell'hero.
 - **Interazioni:** entrata morbida/progressiva, leggero movimento delle card in hover, bordi più ciano
@@ -67,6 +70,9 @@ RULE      Home SEMPRE scura: forza la palette scura sul contenitore Home a presc
 RULE      Sfondo animato dietro ai contenuti, `pointer-events:none`, mai blocca i click né la leggibilità.
           Supporta `prefers-reduced-motion` (versione statica). Niente librerie di animazione pesanti.
 RULE      I CTA collegano SOLO rotte esistenti. Non creare pagine/finte funzioni (Journal/Trading Live = FU).
+RULE      Header e Sidebar sono condivisi tra le pagine autenticate: niente copie locali della stessa
+          navigazione. Il nome app torna sempre alla Home; Impostazioni ed Esci vivono solo nel drawer.
+RULE      Nessuna freccia indietro in questa fase. Sarà introdotta con future pagine secondarie.
 RULE      Ricablare il landing senza rompere i flussi: ogni redirect/navigazione a `/` che significava
           "Chat" va aggiornato alla nuova rotta. Verifica login→Home, Home→Chat, Chat↔Impostazioni, `*`.
 RULE      Disclaimer sempre visibile e leggibile anche in Home. Test per ogni componente nuovo. Validate verde.
@@ -76,7 +82,7 @@ RULE      Disclaimer sempre visibile e leggibile anche in Home. Test per ogni co
 
 Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano insieme più avanti:
 
-- **FU-018** MarketStatusBar: orologio live + stato mercati Londra/New York/Tokyo (aperto/chiuso).
+- **FU-018** MarketStatusBar: ~~stato mercati Londra/New York/Tokyo (aperto/chiuso)~~ **fatto (2026-07-01)** — stato mercati in alto a destra nella Home (vedi §6). **Orologio live** non incluso (utente: solo stato mercati) → eventuale FU futura.
 - **FU-019** MarketOverview: griglia ~9 asset (BTC, ETH, Oro, S&P500, Nasdaq, EUR/USD, GBP/USD, Petrolio, DAX) con prezzo/variazione/sparkline + **fonte dati reale** (niente mock se ci sono dati veri).
 - **FU-020** TradingCalendar: calendario mensile con giorno corrente evidenziato.
 - **FU-021** FeatureCards "panoramica app" (Analisi assistita · Memoria sessioni · Journal · Monitoraggio mercati).
@@ -92,21 +98,31 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 | File | Ruolo | Stato |
 |------|-------|-------|
 | `client/src/pages/Home.jsx` | Pagina Home: wrapper forzato `dark`, header minimale, hero, CTA reali, disclaimer. | **IMPLEMENTATO** |
+| `client/src/components/layout/AppHeader.jsx` | Header autenticato condiviso: hamburger + nome app cliccabile verso Home. | **IMPLEMENTATO** |
+| `client/src/components/layout/useStorico.js` | Stato e azioni condivise del drawer; da Home/Impostazioni apre la Chat corretta. | **IMPLEMENTATO** |
+| `client/src/components/layout/Sidebar.jsx` | Navigazione Home/Nuova analisi, storico, Impostazioni ed Esci. | **IMPLEMENTATO** |
 | `client/src/components/home/AnimatedTradingBackground.jsx` | Sfondo animato (canvas+rAF, reduced-motion→statico, meno particelle su mobile). | **IMPLEMENTATO** |
 | `client/src/components/home/{Hero,HomeCta}.jsx` | Sotto-componenti piccoli. | **IMPLEMENTATO** |
+| `client/src/components/home/useMarketStatus.js` | Stato aperto/chiuso di Londra/New York/Tokyo: orari **locali** per piazza via `Intl`+fuso IANA (DST-safe, solo lun–ven), refresh 60s. | **IMPLEMENTATO (FU-018)** |
+| `client/src/components/home/MarketStatus.jsx` | Stato mercati nella Home; pallino **verde** aperto / grigio chiuso. Desktop: inline a destra dell'header. Mobile: riga orizzontale a tutta larghezza **sopra** il nome app. | **IMPLEMENTATO (FU-018)** |
 | `client/src/App.jsx` | Home su `/`, Chat su `/nuova-analisi`, redirect `*` e post-login aggiornati. | **IMPLEMENTATO** |
-| `client/src/pages/Chat.jsx` | `useEffect` additivo: apre lo storico se arriva `location.state.openStorico` (CTA "Le mie analisi"). | **IMPLEMENTATO** |
-| `client/src/pages/Settings.jsx` | Back-link → `/nuova-analisi`. | **IMPLEMENTATO** |
+| `client/src/pages/Chat.jsx` | Header/Sidebar condivisi; apre una chat indicata da `location.state.openChatId`. | **IMPLEMENTATO** |
+| `client/src/pages/Settings.jsx` | Header/Sidebar condivisi; nessuna freccia indietro. | **IMPLEMENTATO** |
 | `client/src/index.css` | Utility/keyframes per lo sfondo (riusa i token M7). | **IMPLEMENTATO** |
 
 > **Manutenzione:** il canvas non può usare le classi Tailwind, quindi l'accento ciano è replicato come
 > costante `ACCENT='#22d3ee'` in `AnimatedTradingBackground.jsx`. Se cambia il token `freedom.accent`,
 > aggiornare anche lì. (Unica eccezione documentata alla regola "niente hardcoded".)
+>
+> **Verde stato mercati (FU-018):** il LOCK §4 dice "niente verde". Il pallino "aperto" di
+> `MarketStatus.jsx` usa **verde** (`bg-green-500`) per **scelta esplicita dell'utente** (2026-07-01):
+> eccezione autorizzata e confinata al micro-indicatore di stato. "Chiuso" resta grigio (token `faint`).
 
 ## 7. Come si verifica (il «fatto quando»)
 
 - Dopo il login si arriva sulla **Home** (non più dritti in Chat); da lì "Nuova analisi" apre la Chat e
-  "Le mie analisi" apre lo storico. I flussi esistenti (analisi, storico, impostazioni, esci) funzionano ancora.
+  "Le mie analisi" apre lo storico sulla Home. Hamburger e nome app restano coerenti su Home, Chat e
+  Impostazioni; una chat scelta dal drawer si apre correttamente. Impostazioni ed Esci compaiono solo lì.
 - La Home è **scura e immersiva** anche se il toggle è su "chiaro"; palette **slate+ciano** coerente con l'app.
 - Lo **sfondo animato** gira fluido dietro ai contenuti, non blocca i click; con `prefers-reduced-motion`
   attivo diventa **statico**; su mobile ha meno particelle e nessun overflow orizzontale.

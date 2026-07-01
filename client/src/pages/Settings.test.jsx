@@ -1,12 +1,21 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 
-const { mockReload, mockSignIn, mockUpdateUser, mockSaveTheme } = vi.hoisted(() => ({
+const {
+  mockReload,
+  mockSignIn,
+  mockUpdateUser,
+  mockSaveTheme,
+  mockListChats,
+  mockLogout,
+} = vi.hoisted(() => ({
   mockReload: vi.fn(),
   mockSignIn: vi.fn(),
   mockUpdateUser: vi.fn(),
   mockSaveTheme: vi.fn(),
+  mockListChats: vi.fn(),
+  mockLogout: vi.fn(),
 }));
 
 let authState;
@@ -16,7 +25,11 @@ vi.mock('../lib/supabaseClient.js', () => ({
   supabase: { auth: { signInWithPassword: mockSignIn, updateUser: mockUpdateUser } },
 }));
 
-// theme.js reale (normalizeTheme/applyTheme veri), solo saveTheme mockato (niente rete).
+vi.mock('../lib/chatData.js', () => ({
+  listChats: mockListChats,
+  updateChatTitle: vi.fn(),
+}));
+
 vi.mock('../lib/theme.js', async (importActual) => {
   const actual = await importActual();
   return { ...actual, saveTheme: mockSaveTheme };
@@ -24,10 +37,18 @@ vi.mock('../lib/theme.js', async (importActual) => {
 
 import Settings from './Settings.jsx';
 
+function RouteProbe() {
+  const location = useLocation();
+  return <div>CHAT {location.state?.openChatId ?? 'NUOVA'}</div>;
+}
+
 function renderSettings() {
   return render(
-    <MemoryRouter>
-      <Settings />
+    <MemoryRouter initialEntries={['/impostazioni']}>
+      <Routes>
+        <Route path="/impostazioni" element={<Settings />} />
+        <Route path="/nuova-analisi" element={<RouteProbe />} />
+      </Routes>
     </MemoryRouter>,
   );
 }
@@ -39,39 +60,63 @@ beforeEach(() => {
     session: { user: { id: 'u1', email: 'mario@demo.local' } },
     profile: { theme: 'dark' },
     reloadProfile: mockReload,
+    logout: mockLogout,
   };
   mockSaveTheme.mockResolvedValue('light');
   mockSignIn.mockResolvedValue({ error: null });
   mockUpdateUser.mockResolvedValue({ error: null });
+  mockListChats.mockResolvedValue([
+    { id: 'c1', title: 'Analisi BTC', updated_at: '2026-07-01T10:00:00Z' },
+  ]);
 });
 
-describe('Settings — disclaimer', () => {
+describe('Settings — struttura', () => {
   it('mostra sempre il disclaimer', () => {
     renderSettings();
     expect(screen.getByText(/non è consulenza finanziaria/i)).toBeInTheDocument();
   });
+
+  it('mostra header condiviso e titolo pagina, senza freccia indietro', () => {
+    renderSettings();
+    expect(screen.getByRole('button', { name: 'Apri menu' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'FREEDOM TRADING SYSTEM' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('heading', { name: 'Impostazioni', level: 1 })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Torna alla chat')).not.toBeInTheDocument();
+  });
+
+  it('apre una chat dello storico dalla Sidebar', async () => {
+    renderSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Apri menu' }));
+    fireEvent.click(await screen.findByText('Analisi BTC'));
+    expect(screen.getByText('CHAT c1')).toBeInTheDocument();
+  });
+
+  it('avvia una nuova analisi dalla Sidebar', async () => {
+    renderSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Apri menu' }));
+    fireEvent.click(await screen.findByRole('button', { name: /Nuova analisi/i }));
+    expect(screen.getByText('CHAT NUOVA')).toBeInTheDocument();
+  });
 });
 
 describe('Settings — tema', () => {
-  it('cambia tema: salva sul profilo e ricarica il profilo', async () => {
+  it('salva il tema sul profilo e lo ricarica', async () => {
     renderSettings();
     fireEvent.click(screen.getByRole('button', { name: 'Chiaro' }));
     await waitFor(() => {
       expect(mockSaveTheme).toHaveBeenCalledWith('u1', 'light');
     });
     expect(mockReload).toHaveBeenCalled();
-    // Il segmented riflette la scelta (aria-pressed sul bottone Chiaro).
     expect(screen.getByRole('button', { name: 'Chiaro' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('se il salvataggio tema fallisce, mostra errore e fa rollback', async () => {
+  it('se il salvataggio fallisce mostra errore e fa rollback', async () => {
     mockSaveTheme.mockRejectedValue(new Error('Impossibile salvare il tema. Riprova.'));
     renderSettings();
     fireEvent.click(screen.getByRole('button', { name: 'Chiaro' }));
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent(/Impossibile salvare il tema/);
     });
-    // Rollback: torna a Scuro attivo.
     expect(screen.getByRole('button', { name: 'Scuro' })).toHaveAttribute('aria-pressed', 'true');
   });
 });
@@ -105,7 +150,7 @@ describe('Settings — cambio password', () => {
     expect(mockSignIn).not.toHaveBeenCalled();
   });
 
-  it('password attuale errata: messaggio chiaro, nessun updateUser', async () => {
+  it('se la password attuale è errata non aggiorna l’utente', async () => {
     mockSignIn.mockResolvedValue({ error: { message: 'Invalid login credentials' } });
     renderSettings();
     compila({});
@@ -116,7 +161,7 @@ describe('Settings — cambio password', () => {
     expect(mockUpdateUser).not.toHaveBeenCalled();
   });
 
-  it('happy path: riverifica la vecchia poi aggiorna, messaggio di successo', async () => {
+  it('riverifica la vecchia password e aggiorna quella nuova', async () => {
     renderSettings();
     compila({});
     fireEvent.click(screen.getByRole('button', { name: 'Aggiorna password' }));
@@ -127,8 +172,10 @@ describe('Settings — cambio password', () => {
     expect(mockUpdateUser).toHaveBeenCalledWith({ password: 'nuovapass' });
   });
 
-  it('errore su updateUser (password debole): messaggio chiaro, nessun crash', async () => {
-    mockUpdateUser.mockResolvedValue({ error: { message: 'Password should be at least 6 characters' } });
+  it('traduce l’errore di password debole in un messaggio chiaro', async () => {
+    mockUpdateUser.mockResolvedValue({
+      error: { message: 'Password should be at least 6 characters' },
+    });
     renderSettings();
     compila({});
     fireEvent.click(screen.getByRole('button', { name: 'Aggiorna password' }));
@@ -137,7 +184,7 @@ describe('Settings — cambio password', () => {
     });
   });
 
-  it('errore di rete inatteso: mostra un messaggio e riabilita il form', async () => {
+  it('gestisce un errore di rete e riabilita il form', async () => {
     mockSignIn.mockRejectedValue(new Error('fetch failed'));
     renderSettings();
     compila({});

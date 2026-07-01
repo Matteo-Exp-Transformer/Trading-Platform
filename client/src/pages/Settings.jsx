@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { supabase } from '../lib/supabaseClient.js';
 import { applyTheme, saveTheme, normalizeTheme } from '../lib/theme.js';
+import { AppHeader } from '../components/layout/AppHeader.jsx';
+import { Sidebar } from '../components/layout/Sidebar.jsx';
+import { useStorico } from '../components/layout/useStorico.js';
 
 const DISCLAIMER =
   "Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.";
@@ -13,6 +15,7 @@ const MIN_PASSWORD = 6;
 
 export default function Settings() {
   const { session, profile, reloadProfile } = useAuth();
+  const storico = useStorico();
 
   // --- Tema -------------------------------------------------------------------------------
   const [theme, setTheme] = useState(normalizeTheme(profile?.theme));
@@ -121,19 +124,12 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen flex flex-col bg-app text-content">
-      <header className="flex items-center gap-3 px-6 py-4 border-b border-line shrink-0">
-        <Link
-          to="/nuova-analisi"
-          aria-label="Torna alla chat"
-          className="text-muted hover:text-content"
-        >
-          ←
-        </Link>
-        <span className="font-bold text-freedom-accent">Impostazioni</span>
-      </header>
+      <AppHeader onOpenSidebar={storico.openSidebar} className="border-b border-line shrink-0" />
 
       <main className="flex-1 overflow-y-auto px-6 py-8">
         <div className="w-full max-w-md mx-auto flex flex-col gap-10">
+          <h1 className="text-2xl font-semibold">Impostazioni</h1>
+
           {/* Tema */}
           <section className="flex flex-col gap-3">
             <h2 className="text-lg font-semibold">Tema</h2>
@@ -248,6 +244,18 @@ export default function Settings() {
       >
         {DISCLAIMER}
       </footer>
+
+      <Sidebar
+        open={storico.open}
+        onClose={storico.closeSidebar}
+        chats={storico.chats}
+        loading={storico.loading}
+        error={storico.error}
+        renameError={storico.renameError}
+        onSelectChat={storico.selectChat}
+        onNuovaAnalisi={storico.nuovaAnalisi}
+        onRenameChat={storico.renameChat}
+      />
     </div>
   );
 }

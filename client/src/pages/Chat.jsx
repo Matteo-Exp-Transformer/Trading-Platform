@@ -1,18 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '../auth/AuthProvider.jsx';
 import { NewAnalysisForm } from '../components/chat/NewAnalysisForm.jsx';
 import { ChatPanel } from '../components/chat/ChatPanel.jsx';
+import { AppHeader } from '../components/layout/AppHeader.jsx';
 import { Sidebar } from '../components/layout/Sidebar.jsx';
-import { createChat, addMessage, loadMessages, listChats, updateChatTitle } from '../lib/chatData.js';
+import { useStorico } from '../components/layout/useStorico.js';
+import { createChat, addMessage, loadMessages } from '../lib/chatData.js';
 import { analyzeChatStream } from '../lib/agentApi.js';
 
 const DISCLAIMER =
   "Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.";
 
 export default function Chat() {
-  const { profile, session, logout } = useAuth();
   const location = useLocation();
+  const storico = useStorico();
   const [currentChatId, setCurrentChatId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [showForm, setShowForm] = useState(true);
@@ -23,24 +24,6 @@ export default function Chat() {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState(null);
   const [streamingText, setStreamingText] = useState(null); // prosa in arrivo (M5), o parziale su interruzione
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [chats, setChats] = useState([]);
-  const [chatsLoading, setChatsLoading] = useState(false);
-  const [chatsError, setChatsError] = useState(null);
-  const [renameError, setRenameError] = useState(null);
-
-  const fetchChats = useCallback(async () => {
-    setChatsLoading(true);
-    setChatsError(null);
-    try {
-      const data = await listChats();
-      setChats(data);
-    } catch {
-      setChatsError('Impossibile caricare lo storico. Riprova.');
-    } finally {
-      setChatsLoading(false);
-    }
-  }, []);
 
   const fetchMessages = useCallback(async (chatId) => {
     setMessagesLoading(true);
@@ -59,10 +42,15 @@ export default function Chat() {
     if (currentChatId) fetchMessages(currentChatId);
   }, [currentChatId, fetchMessages]);
 
-  // Arrivo dalla Home col CTA «Le mie analisi»: apre lo storico (drawer) all'ingresso. Solo al
-  // mount, leggendo lo stato di navigazione una volta (non riapre sui re-render successivi).
+  // Arrivo dalla Home/Impostazioni selezionando una chat dello storico: la rotta porta
+  // `openChatId` nello stato di navigazione → apri quella chat all'ingresso. Solo al mount
+  // (non riapre sui re-render). Senza stato, resta il form pulito (default) = «Nuova analisi».
   useEffect(() => {
-    if (location.state?.openStorico) handleOpenSidebar();
+    const chatId = location.state?.openChatId;
+    if (chatId) {
+      setCurrentChatId(chatId);
+      setShowForm(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -128,12 +116,8 @@ export default function Chat() {
     setStreamingText(null);
   }
 
-  function handleOpenSidebar() {
-    setSidebarOpen(true);
-    setRenameError(null);
-    fetchChats();
-  }
-
+  // Sulla pagina Chat la selezione di una chat e la nuova analisi agiscono IN-PLACE (senza
+  // cambiare rotta): sovrascrivono le navigazioni di default del hook. Chiudono poi il drawer.
   function handleSelectChat(chatId) {
     setCurrentChatId(chatId);
     setShowForm(false);
@@ -141,55 +125,17 @@ export default function Chat() {
     setMessagesError(null);
     setAnalysisError(null);
     setStreamingText(null);
-    setSidebarOpen(false);
+    storico.closeSidebar();
   }
 
   function handleNuovaChatFromSidebar() {
     handleNuovaAnalisi();
-    setSidebarOpen(false);
-  }
-
-  async function handleRenameChat(chatId, title) {
-    setRenameError(null);
-    try {
-      const updated = await updateChatTitle(chatId, title);
-      setChats((prev) =>
-        prev
-          .map((c) => (c.id === chatId ? updated : c))
-          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)),
-      );
-    } catch {
-      setRenameError('Rinomina non riuscita. Riprova.');
-    }
+    storico.closeSidebar();
   }
 
   return (
     <div className="h-screen bg-app text-content flex flex-col">
-      {/* header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-line shrink-0">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleOpenSidebar}
-            aria-label="Apri storico chat"
-            className="text-muted hover:text-content"
-          >
-            ☰
-          </button>
-          <span className="font-bold text-freedom-accent">FREEDOM TRADING SYSTEM</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted hidden sm:inline">
-            {profile?.display_name ?? session?.user?.email}
-          </span>
-          <button
-            onClick={logout}
-            className="text-sm text-muted hover:text-content"
-          >
-            Esci
-          </button>
-        </div>
-      </header>
+      <AppHeader onOpenSidebar={storico.openSidebar} className="border-b border-line shrink-0" />
 
       {/* area principale */}
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -224,16 +170,16 @@ export default function Chat() {
       </footer>
 
       <Sidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        chats={chats}
-        loading={chatsLoading}
-        error={chatsError}
-        renameError={renameError}
+        open={storico.open}
+        onClose={storico.closeSidebar}
+        chats={storico.chats}
+        loading={storico.loading}
+        error={storico.error}
+        renameError={storico.renameError}
         currentChatId={currentChatId}
         onSelectChat={handleSelectChat}
-        onRenameChat={handleRenameChat}
-        onNuovaChat={handleNuovaChatFromSidebar}
+        onNuovaAnalisi={handleNuovaChatFromSidebar}
+        onRenameChat={storico.renameChat}
       />
     </div>
   );

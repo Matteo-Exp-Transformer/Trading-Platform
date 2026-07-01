@@ -1,15 +1,16 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Hero } from './Hero.jsx';
 
 // Hero monta HomeCta (usa useNavigate): serve un Router.
-function renderHero() {
-  return render(
+function renderHero(onOpenStorico = vi.fn()) {
+  const view = render(
     <MemoryRouter>
-      <Hero />
+      <Hero onOpenStorico={onOpenStorico} />
     </MemoryRouter>,
   );
+  return { ...view, onOpenStorico };
 }
 
 describe('Hero', () => {
@@ -32,5 +33,11 @@ describe('Hero', () => {
     renderHero();
     expect(screen.getByRole('button', { name: 'Nuova analisi' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Le mie analisi' })).toBeInTheDocument();
+  });
+
+  it('inoltra l’apertura dello storico al CTA', () => {
+    const { onOpenStorico } = renderHero();
+    fireEvent.click(screen.getByRole('button', { name: 'Le mie analisi' }));
+    expect(onOpenStorico).toHaveBeenCalledOnce();
   });
 });

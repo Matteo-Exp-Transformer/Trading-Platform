@@ -1,9 +1,12 @@
-import { vi, describe, it, expect, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import Home from './Home.jsx';
 
-const { mockLogout } = vi.hoisted(() => ({ mockLogout: vi.fn() }));
+const { mockLogout, mockListChats } = vi.hoisted(() => ({
+  mockLogout: vi.fn(),
+  mockListChats: vi.fn(),
+}));
 
 vi.mock('../auth/AuthProvider.jsx', () => ({
   useAuth: () => ({
@@ -13,33 +16,57 @@ vi.mock('../auth/AuthProvider.jsx', () => ({
   }),
 }));
 
-// Sonda che mostra la rotta di destinazione e se è stato passato lo stato `openStorico`.
-function RouteProbe() {
-  const location = useLocation();
-  return <div>NUOVA ANALISI {location.state?.openStorico ? 'STORICO' : 'FRESH'}</div>;
-}
+vi.mock('../lib/chatData.js', () => ({
+  listChats: mockListChats,
+  updateChatTitle: vi.fn(),
+}));
+
+vi.mock('../components/home/AnimatedTradingBackground.jsx', () => ({
+  AnimatedTradingBackground: () => <div data-motion="static" />,
+}));
 
 function renderHome() {
   return render(
     <MemoryRouter initialEntries={['/']}>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/nuova-analisi" element={<RouteProbe />} />
+        <Route path="/nuova-analisi" element={<div>PAGINA NUOVA ANALISI</div>} />
         <Route path="/impostazioni" element={<div>PAGINA IMPOSTAZIONI</div>} />
       </Routes>
     </MemoryRouter>,
   );
 }
 
-afterEach(() => {
+beforeEach(() => {
   vi.clearAllMocks();
+  mockListChats.mockResolvedValue([
+    { id: 'c1', title: 'Analisi BTC', updated_at: '2026-07-01T10:00:00Z' },
+  ]);
+  window.matchMedia = vi.fn().mockImplementation((query) => ({
+    matches: true,
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+  }));
+});
+
+afterEach(() => {
   delete window.matchMedia;
 });
 
 describe('Home (landing immersiva)', () => {
-  it('mostra il nome prodotto', () => {
+  it('mostra hamburger e nome prodotto cliccabile verso la Home', () => {
     renderHome();
-    expect(screen.getByText('FREEDOM TRADING SYSTEM')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Apri menu' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'FREEDOM TRADING SYSTEM' })).toHaveAttribute('href', '/');
+  });
+
+  it('non mostra azioni account nell’header', () => {
+    renderHome();
+    expect(screen.queryByText('Impostazioni')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Esci' })).not.toBeInTheDocument();
   });
 
   it('mostra sempre il disclaimer', () => {
@@ -53,45 +80,52 @@ describe('Home (landing immersiva)', () => {
     expect(screen.getByRole('button', { name: 'Le mie analisi' })).toBeInTheDocument();
   });
 
-  it('«Nuova analisi» apre la Chat (rotta /nuova-analisi) senza stato storico', () => {
+  it('porta alla pagina Nuova analisi', () => {
     renderHome();
     fireEvent.click(screen.getByRole('button', { name: 'Nuova analisi' }));
-    expect(screen.getByText('NUOVA ANALISI FRESH')).toBeInTheDocument();
+    expect(screen.getByText('PAGINA NUOVA ANALISI')).toBeInTheDocument();
   });
 
-  it('«Le mie analisi» apre la Chat passando lo stato openStorico', () => {
+  it('apre lo storico direttamente sulla Home dal CTA', async () => {
     renderHome();
     fireEvent.click(screen.getByRole('button', { name: 'Le mie analisi' }));
-    expect(screen.getByText('NUOVA ANALISI STORICO')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('complementary', { name: 'Menu' })).toBeInTheDocument();
+    });
+    expect(screen.getByText('Analisi BTC')).toBeInTheDocument();
+    expect(mockListChats).toHaveBeenCalledOnce();
   });
 
-  it('«Impostazioni» porta alle impostazioni', () => {
+  it('apre lo stesso menu dall’hamburger', async () => {
     renderHome();
-    fireEvent.click(screen.getByRole('link', { name: 'Impostazioni' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apri menu' }));
+    await waitFor(() => {
+      expect(screen.getByRole('complementary', { name: 'Menu' })).toBeInTheDocument();
+    });
+    expect(mockListChats).toHaveBeenCalledOnce();
+  });
+
+  it('raggiunge Impostazioni soltanto dal menu', async () => {
+    renderHome();
+    fireEvent.click(screen.getByRole('button', { name: 'Apri menu' }));
+    const link = await screen.findByRole('link', { name: /Impostazioni/i });
+    fireEvent.click(link);
     expect(screen.getByText('PAGINA IMPOSTAZIONI')).toBeInTheDocument();
   });
 
-  it('«Esci» chiama logout', () => {
+  it('esegue il logout soltanto dal menu', async () => {
     renderHome();
-    fireEvent.click(screen.getByRole('button', { name: 'Esci' }));
-    expect(mockLogout).toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Apri menu' }));
+    fireEvent.click(await screen.findByRole('button', { name: /Esci/i }));
+    expect(mockLogout).toHaveBeenCalledOnce();
   });
 
-  it('il wrapper forza il tema scuro anche senza .dark globale', () => {
+  it('forza il tema scuro anche senza .dark globale', () => {
     const { container } = renderHome();
-    // La Home è sempre immersiva: il contenitore radice porta la classe `dark`.
     expect(container.querySelector('.dark')).not.toBeNull();
   });
 
-  it('con prefers-reduced-motion lo sfondo è statico', () => {
-    window.matchMedia = vi.fn().mockImplementation((query) => ({
-      matches: true,
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-    }));
+  it('con prefers-reduced-motion rende statico lo sfondo', () => {
     const { container } = renderHome();
     expect(container.querySelector('[data-motion]')).toHaveAttribute('data-motion', 'static');
   });

@@ -1,35 +1,44 @@
-import { vi, describe, it, expect } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Sidebar } from './Sidebar.jsx';
+
+const { mockLogout } = vi.hoisted(() => ({ mockLogout: vi.fn() }));
+
+vi.mock('../../auth/AuthProvider.jsx', () => ({
+  useAuth: () => ({ logout: mockLogout }),
+}));
 
 const chats = [
   { id: 'c1', title: 'BTC/USD - swing', updated_at: '2026-06-30T10:00:00Z' },
   { id: 'c2', title: 'Oro intraday', updated_at: '2026-06-29T10:00:00Z' },
 ];
 
-// La Sidebar contiene un <Link> (ingresso Impostazioni): serve un Router nei test.
-function renderSidebar(props) {
+function renderSidebar(props, initialEntries = ['/']) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <Sidebar
         onClose={vi.fn()}
         onSelectChat={vi.fn()}
         onRenameChat={vi.fn()}
-        onNuovaChat={vi.fn()}
+        onNuovaAnalisi={vi.fn()}
         {...props}
       />
     </MemoryRouter>,
   );
 }
 
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
 describe('Sidebar', () => {
-  it('non renderizza nulla quando chiusa', () => {
+  it('non renderizza nulla quando è chiusa', () => {
     renderSidebar({ open: false, chats });
-    expect(screen.queryByText('Storico chat')).not.toBeInTheDocument();
+    expect(screen.queryByText('Menu')).not.toBeInTheDocument();
   });
 
-  it('mostra le chat ordinate ricevute, con titolo e data', () => {
+  it('mostra lo storico ricevuto con titolo e data', () => {
     renderSidebar({ open: true, chats });
     expect(screen.getByText('BTC/USD - swing')).toBeInTheDocument();
     expect(screen.getByText('Oro intraday')).toBeInTheDocument();
@@ -38,45 +47,64 @@ describe('Sidebar', () => {
 
   it('usa un pannello opaco e distinto dal contenuto sottostante', () => {
     renderSidebar({ open: true, chats });
-    expect(screen.getByRole('complementary', { name: 'Storico chat' })).toHaveClass(
+    expect(screen.getByRole('complementary', { name: 'Menu' })).toHaveClass(
       'sidebar-panel',
       'bg-surface',
     );
   });
 
-  it('mostra il messaggio di lista vuota', () => {
+  it('mostra lo stato vuoto', () => {
     renderSidebar({ open: true, chats: [] });
     expect(screen.getByText('Nessuna chat ancora.')).toBeInTheDocument();
   });
 
-  it('chiama onSelectChat al click su una riga', () => {
+  it('apre una chat selezionata', () => {
     const onSelectChat = vi.fn();
     renderSidebar({ open: true, chats, onSelectChat });
     fireEvent.click(screen.getByText('BTC/USD - swing'));
     expect(onSelectChat).toHaveBeenCalledWith('c1');
   });
 
-  it('chiama onNuovaChat al click sul bottone nuova chat', () => {
-    const onNuovaChat = vi.fn();
-    renderSidebar({ open: true, chats, onNuovaChat });
-    fireEvent.click(screen.getByText('+ Nuova chat'));
-    expect(onNuovaChat).toHaveBeenCalled();
+  it('avvia una nuova analisi dalla navigazione principale', () => {
+    const onNuovaAnalisi = vi.fn();
+    renderSidebar({ open: true, chats, onNuovaAnalisi });
+    fireEvent.click(screen.getByRole('button', { name: /Nuova analisi/i }));
+    expect(onNuovaAnalisi).toHaveBeenCalledOnce();
   });
 
-  it('chiama onClose al click sul backdrop', () => {
+  it('chiude il menu dal backdrop', () => {
     const onClose = vi.fn();
     const { container } = renderSidebar({ open: true, chats, onClose });
-    fireEvent.click(container.querySelector('[aria-hidden="true"]'));
-    expect(onClose).toHaveBeenCalled();
+    fireEvent.click(container.querySelector('.bg-black\\/50'));
+    expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it('mostra l’ingresso Impostazioni che punta a /impostazioni', () => {
+  it('mostra Home e Impostazioni con le destinazioni corrette', () => {
     renderSidebar({ open: true, chats });
-    const link = screen.getByRole('link', { name: /Impostazioni/i });
-    expect(link).toHaveAttribute('href', '/impostazioni');
+    expect(screen.getByRole('link', { name: /Home/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: /Impostazioni/i })).toHaveAttribute(
+      'href',
+      '/impostazioni',
+    );
   });
 
-  it('rinomina una chat: icona matita apre editing, invio salva', () => {
+  it('evidenzia la destinazione corrente', () => {
+    renderSidebar({ open: true, chats }, ['/impostazioni']);
+    expect(screen.getByRole('link', { name: /Impostazioni/i })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
+
+  it('chiude il menu e riusa il logout esistente', () => {
+    const onClose = vi.fn();
+    renderSidebar({ open: true, chats, onClose });
+    fireEvent.click(screen.getByRole('button', { name: /Esci/i }));
+    expect(onClose).toHaveBeenCalledOnce();
+    expect(mockLogout).toHaveBeenCalledOnce();
+  });
+
+  it('rinomina una chat: la matita apre l’editing e Invio salva', () => {
     const onRenameChat = vi.fn();
     renderSidebar({ open: true, chats, onRenameChat });
     fireEvent.click(screen.getAllByLabelText('Rinomina chat')[0]);
@@ -86,12 +114,12 @@ describe('Sidebar', () => {
     expect(onRenameChat).toHaveBeenCalledWith('c1', 'Nuovo titolo');
   });
 
-  it('mostra il banner di errore rinomina quando renameError è valorizzato', () => {
+  it('mostra l’errore di rinomina', () => {
     renderSidebar({ open: true, chats, renameError: 'Rinomina non riuscita. Riprova.' });
     expect(screen.getByRole('alert')).toHaveTextContent('Rinomina non riuscita. Riprova.');
   });
 
-  it('non chiama onRenameChat se il titolo non cambia', () => {
+  it('non salva se il titolo non cambia', () => {
     const onRenameChat = vi.fn();
     renderSidebar({ open: true, chats, onRenameChat });
     fireEvent.click(screen.getAllByLabelText('Rinomina chat')[0]);

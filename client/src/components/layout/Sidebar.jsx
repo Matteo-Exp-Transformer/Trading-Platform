@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../auth/AuthProvider.jsx';
 
 function formatChatDate(dateStr) {
   if (!dateStr) return '';
@@ -8,6 +9,14 @@ function formatChatDate(dateStr) {
     month: '2-digit',
     year: 'numeric',
   });
+}
+
+// Stile condiviso delle voci di navigazione: attiva = superficie più marcata (token esistenti),
+// inattiva = tenue con hover. Nessun colore fuori dai token slate+ciano.
+function navItemClass(active) {
+  return `flex items-center gap-2 w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${
+    active ? 'bg-surface-stronger text-content' : 'text-muted hover:bg-surface hover:text-content'
+  }`;
 }
 
 function SidebarChatRow({ chat, active, onSelect, onRename }) {
@@ -66,6 +75,11 @@ function SidebarChatRow({ chat, active, onSelect, onRename }) {
   );
 }
 
+// Sidebar (drawer) condivisa da tutte le pagine autenticate. Organizza: Home · Nuova analisi ·
+// sezione «Le mie analisi» (storico) · Impostazioni · Esci (in fondo, separato). Impostazioni ed
+// Esci vivono SOLO qui, non negli header. La navigazione tra le rotte usa i Link/useLocation
+// interni (stato attivo evidenziato); le azioni che dipendono dalla pagina (apri una chat, nuova
+// analisi) arrivano come callback. Il logout riusa l'azione esistente da useAuth.
 export function Sidebar({
   open,
   onClose,
@@ -75,38 +89,58 @@ export function Sidebar({
   renameError,
   currentChatId,
   onSelectChat,
+  onNuovaAnalisi,
   onRenameChat,
-  onNuovaChat,
 }) {
+  const { pathname } = useLocation();
+  const { logout } = useAuth();
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-40 flex">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <aside
-        aria-label="Storico chat"
+        aria-label="Menu"
         className="sidebar-panel relative z-50 w-72 max-w-[80vw] h-full bg-surface border-r border-line shadow-2xl flex flex-col"
       >
         <div className="flex items-center justify-between px-4 py-4 border-b border-line shrink-0">
-          <span className="text-sm font-semibold text-muted">Storico chat</span>
+          <span className="text-sm font-semibold text-muted">Menu</span>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Chiudi storico chat"
+            aria-label="Chiudi menu"
             className="text-muted hover:text-content"
           >
             ✕
           </button>
         </div>
 
-        <div className="px-4 py-3 shrink-0">
+        {/* Navigazione principale */}
+        <nav aria-label="Navigazione" className="flex flex-col gap-1 px-2 py-3 shrink-0">
+          <Link
+            to="/"
+            onClick={onClose}
+            aria-current={pathname === '/' ? 'page' : undefined}
+            className={navItemClass(pathname === '/')}
+          >
+            <span aria-hidden="true">⌂</span> Home
+          </Link>
           <button
             type="button"
-            onClick={onNuovaChat}
-            className="w-full bg-freedom-accent text-slate-950 rounded-full px-4 py-2 text-sm font-semibold hover:bg-freedom-accentHover transition-colors"
+            onClick={onNuovaAnalisi}
+            aria-current={pathname === '/nuova-analisi' ? 'page' : undefined}
+            className={navItemClass(pathname === '/nuova-analisi')}
           >
-            + Nuova chat
+            <span aria-hidden="true">＋</span> Nuova analisi
           </button>
+        </nav>
+
+        {/* Storico */}
+        <div className="px-4 pt-1 pb-2 shrink-0">
+          <span className="text-xs font-semibold uppercase tracking-wide text-faint">
+            Le mie analisi
+          </span>
         </div>
 
         {renameError && (
@@ -138,14 +172,26 @@ export function Sidebar({
           </ul>
         </div>
 
-        <div className="border-t border-line px-2 py-3 shrink-0">
+        {/* Impostazioni + Esci: ancorati in fondo, separati dal resto */}
+        <div className="border-t border-line px-2 py-3 shrink-0 flex flex-col gap-1">
           <Link
             to="/impostazioni"
             onClick={onClose}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-muted hover:bg-surface hover:text-content"
+            aria-current={pathname === '/impostazioni' ? 'page' : undefined}
+            className={navItemClass(pathname === '/impostazioni')}
           >
             <span aria-hidden="true">⚙</span> Impostazioni
           </Link>
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              logout();
+            }}
+            className={navItemClass(false)}
+          >
+            <span aria-hidden="true">⎋</span> Esci
+          </button>
         </div>
       </aside>
     </div>

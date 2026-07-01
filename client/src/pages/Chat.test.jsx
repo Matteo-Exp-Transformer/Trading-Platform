@@ -1,16 +1,12 @@
-import { vi, describe, it, expect } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Chat from './Chat.jsx';
 
-// La Chat monta la Sidebar, che contiene un <Link> (ingresso Impostazioni): serve un Router.
-function renderChat(entries) {
-  return render(
-    <MemoryRouter initialEntries={entries}>
-      <Chat />
-    </MemoryRouter>,
-  );
-}
+const { mockListChats, mockLoadMessages } = vi.hoisted(() => ({
+  mockListChats: vi.fn(),
+  mockLoadMessages: vi.fn(),
+}));
 
 vi.mock('../auth/AuthProvider.jsx', () => ({
   useAuth: () => ({
@@ -20,14 +16,10 @@ vi.mock('../auth/AuthProvider.jsx', () => ({
   }),
 }));
 
-const { mockListChats } = vi.hoisted(() => ({
-  mockListChats: vi.fn().mockResolvedValue([]),
-}));
-
 vi.mock('../lib/chatData.js', () => ({
   createChat: vi.fn(),
   addMessage: vi.fn(),
-  loadMessages: vi.fn().mockResolvedValue([]),
+  loadMessages: mockLoadMessages,
   listChats: mockListChats,
   updateChatTitle: vi.fn(),
 }));
@@ -36,10 +28,27 @@ vi.mock('../lib/agentApi.js', () => ({
   analyzeChatStream: vi.fn().mockResolvedValue({ transcript: null }),
 }));
 
+function renderChat(entries = ['/nuova-analisi']) {
+  return render(
+    <MemoryRouter initialEntries={entries}>
+      <Chat />
+    </MemoryRouter>,
+  );
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mockListChats.mockResolvedValue([
+    { id: 'c1', title: 'Analisi BTC', updated_at: '2026-07-01T10:00:00Z' },
+  ]);
+  mockLoadMessages.mockResolvedValue([]);
+});
+
 describe('Chat (pagina)', () => {
-  it('mostra il nome prodotto nell\'header', () => {
+  it('mostra hamburger e nome prodotto cliccabile verso la Home', () => {
     renderChat();
-    expect(screen.getByText('FREEDOM TRADING SYSTEM')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Apri menu' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'FREEDOM TRADING SYSTEM' })).toHaveAttribute('href', '/');
   });
 
   it('mostra il form di nuova analisi al primo caricamento', () => {
@@ -49,44 +58,52 @@ describe('Chat (pagina)', () => {
 
   it('mostra il disclaimer fisso nel footer', () => {
     renderChat();
-    const disclaimers = screen.getAllByText(/non è consulenza finanziaria/i);
-    expect(disclaimers.length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/non è consulenza finanziaria/i).length).toBeGreaterThan(0);
   });
 
-  it('mostra il pulsante Esci', () => {
+  it('non mostra Esci nell’header', () => {
     renderChat();
-    expect(screen.getByRole('button', { name: /esci/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Esci/i })).not.toBeInTheDocument();
   });
 
-  it('apre la sidebar e carica lo storico al click sull\'icona menu', async () => {
+  it('apre il menu e carica lo storico dall’hamburger', async () => {
     renderChat();
-    fireEvent.click(screen.getByRole('button', { name: /apri storico chat/i }));
-    expect(mockListChats).toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Apri menu' }));
+    expect(mockListChats).toHaveBeenCalledOnce();
     await waitFor(() => {
-      expect(screen.getByText('Storico chat')).toBeInTheDocument();
+      expect(screen.getByRole('complementary', { name: 'Menu' })).toBeInTheDocument();
     });
+    expect(screen.getByText('Analisi BTC')).toBeInTheDocument();
   });
 
-  it('apre lo storico all\'arrivo dalla Home con lo stato openStorico', async () => {
-    renderChat([{ pathname: '/nuova-analisi', state: { openStorico: true } }]);
-    expect(mockListChats).toHaveBeenCalled();
+  it('apre una chat indicata nello stato di navigazione', async () => {
+    renderChat([{ pathname: '/nuova-analisi', state: { openChatId: 'c1' } }]);
     await waitFor(() => {
-      expect(screen.getByText('Storico chat')).toBeInTheDocument();
+      expect(mockLoadMessages).toHaveBeenCalledWith('c1');
     });
+    expect(screen.queryByText('Nuova analisi')).not.toBeInTheDocument();
   });
 
-  it('senza stato di navigazione lo storico resta chiuso all\'avvio', () => {
+  it('senza stato di navigazione il menu resta chiuso', () => {
     renderChat();
-    expect(screen.queryByText('Storico chat')).not.toBeInTheDocument();
+    expect(screen.queryByRole('complementary', { name: 'Menu' })).not.toBeInTheDocument();
   });
 
-  it('chiude la sidebar al click su chiudi', async () => {
+  it('chiude il menu dal pulsante dedicato', async () => {
     renderChat();
-    fireEvent.click(screen.getByRole('button', { name: /apri storico chat/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apri menu' }));
+    await screen.findByRole('complementary', { name: 'Menu' });
+    fireEvent.click(screen.getByRole('button', { name: 'Chiudi menu' }));
+    expect(screen.queryByRole('complementary', { name: 'Menu' })).not.toBeInTheDocument();
+  });
+
+  it('apre una chat dello storico restando nella pagina Chat', async () => {
+    renderChat();
+    fireEvent.click(screen.getByRole('button', { name: 'Apri menu' }));
+    fireEvent.click(await screen.findByText('Analisi BTC'));
     await waitFor(() => {
-      expect(screen.getByText('Storico chat')).toBeInTheDocument();
+      expect(mockLoadMessages).toHaveBeenCalledWith('c1');
     });
-    fireEvent.click(screen.getByRole('button', { name: /chiudi storico chat/i }));
-    expect(screen.queryByText('Storico chat')).not.toBeInTheDocument();
+    expect(screen.queryByRole('complementary', { name: 'Menu' })).not.toBeInTheDocument();
   });
 });

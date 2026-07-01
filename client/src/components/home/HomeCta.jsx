@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 
-// I due CTA della Home puntano SOLO a rotte esistenti:
+// I due CTA della Home puntano SOLO a rotte/azioni esistenti:
 //  - «Nuova analisi» → la Chat (rotta /nuova-analisi), form pulito;
-//  - «Le mie analisi» → sempre la Chat, ma passando lo stato `openStorico` così la Chat apre il
-//    drawer dello storico all'arrivo (lo storico vive come drawer dentro la Chat, non come rotta).
+//  - «Le mie analisi» → apre la Sidebar/storico QUI sulla Home (`onOpenStorico`), senza passare
+//    inutilmente dalla pagina Chat. È lo stesso drawer che apre l'hamburger.
 // Niente Journal/Trading Live: sono follow-up (FU-023/FU-024), non esistono ancora.
-export function HomeCta() {
+export function HomeCta({ onOpenStorico }) {
   const navigate = useNavigate();
 
   return (
@@ -22,7 +22,7 @@ export function HomeCta() {
       </button>
       <button
         type="button"
-        onClick={() => navigate('/nuova-analisi', { state: { openStorico: true } })}
+        onClick={onOpenStorico}
         className="inline-flex items-center justify-center rounded-2xl border border-line bg-surface/60 px-6 py-3 font-semibold text-content transition-all duration-200 hover:border-freedom-accent hover:text-freedom-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-freedom-accent"
       >
         Le mie analisi

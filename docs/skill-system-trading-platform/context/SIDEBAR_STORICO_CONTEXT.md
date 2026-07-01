@@ -6,24 +6,32 @@
 >
 > **Trigger di routing:** «sidebar», «storico», «storico chat», «riapri chat», «rinomina chat»,
 > «nuova chat» → questo file.
-> Creato: 2026-06-30 (intervista slice 2c, M2). Codice da costruire: i path sono **previsti**.
+> Creato: 2026-06-30 (intervista slice 2c, M2). Aggiornato: 2026-07-01
+> (navigazione autenticata condivisa).
 
 ---
 
 ## 1. Cos'è questa zona
 
-Un pannello **a comparsa** (drawer, non sempre visibile) che elenca le chat passate dell'utente,
-più recenti prima. Da lì l'utente riapre una chat esistente, la rinomina, o avvia una nuova analisi.
-Sostituisce l'attuale bottone «+ Nuova analisi» dentro `ChatPanel` (slice 2b): quel bottone **si
-rimuove da dentro la chat** e vive **solo qui**, fuori dal flusso di conversazione.
+Un pannello **a comparsa** (drawer, non sempre visibile) condiviso da Home, Chat e Impostazioni.
+Contiene la navigazione principale, elenca le chat passate dell'utente (più recenti prima) e raccoglie
+le azioni account. Da lì l'utente torna alla Home, avvia una nuova analisi, riapre o rinomina una chat,
+apre Impostazioni oppure esce.
+
+La voce globale «Nuova analisi» vive nella Sidebar, fuori dal flusso di conversazione. Convive con il
+CTA contestuale della Home approvato in `HOME_CONTEXT.md`; `ChatPanel` non contiene un terzo ingresso.
 
 ## 2. File coinvolti (previsti)
 
 | File | Ruolo |
 |------|-------|
-| `client/src/components/layout/Sidebar.jsx` *(nuovo)* | Drawer: lista chat, rinomina, bottone «nuova chat» |
+| `client/src/components/layout/AppHeader.jsx` | Header condiviso: hamburger + nome app cliccabile verso Home |
+| `client/src/components/layout/useStorico.js` | Stato, caricamento, rinomina e navigazioni del drawer condivisi |
+| `client/src/components/layout/Sidebar.jsx` | Drawer: Home, Nuova analisi, lista chat, Impostazioni, Esci |
 | `client/src/components/layout/SidebarChatRow.jsx` *(nuovo, opzionale)* | Singola riga: titolo + data + menu rinomina |
-| `client/src/pages/Chat.jsx` | Aggiunge stato apertura/chiusura sidebar, icona toggle in header, wiring `onSelectChat`/`onNuovaChat` |
+| `client/src/pages/Home.jsx` | Apre il drawer da hamburger o CTA «Le mie analisi» |
+| `client/src/pages/Chat.jsx` | Usa header/drawer condivisi e gestisce selezione/nuova analisi in-place |
+| `client/src/pages/Settings.jsx` | Usa header/drawer condivisi; da qui una chat apre `/nuova-analisi` |
 | `client/src/components/chat/ChatPanel.jsx` | **Rimuove** il bottone «+ Nuova analisi» (riga 70-76) e la prop `onNuovaAnalisi` |
 | `client/src/lib/chatData.js` | **Aggiunge** `listChats()` e `updateChatTitle(chatId, title)` |
 
@@ -32,20 +40,25 @@ rimuove da dentro la chat** e vive **solo qui**, fuori dal flusso di conversazio
 ```
 LOCK  isolamento per utente (RLS) — listChats/updateChatTitle passano SEMPRE per le policy esistenti
       su `chats` (select/update già coperte, vedi DB_SUPABASE_SKILL §RLS). Mai bypassare con query dirette.
-RULE  Mai un secondo punto di ingresso per "nuova chat": il bottone vive SOLO in Sidebar, non in ChatPanel.
+RULE  Ingressi approvati per "nuova analisi": voce globale nella Sidebar + CTA contestuale nella Home.
+      Nessun ingresso aggiuntivo dentro ChatPanel.
 RULE  Mai crash a vista: lista vuota (nessuna chat) → messaggio semplice, non errore.
+RULE  Impostazioni ed Esci vivono solo nella Sidebar, mai negli header autenticati.
+RULE  Il nome app nell'header riporta sempre alla Home. Nessuna freccia indietro in questa fase.
 ```
 
 ## 4. Decisioni d'intervista (slice 2c, 2026-06-30)
 
 | Domanda | Decisione |
 |---------|-----------|
-| Dove sta la sidebar | **A comparsa**: icona (hamburger) nell'header di `Chat.jsx` apre/chiude un drawer a sinistra. Non sempre visibile. |
+| Dove sta la sidebar | **A comparsa**: l’hamburger nell’header condiviso di Home, Chat e Impostazioni apre/chiude lo stesso drawer a sinistra. Non sempre visibile. |
 | Cosa mostra ogni riga | **Titolo + data ultima modifica** (`chats.updated_at`, formattata leggibile — es. `gg/mm` o relativa "oggi", "ieri") |
 | Ordinamento | `updated_at desc` (più recenti in cima) — già deciso in handoff, confermato |
 | Click su una riga | Apre quella chat: `setCurrentChatId(chat.id)` + carica messaggi (riusa `loadMessages` già in `Chat.jsx`), poi **chiude il drawer** |
 | Rinomina | **Icona/menu dedicato** accanto alla riga (es. icona matita) → titolo diventa editabile sul posto → invio/blur salva con `updateChatTitle` |
-| Bottone «nuova chat» | **Vive solo nella sidebar**, rimosso da dentro `ChatPanel`. Click → reset stato (`currentChatId=null`, `showForm=true`, riusa `handleNuovaAnalisi` esistente) e **chiude il drawer**. **Nessuna conferma richiesta**: ogni messaggio è già persistito al momento dell'invio (`addMessage` in `chatData.js`), quindi non esiste mai "lavoro non salvato" da perdere passando a una nuova chat. |
+| Bottone «nuova analisi» | **Voce globale nella Sidebar**, rimossa da `ChatPanel`; convive con il CTA della Home. In Chat resetta lo stato in-place, da Home/Impostazioni naviga a `/nuova-analisi`; poi chiude il drawer. Nessuna conferma: i messaggi sono già persistiti. |
+| Selezione da Home/Impostazioni | Naviga a `/nuova-analisi` passando l’ID della chat; Chat la carica all’ingresso. |
+| Navigazione account | Impostazioni ed Esci sono ancorati in fondo e separati dallo storico; Esci riusa il logout esistente. |
 
 > **Titolo chat:** già risolto in slice 2b — `buildTitle()` in `formUtils.js` usa l'idea utente (troncata)
 > o `asset · obiettivo` come fallback. La rinomina qui descritta è una **modifica manuale successiva**,
