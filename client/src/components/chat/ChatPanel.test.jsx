@@ -33,6 +33,19 @@ describe('ChatPanel — stato di attesa', () => {
   });
 });
 
+describe('ChatPanel — limite follow-up', () => {
+  it('blocca la scrittura e avvisa quando il limite è raggiunto', () => {
+    render(<ChatPanel {...baseProps} analyzing={false} analysisError={null} limitReached />);
+    expect(screen.getByPlaceholderText(/limite di approfondimenti raggiunto/i)).toBeDisabled();
+    expect(screen.getByText(/hai raggiunto il limite di approfondimenti/i)).toBeInTheDocument();
+  });
+
+  it('non mostra l’avviso quando il limite non è raggiunto', () => {
+    render(<ChatPanel {...baseProps} analyzing={false} analysisError={null} />);
+    expect(screen.queryByText(/hai raggiunto il limite di approfondimenti/i)).not.toBeInTheDocument();
+  });
+});
+
 describe('ChatPanel — streaming (M5)', () => {
   it('mostra la prosa in arrivo e nasconde "sta analizzando" appena c’è testo', () => {
     render(

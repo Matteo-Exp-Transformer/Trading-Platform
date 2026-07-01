@@ -6,13 +6,16 @@ import { useActiveSession } from './useActiveSession.js';
 // Se non c'è nessuna sessione (o durante il caricamento) → la card NON compare (return null),
 // così il primo accesso resta pulito. `onReprendi(chatId)` è fornito dalla Home (apre la Chat).
 export function ActiveSessionCard({ onReprendi }) {
-  const { session, loading } = useActiveSession();
+  const { session, limitReached, loading } = useActiveSession();
   if (loading || !session) return null;
 
   const asset = session.form_context?.asset;
   const meta = [asset, `aggiornata ${relativeDayLabel(session.updated_at)}`]
     .filter(Boolean)
     .join(' · ');
+  // Se l'ultima sessione ha esaurito i follow-up non è più "riprendibile" con nuove domande:
+  // resta consultabile, quindi la etichetta cambia in "Apri ultima sessione".
+  const label = limitReached ? 'Apri ultima sessione' : 'Riprendi sessione';
 
   return (
     <button
@@ -22,7 +25,7 @@ export function ActiveSessionCard({ onReprendi }) {
     >
       <span className="flex min-w-0 flex-col">
         <span className="text-xs font-semibold uppercase tracking-widest text-freedom-accent">
-          Riprendi sessione
+          {label}
         </span>
         <span className="mt-1 truncate text-base font-semibold text-content">{session.title}</span>
         {meta && <span className="mt-0.5 truncate text-sm text-muted">{meta}</span>}

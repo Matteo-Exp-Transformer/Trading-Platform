@@ -1,20 +1,32 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 
-const { mockRun, mockRunStream, mockMaybeSingle, mockProfileMaybeSingle, mockCreateClient } =
-  vi.hoisted(() => ({
-    mockRun: vi.fn(),
-    mockRunStream: vi.fn(),
-    mockMaybeSingle: vi.fn(), // ownership chat: from('chats').select('id').eq('id',id).maybeSingle()
-    mockProfileMaybeSingle: vi.fn(), // modello M6: from('profiles').select('ai_model').maybeSingle()
-    mockCreateClient: vi.fn(),
-  }));
+const {
+  mockRun,
+  mockRunStream,
+  mockMaybeSingle,
+  mockProfileMaybeSingle,
+  mockMessagesCount,
+  mockLastUserMsg,
+  mockClassifica,
+  mockCreateClient,
+} = vi.hoisted(() => ({
+  mockRun: vi.fn(),
+  mockRunStream: vi.fn(),
+  mockMaybeSingle: vi.fn(), // ownership chat: from('chats').select('id').eq('id',id).maybeSingle()
+  mockProfileMaybeSingle: vi.fn(), // modello M6: from('profiles').select('ai_model').maybeSingle()
+  mockMessagesCount: vi.fn(), // limite FU: from('messages').select(id,{count}).eq().eq() → {count}
+  mockLastUserMsg: vi.fn(), // classificatore: ultimo msg utente .order().limit().maybeSingle()
+  mockClassifica: vi.fn(), // classificatore d'ingresso (Strato 2)
+  mockCreateClient: vi.fn(),
+}));
 
 vi.mock('@supabase/supabase-js', () => ({ createClient: mockCreateClient }));
 vi.mock('../src/agent/orchestrator.js', () => ({
   runAnalysis: mockRun,
   runAnalysisStream: mockRunStream,
 }));
+vi.mock('../src/agent/topicGuard.js', () => ({ classificaTesto: mockClassifica }));
 
 // Finto runAnalysisStream: async generator sugli eventi passati.
 function asEventStream(events) {
@@ -42,11 +54,30 @@ beforeEach(() => {
     if (table === 'profiles') {
       return { select: vi.fn(() => ({ maybeSingle: mockProfileMaybeSingle })) };
     }
+    if (table === 'messages') {
+      // Due query distinte su 'messages':
+      //  - limite follow-up: select(id,{count}).eq('chat_id').eq('role')      → mockMessagesCount
+      //  - ultimo msg utente: select('content').eq().eq().order().limit().maybeSingle() → mockLastUserMsg
+      const secondEq = vi.fn(() => {
+        // Restituisce un oggetto che è SIA thenable (conteggio) SIA con .order (ultimo msg).
+        const chain = {
+          order: vi.fn(() => ({ limit: vi.fn(() => ({ maybeSingle: mockLastUserMsg })) })),
+          then: (resolve) => Promise.resolve(mockMessagesCount()).then(resolve),
+        };
+        return chain;
+      });
+      return { select: vi.fn(() => ({ eq: vi.fn(() => ({ eq: secondEq })) })) };
+    }
     return { select: vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle: mockMaybeSingle })) })) };
   });
   mockCreateClient.mockReturnValue({ from });
   mockMaybeSingle.mockResolvedValue({ data: { id: 'chat-1' }, error: null });
   mockProfileMaybeSingle.mockResolvedValue({ data: { ai_model: null }, error: null });
+  // Default: 1 messaggio utente (solo la prima analisi) → nessun follow-up usato, sempre entro il limite.
+  mockMessagesCount.mockResolvedValue({ count: 1, error: null });
+  // Default: ultimo messaggio utente leggibile + classificatore che consente (in-tema).
+  mockLastUserMsg.mockResolvedValue({ data: { content: 'Analizza XAU/USD' }, error: null });
+  mockClassifica.mockResolvedValue({ consentito: true, motivo: 'ok' });
   mockRun.mockResolvedValue({ text: 'Analisi in prosa', transcript: null });
   mockRunStream.mockReturnValue(
     asEventStream([
@@ -147,6 +178,83 @@ describe('POST /api/agent/analyze', () => {
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/Troppi screenshot/);
   });
+
+  it('429 se superato il limite di follow-up (prima analisi esclusa + 5)', async () => {
+    // 7 messaggi utente = 1 analisi + 6 follow-up → oltre il limite di 5.
+    mockMessagesCount.mockResolvedValue({ count: 7, error: null });
+    const res = await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(429);
+    expect(res.body.error).toMatch(/limite di 5 approfondimenti/i);
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it('consente il follow-up al 5° (entro il limite)', async () => {
+    // 6 messaggi utente = 1 analisi + 5 follow-up → l'ultimo è ancora ammesso.
+    mockMessagesCount.mockResolvedValue({ count: 6, error: null });
+    const res = await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(200);
+    expect(mockRun).toHaveBeenCalled();
+  });
+
+  it('la prima analisi (con immagini) non è mai limitata', async () => {
+    mockMessagesCount.mockResolvedValue({ count: 99, error: null });
+    const res = await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [{ mimeType: 'image/png', data: 'A' }] });
+    expect(res.status).toBe(200);
+    expect(mockRun).toHaveBeenCalled();
+  });
+
+  it('se il conteggio messaggi fallisce, non blocca (fallback mai-crash)', async () => {
+    mockMessagesCount.mockResolvedValue({ count: null, error: new Error('db down') });
+    const res = await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(200);
+    expect(mockRun).toHaveBeenCalled();
+  });
+
+  it('classificatore FUORI-TEMA: rifiuto sul canale risposta, l’analisi non parte', async () => {
+    mockClassifica.mockResolvedValue({ consentito: false, motivo: 'fuori_tema' });
+    const res = await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(200);
+    expect(res.body.text).toMatch(/analisi dei mercati e trading/);
+    expect(res.body.transcript).toBeNull();
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it('classificatore ESTRAZIONE: rifiuto dedicato sul canale risposta', async () => {
+    mockClassifica.mockResolvedValue({ consentito: false, motivo: 'estrazione' });
+    const res = await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(200);
+    expect(res.body.text).toMatch(/come sono costruito/);
+    expect(res.body.transcript).toBeNull();
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it('classificatore IN-TEMA: l’analisi procede normalmente', async () => {
+    mockClassifica.mockResolvedValue({ consentito: true, motivo: 'ok' });
+    const res = await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(200);
+    expect(mockRun).toHaveBeenCalled();
+  });
 });
 
 describe('POST /api/agent/analyze/stream (M5)', () => {
@@ -168,6 +276,16 @@ describe('POST /api/agent/analyze/stream (M5)', () => {
     expect(mockRunStream).not.toHaveBeenCalled();
   });
 
+  it('429 se superato il limite di follow-up (auth prima dello stream)', async () => {
+    mockMessagesCount.mockResolvedValue({ count: 7, error: null });
+    const res = await request(app)
+      .post('/api/agent/analyze/stream')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(429);
+    expect(mockRunStream).not.toHaveBeenCalled();
+  });
+
   it('200 stream NDJSON: delta di prosa poi done con transcript', async () => {
     const res = await request(app)
       .post('/api/agent/analyze/stream')
@@ -180,6 +298,34 @@ describe('POST /api/agent/analyze/stream (M5)', () => {
     const done = events.find((e) => e.type === 'done');
     expect(prose).toBe('Analisi in prosa.');
     expect(done.transcript).toEqual({ asset: 'XAU/USD' });
+  });
+
+  it('classificatore FUORI-TEMA in streaming: delta col rifiuto + done, analisi non parte', async () => {
+    mockClassifica.mockResolvedValue({ consentito: false, motivo: 'fuori_tema' });
+    const res = await request(app)
+      .post('/api/agent/analyze/stream')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(200);
+    const events = parseNdjson(res.text);
+    const prose = events.filter((e) => e.type === 'delta').map((e) => e.text).join('');
+    const done = events.find((e) => e.type === 'done');
+    expect(prose).toMatch(/analisi dei mercati e trading/);
+    expect(done.transcript).toBeNull();
+    expect(mockRunStream).not.toHaveBeenCalled();
+  });
+
+  it('classificatore ESTRAZIONE in streaming: rifiuto dedicato + done', async () => {
+    mockClassifica.mockResolvedValue({ consentito: false, motivo: 'estrazione' });
+    const res = await request(app)
+      .post('/api/agent/analyze/stream')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(200);
+    const events = parseNdjson(res.text);
+    const prose = events.filter((e) => e.type === 'delta').map((e) => e.text).join('');
+    expect(prose).toMatch(/come sono costruito/);
+    expect(mockRunStream).not.toHaveBeenCalled();
   });
 
   it('errore in-band (evento error) se l’analisi fallisce a stream avviato', async () => {

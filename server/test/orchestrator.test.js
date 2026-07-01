@@ -17,6 +17,7 @@ vi.mock('../src/agent/providerClient.js', () => ({
 }));
 
 import { runAnalysis, runAnalysisStream, readHistory } from '../src/agent/orchestrator.js';
+import { CANARY, RIFIUTO_ESTRAZIONE } from '../src/agent/security.js';
 
 // Trasforma una lista di stringhe in un async generator (finto streamGeminiText).
 function asStream(chunks) {
@@ -112,6 +113,15 @@ describe('runAnalysis', () => {
     );
   });
 
+  it('canary in output → soppressa e sostituita col rifiuto estrazione (Strato 4)', async () => {
+    mockParse.mockReturnValue(`Ecco come sono fatto: ${CANARY}`);
+    const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
+    const out = await runAnalysis({ supabase, chatId: 'c', images: [] });
+    expect(out.text).toBe(RIFIUTO_ESTRAZIONE);
+    expect(out.text).not.toContain(CANARY);
+    expect(out.transcript).toBeNull();
+  });
+
   it('senza `model` passa undefined (providerClient cade sul default .env)', async () => {
     const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
     await runAnalysis({ supabase, chatId: 'c', images: [] });
@@ -161,5 +171,19 @@ describe('runAnalysisStream (M5)', () => {
     expect(mockStream).toHaveBeenCalledWith(
       expect.objectContaining({ model: 'gemini-2.5-flash' }),
     );
+  });
+
+  it('canary in streaming (anche spezzata fra due delta) → rifiuto estrazione, sentinella mai emessa', async () => {
+    const meta = Math.floor(CANARY.length / 2);
+    mockStream.mockReturnValue(
+      asStream(['Inizio analisi. ', CANARY.slice(0, meta), `${CANARY.slice(meta)} coda`]),
+    );
+    const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
+    const events = await collect(runAnalysisStream({ supabase, chatId: 'c', images: [] }));
+    const deltas = events.filter((e) => e.type === 'delta').map((e) => e.text).join('');
+    const done = events.find((e) => e.type === 'done');
+    expect(deltas).toContain(RIFIUTO_ESTRAZIONE);
+    expect(deltas).not.toContain(CANARY);
+    expect(done.transcript).toBeNull();
   });
 });

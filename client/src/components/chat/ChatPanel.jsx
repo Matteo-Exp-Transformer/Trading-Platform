@@ -9,13 +9,16 @@ export function ChatPanel({
   analyzing,
   analysisError,
   streamingText,
+  limitReached = false,
 }) {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState(null);
   const bottomRef = useRef(null);
 
+  // Scrittura bloccata mentre l'agente lavora, o quando la sessione ha esaurito i follow-up.
   const busy = sending || analyzing;
+  const disabled = busy || limitReached;
   const hasStreaming = typeof streamingText === 'string' && streamingText.length > 0;
 
   useEffect(() => {
@@ -24,7 +27,7 @@ export function ChatPanel({
 
   async function handleSend(e) {
     e.preventDefault();
-    if (!text.trim() || busy) return;
+    if (!text.trim() || disabled) return;
     setSendError(null);
     setSending(true);
     try {
@@ -82,18 +85,30 @@ export function ChatPanel({
             {sendError}
           </p>
         )}
+        {limitReached && (
+          <p className="text-muted text-xs text-center">
+            Hai raggiunto il limite di approfondimenti per questa sessione. Avvia una nuova analisi
+            per continuare.
+          </p>
+        )}
         <form onSubmit={handleSend} className="flex gap-2">
           <input
             type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            disabled={busy}
-            placeholder={analyzing ? 'L’agente sta analizzando…' : 'Scrivi un messaggio…'}
+            disabled={disabled}
+            placeholder={
+              limitReached
+                ? 'Limite di approfondimenti raggiunto'
+                : analyzing
+                  ? 'L’agente sta analizzando…'
+                  : 'Scrivi un messaggio…'
+            }
             className="flex-1 bg-surface-strong border border-line rounded-full px-4 py-2 text-sm text-content placeholder-faint focus:outline-none focus:border-freedom-accent disabled:opacity-50"
           />
           <button
             type="submit"
-            disabled={!text.trim() || busy}
+            disabled={!text.trim() || disabled}
             className="bg-freedom-accent text-slate-950 px-4 py-2 rounded-full text-sm font-semibold disabled:opacity-50 hover:bg-freedom-accentHover transition-colors"
           >
             Invia

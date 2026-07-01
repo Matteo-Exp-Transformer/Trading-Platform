@@ -7,6 +7,7 @@ import { Sidebar } from '../components/layout/Sidebar.jsx';
 import { useStorico } from '../components/layout/useStorico.js';
 import { createChat, addMessage, loadMessages } from '../lib/chatData.js';
 import { analyzeChatStream } from '../lib/agentApi.js';
+import { followUpLimitReached } from '../lib/followUp.js';
 
 const DISCLAIMER =
   "Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.";
@@ -99,8 +100,14 @@ export default function Chat() {
     }
   }
 
+  // Limite approfondimenti: dopo la prima analisi l'utente può fare al massimo 5 follow-up
+  // (vedi lib/followUp.js). Raggiunto il limite, la scrittura si blocca. Il server è comunque
+  // l'autorità e rifiuta un follow-up oltre soglia (routes/agent.js).
+  const followUpLimit = followUpLimitReached(messages);
+
   // Follow-up: solo testo, nessun nuovo screenshot (le immagini esistono solo nel primo turno).
   async function handleSendMessage(content) {
+    if (followUpLimit) return; // barriera anche qui: mai inviare oltre il limite
     const msg = await addMessage(currentChatId, content, 'user');
     setMessages((prev) => [...prev, msg]);
     await runAnalysisTurn(currentChatId, []);
@@ -159,6 +166,7 @@ export default function Chat() {
             analyzing={analyzing}
             analysisError={analysisError}
             streamingText={streamingText}
+            limitReached={followUpLimit}
           />
         )}
       </main>

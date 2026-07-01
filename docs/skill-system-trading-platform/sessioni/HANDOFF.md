@@ -25,6 +25,19 @@
 > **FU-019 (mercati live) PARCHEGGIATA** per licenze commerciali (ricerca in `FOLLOW_UP.md` FU-019:
 > azioni/indici real-time = licenze borse costose; crypto/forex solo con piano commerciale a pagamento).
 > `validate` verde (190+78), build OK.
+>
+> **Aggiornamento 2026-07-01 (sessione limite FU + BLINDATURA agente):** tre blocchi, tutti verdi
+> (`validate` **201 client + 109 server**, lint OK). **(1) Limite follow-up = 5** (prima analisi esclusa):
+> server autorità in `routes/agent.js` (429 oltre soglia) + client `lib/followUp.js` blocca la scrittura
+> in `ChatPanel`; card Home diventa "Apri ultima sessione" a limite raggiunto (`useActiveSession`+`ActiveSessionCard`).
+> **(2) Blindatura agente (Strati 1/2/4):** recinto nel prompt `kit/10_SICUREZZA_GUARDRAIL.md`; classificatore
+> d'ingresso Gemini Flash `agent/topicGuard.js` (+`security.js`) innescato in route (ordine auth→limite FU→
+> classificatore→analisi; rifiuto sul canale normale, salvato come msg agente, consuma un FU); sentinella
+> anti-leak `agent/canary.js` in `orchestrator` (stream+non-stream). Fonte di verità: `context/SICUREZZA_CONTEXT.md`.
+> **(3) Policy "via di mezzo"** (§2-bis del context): l'agente insegna concetti TA generali ma spersonalizzati,
+> mai "il mio metodo/lente" né gerarchia replicabile; "spiegami il metodo" NON è più estrazione (risposta
+> generica), estrazione = solo l'implementazione. **Strato 3 (filtro d'uscita) = fase 2.** Non ancora provato
+> dal vivo. **DEBUG SICUREZZA APERTO:** vedi §2 punto "Debug sicurezza chat".
 
 ---
 
@@ -101,7 +114,14 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 2. Prossimo passo concreto
 
-1. **FU-017 — verifica visiva live M7 + Home [PROSSIMO — utente]:** aprire l'app e controllare a occhio
+0. **Debug sicurezza chat [PROSSIMO — richiesto dall'utente]:** provare **dal vivo** la blindatura (skill
+   `avvia-app`), rifacendo prompt ambigui/di confine e verificando: (a) che la policy "via di mezzo" tenga
+   (concetti generali sì, "il mio metodo"/gerarchia replicabile no); (b) rifiuto fuori-tema ed estrazione coi
+   testi esatti; (c) che la chat NON si blocchi (solo il 6° follow-up è bloccato). **Buco noto da chiudere in
+   fase 2:** sonda di estrazione dentro uno **screenshot** aggira il classificatore (non leggiamo le immagini)
+   → serve analisi vision. **Fase 2 anche:** Strato 3 = filtro d'uscita completo compatibile con lo streaming.
+   Tutto tracciato in `context/SICUREZZA_CONTEXT.md` (§2-bis, §3 stato, §4-ter flusso).
+1. **FU-017 — verifica visiva live M7 + Home [utente]:** aprire l'app e controllare a occhio
    Login/Chat/Sidebar/Impostazioni (tema chiaro/scuro) **e la Home** (sfondo animato, sempre scura, responsive),
    desktop+mobile.
 2. **M8 (blindatura + deploy)** secondo `PIANO_LAVORO.md`. Valutare se prima portare in scope alcune FU-018→025 (elementi Home).

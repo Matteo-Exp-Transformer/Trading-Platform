@@ -12,6 +12,8 @@ import {
   splitTranscript,
   createProseStreamer,
 } from './transcript.js';
+import { contieneCanary, creaFiltroCanary } from './canary.js';
+import { RIFIUTO_ESTRAZIONE } from './security.js';
 
 // Legge la storia testuale della chat (role + content) ordinata cronologicamente.
 export async function readHistory(supabase, chatId) {
@@ -53,6 +55,11 @@ export async function runAnalysis({ supabase, chatId, images = [], model }) {
     throw new Error('Il modello non ha restituito una risposta valida.');
   }
 
+  // Strato 4 (canary): se la sentinella del kit è comparsa, è un leak → sopprimi tutto e rifiuta.
+  if (contieneCanary(text)) {
+    return { text: RIFIUTO_ESTRAZIONE, transcript: null };
+  }
+
   const { prose, transcript } = splitTranscript(text);
   if (!prose) {
     throw new Error('Il modello non ha restituito una risposta valida.');
@@ -69,9 +76,30 @@ export async function* runAnalysisStream({ supabase, chatId, images = [], model 
   const { system, messages } = await prepareTurn(supabase, chatId, images);
 
   const streamer = createProseStreamer();
+  // Strato 4 (canary): i delta grezzi passano PRIMA dal filtro sentinella, poi dal prose-streamer.
+  // Il filtro trattiene una coda lunga quanto la sentinella: così una sentinella spezzata fra due
+  // delta viene ricomposta e mai emessa. Se compare → si sopprime tutto e si manda il rifiuto.
+  const canary = creaFiltroCanary();
   let emittedLen = 0;
   for await (const delta of streamGeminiText({ system, messages, model })) {
-    const prose = streamer.push(delta);
+    const { safe, leak } = canary.push(delta);
+    if (leak) {
+      // Leak certo: sopprimi il resto e consegna il rifiuto sul canale normale.
+      yield { type: 'delta', text: RIFIUTO_ESTRAZIONE };
+      yield { type: 'done', transcript: null };
+      return;
+    }
+    if (!safe) continue;
+    const prose = streamer.push(safe);
+    if (prose) {
+      emittedLen += prose.length;
+      yield { type: 'delta', text: prose };
+    }
+  }
+  // Coda residua del filtro canary (non può più formare una sentinella) → nel prose-streamer.
+  const { safe: coda } = canary.flush();
+  if (coda) {
+    const prose = streamer.push(coda);
     if (prose) {
       emittedLen += prose.length;
       yield { type: 'delta', text: prose };

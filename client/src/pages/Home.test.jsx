@@ -19,6 +19,7 @@ vi.mock('../auth/AuthProvider.jsx', () => ({
 vi.mock('../lib/chatData.js', () => ({
   listChats: mockListChats,
   updateChatTitle: vi.fn(),
+  loadMessages: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock('../components/home/AnimatedTradingBackground.jsx', () => ({
