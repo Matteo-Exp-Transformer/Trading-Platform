@@ -5,8 +5,13 @@
 // Non salva nulla: la persistenza dei messaggi vive nel flusso client (chatData), vedi route.
 import { loadSkillPrompt } from './skillLoader.js';
 import { buildMessages } from './promptBuilder.js';
-import { requestCompletion, parseCompletionResponse } from './providerClient.js';
-import { buildImageCheckInstruction, buildTranscriptInstruction, splitTranscript } from './transcript.js';
+import { requestCompletion, parseCompletionResponse, streamGeminiText } from './providerClient.js';
+import {
+  buildImageCheckInstruction,
+  buildTranscriptInstruction,
+  splitTranscript,
+  createProseStreamer,
+} from './transcript.js';
 
 // Legge la storia testuale della chat (role + content) ordinata cronologicamente.
 export async function readHistory(supabase, chatId) {
@@ -19,23 +24,26 @@ export async function readHistory(supabase, chatId) {
   return data || [];
 }
 
-// Ritorna { text, transcript }: `text` è la prosa mostrata all'utente; `transcript` è la scheda
-// JSON dell'analisi (M4) da salvare in messages.attachments, oppure null (follow-up testuale, o
-// scheda mancante/illeggibile — mai bloccante). La scheda si chiede solo nel turno con immagini.
-export async function runAnalysis({ supabase, chatId, images = [] }) {
+// Prepara system + messaggi per un turno d'analisi. Solo nel turno con immagini si aggiunge
+// l'istruzione (controllo screenshot + richiesta scheda JSON), in coda al turno utente (kit intatto).
+async function prepareTurn(supabase, chatId, images) {
   const systemPrompt = await loadSkillPrompt();
-
   const history = await readHistory(supabase, chatId);
   if (history.length === 0) {
     throw new Error('Nessun messaggio da analizzare per questa chat.');
   }
-
-  // Solo nel turno con immagini: controlla gli screenshot (segnala i non validi) + chiedi la scheda JSON.
   const instruction =
     images.length > 0
       ? `${buildImageCheckInstruction()}\n\n${buildTranscriptInstruction()}`
       : '';
-  const { system, messages } = buildMessages(systemPrompt, history, images, instruction);
+  return buildMessages(systemPrompt, history, images, instruction);
+}
+
+// Ritorna { text, transcript }: `text` è la prosa mostrata all'utente; `transcript` è la scheda
+// JSON dell'analisi (M4) da salvare in messages.attachments, oppure null (follow-up testuale, o
+// scheda mancante/illeggibile — mai bloccante). Percorso NON-streaming (fallback).
+export async function runAnalysis({ supabase, chatId, images = [] }) {
+  const { system, messages } = await prepareTurn(supabase, chatId, images);
 
   const response = await requestCompletion({ system, messages });
   const text = parseCompletionResponse(response);
@@ -48,4 +56,31 @@ export async function runAnalysis({ supabase, chatId, images = [] }) {
     throw new Error('Il modello non ha restituito una risposta valida.');
   }
   return { text: prose, transcript };
+}
+
+// Percorso STREAMING (M5): async generator che emette eventi
+//   { type: 'delta', text }  — pezzi di PROSA (marcatore/scheda già nascosti dal prose-streamer)
+//   { type: 'done', transcript } — a fine risposta, la scheda JSON (o null)
+// Lancia se il modello non produce alcuna prosa (la route lo traduce in evento d'errore).
+export async function* runAnalysisStream({ supabase, chatId, images = [] }) {
+  const { system, messages } = await prepareTurn(supabase, chatId, images);
+
+  const streamer = createProseStreamer();
+  let emittedLen = 0;
+  for await (const delta of streamGeminiText({ system, messages })) {
+    const prose = streamer.push(delta);
+    if (prose) {
+      emittedLen += prose.length;
+      yield { type: 'delta', text: prose };
+    }
+  }
+  const { remaining, transcript } = streamer.finish();
+  if (remaining) {
+    emittedLen += remaining.length;
+    yield { type: 'delta', text: remaining };
+  }
+  if (emittedLen === 0) {
+    throw new Error('Il modello non ha restituito una risposta valida.');
+  }
+  yield { type: 'done', transcript };
 }

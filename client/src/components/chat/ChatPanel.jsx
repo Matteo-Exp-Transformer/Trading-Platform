@@ -1,17 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageBubble } from './MessageBubble.jsx';
 
-export function ChatPanel({ messages, onSendMessage, loading, error, analyzing, analysisError }) {
+export function ChatPanel({
+  messages,
+  onSendMessage,
+  loading,
+  error,
+  analyzing,
+  analysisError,
+  streamingText,
+}) {
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState(null);
   const bottomRef = useRef(null);
 
   const busy = sending || analyzing;
+  const hasStreaming = typeof streamingText === 'string' && streamingText.length > 0;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, analyzing]);
+  }, [messages, analyzing, streamingText]);
 
   async function handleSend(e) {
     e.preventDefault();
@@ -43,7 +52,17 @@ export function ChatPanel({ messages, onSendMessage, loading, error, analyzing, 
         {messages.map((m) => (
           <MessageBubble key={m.id} message={m} />
         ))}
-        {analyzing && (
+        {/* Streaming (M5): la prosa in arrivo come bolla assistant, con cursore mentre scorre. */}
+        {hasStreaming && (
+          <div className="flex justify-start" aria-live="polite">
+            <div className="max-w-[85%] sm:max-w-[70%] px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed whitespace-pre-wrap break-words bg-white/10 text-white">
+              {streamingText}
+              {analyzing && <span className="animate-pulse">▋</span>}
+            </div>
+          </div>
+        )}
+        {/* Attesa: solo finché non è arrivato il primo pezzo di testo. */}
+        {analyzing && !hasStreaming && (
           <p className="text-white/60 text-sm text-center animate-pulse" aria-live="polite">
             L'agente sta analizzando…
           </p>

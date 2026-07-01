@@ -150,6 +150,24 @@ quando `images.length > 0`, separa prosa/scheda, ritorna `{ text, transcript }`;
 messaggio `assistant` come **elemento tipizzato in un array**: `[{ type:'transcript', data:{…} }]` (la colonna
 jsonb ha default `[]`, quindi `attachments` resta sempre un array).
 
+## 4-ter. M5 — Streaming (deciso 2026-07-01)
+
+La risposta scorre **a pezzi** invece di arrivare tutta insieme. **Si adatta solo `providerClient`** (LOCK
+rispettato): nuova `streamGeminiText()` che chiama `:streamGenerateContent` (SSE) e produce i delta di testo.
+
+| Aspetto | Decisione |
+|---------|-----------|
+| Trasporto | Gemini SSE → server → client via **NDJSON** su risposta a flusso (serve header auth → non EventSource). |
+| Scheda mai a vista | Il server usa `transcript.createProseStreamer()`: emette solo la prosa, **bufferizza la coda** e nasconde `===SCHEDA_JSON===` + JSON. La scheda si consegna al client in un evento finale `done`. |
+| Persistenza (invariata M4) | La prosa scorre a schermo ma si **salva a fine risposta** (client), con la scheda estratta. Nessun salvataggio a metà. |
+| Interruzione | Testo parziale resta visibile + avviso «risposta interrotta, riprova». Il parziale **non** si salva. |
+| Pulsante «ferma» | **No** (anti-scope; possibile follow-up). |
+
+**Innesto:** `providerClient.streamGeminiText` (SSE, generator) · `transcript.createProseStreamer` (nasconde
+scheda) · `orchestrator.runAnalysisStream` (async generator: eventi `delta`/`done`) · route
+`POST /api/agent/analyze/stream` (NDJSON; auth/ownership condivisa con `/analyze` via helper) · client
+`agentApi` consuma lo stream, `Chat.jsx` mostra progressivo e salva a fine. Il vecchio `/analyze` resta come fallback.
+
 ## 5. LOCK di area (invarianti locali)
 
 ```

@@ -4,7 +4,7 @@ import { NewAnalysisForm } from '../components/chat/NewAnalysisForm.jsx';
 import { ChatPanel } from '../components/chat/ChatPanel.jsx';
 import { Sidebar } from '../components/layout/Sidebar.jsx';
 import { createChat, addMessage, loadMessages, listChats, updateChatTitle } from '../lib/chatData.js';
-import { analyzeChat } from '../lib/agentApi.js';
+import { analyzeChatStream } from '../lib/agentApi.js';
 
 const DISCLAIMER =
   "Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.";
@@ -20,6 +20,7 @@ export default function Chat() {
   const [messagesError, setMessagesError] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState(null);
+  const [streamingText, setStreamingText] = useState(null); // prosa in arrivo (M5), o parziale su interruzione
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chats, setChats] = useState([]);
   const [chatsLoading, setChatsLoading] = useState(false);
@@ -56,19 +57,28 @@ export default function Chat() {
     if (currentChatId) fetchMessages(currentChatId);
   }, [currentChatId, fetchMessages]);
 
-  // Esegue un turno di analisi: chiama la route (Gemini), salva e mostra la risposta assistant.
-  // Gestisce internamente l'attesa e gli errori: non rilancia (mai un crash a vista).
+  // Esegue un turno di analisi in STREAMING (M5): la prosa scorre a schermo man mano che arriva;
+  // a fine risposta si salva il messaggio con la scheda JSON (M4). Se lo stream si interrompe, il
+  // testo parziale resta a vista con un avviso e NON viene salvato. Non rilancia (mai un crash a vista).
   async function runAnalysisTurn(chatId, images) {
     setAnalyzing(true);
     setAnalysisError(null);
+    setStreamingText('');
+    let streamed = '';
     try {
-      const { text, transcript } = await analyzeChat(chatId, images);
-      // M4: la scheda JSON (se presente) si salva sul messaggio assistant come elemento
-      // tipizzato dentro attachments (jsonb, sempre un array — default '[]').
+      const { transcript } = await analyzeChatStream(chatId, images, {
+        onDelta: (t) => {
+          streamed += t;
+          setStreamingText(streamed);
+        },
+      });
+      // M4: la scheda (se presente) si salva come elemento tipizzato in attachments (jsonb, array).
       const attachments = transcript ? [{ type: 'transcript', data: transcript }] : null;
-      const assistantMsg = await addMessage(chatId, text, 'assistant', attachments);
+      const assistantMsg = await addMessage(chatId, streamed, 'assistant', attachments);
       setMessages((prev) => [...prev, assistantMsg]);
+      setStreamingText(null); // ora è un messaggio salvato: svuota il buffer progressivo
     } catch (e) {
+      // Interruzione/errore: tieni il testo parziale a vista (streamingText) + avviso, senza salvare.
       setAnalysisError(e?.message || 'Analisi non riuscita. Riprova.');
     } finally {
       setAnalyzing(false);
@@ -106,6 +116,7 @@ export default function Chat() {
     setFormError(null);
     setMessagesError(null);
     setAnalysisError(null);
+    setStreamingText(null);
   }
 
   function handleOpenSidebar() {
@@ -120,6 +131,7 @@ export default function Chat() {
     setFormError(null);
     setMessagesError(null);
     setAnalysisError(null);
+    setStreamingText(null);
     setSidebarOpen(false);
   }
 
@@ -189,6 +201,7 @@ export default function Chat() {
             error={messagesError}
             analyzing={analyzing}
             analysisError={analysisError}
+            streamingText={streamingText}
           />
         )}
       </main>

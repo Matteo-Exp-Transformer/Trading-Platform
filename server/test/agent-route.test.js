@@ -1,14 +1,32 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 
-const { mockRun, mockMaybeSingle, mockCreateClient } = vi.hoisted(() => ({
+const { mockRun, mockRunStream, mockMaybeSingle, mockCreateClient } = vi.hoisted(() => ({
   mockRun: vi.fn(),
+  mockRunStream: vi.fn(),
   mockMaybeSingle: vi.fn(),
   mockCreateClient: vi.fn(),
 }));
 
 vi.mock('@supabase/supabase-js', () => ({ createClient: mockCreateClient }));
-vi.mock('../src/agent/orchestrator.js', () => ({ runAnalysis: mockRun }));
+vi.mock('../src/agent/orchestrator.js', () => ({
+  runAnalysis: mockRun,
+  runAnalysisStream: mockRunStream,
+}));
+
+// Finto runAnalysisStream: async generator sugli eventi passati.
+function asEventStream(events) {
+  return (async function* () {
+    for (const e of events) yield e;
+  })();
+}
+// Parsa il corpo NDJSON in array di eventi.
+function parseNdjson(text) {
+  return text
+    .split('\n')
+    .filter((l) => l.trim())
+    .map((l) => JSON.parse(l));
+}
 
 import { createApp } from '../src/app.js';
 import { messaggioErrore } from '../src/routes/agent.js';
@@ -22,6 +40,13 @@ beforeEach(() => {
   mockCreateClient.mockReturnValue({ from });
   mockMaybeSingle.mockResolvedValue({ data: { id: 'chat-1' }, error: null });
   mockRun.mockResolvedValue({ text: 'Analisi in prosa', transcript: null });
+  mockRunStream.mockReturnValue(
+    asEventStream([
+      { type: 'delta', text: 'Analisi ' },
+      { type: 'delta', text: 'in prosa.' },
+      { type: 'done', transcript: { asset: 'XAU/USD' } },
+    ]),
+  );
 });
 
 describe('POST /api/agent/analyze', () => {
@@ -83,6 +108,57 @@ describe('POST /api/agent/analyze', () => {
       .send({ chatId: 'chat-1', images: many });
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/Troppi screenshot/);
+  });
+});
+
+describe('POST /api/agent/analyze/stream (M5)', () => {
+  const app = createApp();
+
+  it('401 senza token (auth prima dello stream)', async () => {
+    const res = await request(app).post('/api/agent/analyze/stream').send({ chatId: 'chat-1' });
+    expect(res.status).toBe(401);
+    expect(mockRunStream).not.toHaveBeenCalled();
+  });
+
+  it('404 se la chat non è dell’utente', async () => {
+    mockMaybeSingle.mockResolvedValue({ data: null, error: null });
+    const res = await request(app)
+      .post('/api/agent/analyze/stream')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-altrui' });
+    expect(res.status).toBe(404);
+    expect(mockRunStream).not.toHaveBeenCalled();
+  });
+
+  it('200 stream NDJSON: delta di prosa poi done con transcript', async () => {
+    const res = await request(app)
+      .post('/api/agent/analyze/stream')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [] });
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/ndjson/);
+    const events = parseNdjson(res.text);
+    const prose = events.filter((e) => e.type === 'delta').map((e) => e.text).join('');
+    const done = events.find((e) => e.type === 'done');
+    expect(prose).toBe('Analisi in prosa.');
+    expect(done.transcript).toEqual({ asset: 'XAU/USD' });
+  });
+
+  it('errore in-band (evento error) se l’analisi fallisce a stream avviato', async () => {
+    mockRunStream.mockReturnValue(
+      (async function* () {
+        yield { type: 'delta', text: 'Inizio…' };
+        throw new Error('Errore Gemini 500: down');
+      })(),
+    );
+    const res = await request(app)
+      .post('/api/agent/analyze/stream')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1' });
+    expect(res.status).toBe(200); // header già inviati: l'errore è in-band
+    const events = parseNdjson(res.text);
+    const err = events.find((e) => e.type === 'error');
+    expect(err.error).toMatch(/non è raggiungibile/);
   });
 });
 

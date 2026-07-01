@@ -23,7 +23,7 @@ vi.mock('../lib/chatData.js', () => ({
 }));
 
 vi.mock('../lib/agentApi.js', () => ({
-  analyzeChat: vi.fn().mockResolvedValue({ text: 'Analisi', transcript: null }),
+  analyzeChatStream: vi.fn().mockResolvedValue({ transcript: null }),
 }));
 
 describe('Chat (pagina)', () => {

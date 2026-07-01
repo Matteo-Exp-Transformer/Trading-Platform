@@ -32,3 +32,31 @@ describe('ChatPanel — stato di attesa', () => {
     expect(screen.getByPlaceholderText(/scrivi un messaggio/i)).not.toBeDisabled();
   });
 });
+
+describe('ChatPanel — streaming (M5)', () => {
+  it('mostra la prosa in arrivo e nasconde "sta analizzando" appena c’è testo', () => {
+    render(
+      <ChatPanel {...baseProps} analyzing analysisError={null} streamingText="Analisi in corso" />,
+    );
+    expect(screen.getByText(/Analisi in corso/)).toBeInTheDocument();
+    expect(screen.queryByText(/sta analizzando/i)).not.toBeInTheDocument();
+  });
+
+  it('con streamingText vuoto mostra ancora "sta analizzando"', () => {
+    render(<ChatPanel {...baseProps} analyzing analysisError={null} streamingText="" />);
+    expect(screen.getByText(/sta analizzando/i)).toBeInTheDocument();
+  });
+
+  it('mostra il testo parziale + avviso su interruzione (non sta più analizzando)', () => {
+    render(
+      <ChatPanel
+        {...baseProps}
+        analyzing={false}
+        analysisError="Risposta interrotta. Riprova."
+        streamingText="Prima parte del testo"
+      />,
+    );
+    expect(screen.getByText(/Prima parte del testo/)).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent(/interrotta/i);
+  });
+});

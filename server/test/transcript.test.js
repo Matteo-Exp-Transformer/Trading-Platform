@@ -4,6 +4,7 @@ import {
   buildImageCheckInstruction,
   buildTranscriptInstruction,
   splitTranscript,
+  createProseStreamer,
 } from '../src/agent/transcript.js';
 
 const SCHEDA = '{"asset":"XAU/USD","timeframe":{"Contesto 4H":"rialzista"},"livelli":["2350","2360"],"struttura":"HH/HL","indicatori":"RSI 58","bias":"long","posizione":null,"avvisi":null}';
@@ -65,5 +66,55 @@ describe('splitTranscript', () => {
     const raw = `P.\n${TRANSCRIPT_MARKER}\n${SCHEDA}\nGrazie!`;
     const { transcript } = splitTranscript(raw);
     expect(transcript.asset).toBe('XAU/USD');
+  });
+});
+
+describe('createProseStreamer', () => {
+  // Alimenta lo streamer coi delta e concatena l'output mostrato + il residuo finale.
+  function streamAll(deltas) {
+    const s = createProseStreamer();
+    let shown = '';
+    for (const d of deltas) shown += s.push(d);
+    const { remaining, transcript } = s.finish();
+    return { shown: shown + remaining, transcript };
+  }
+
+  it('mostra tutta la prosa e nasconde marcatore+scheda (delta multipli)', () => {
+    const { shown, transcript } = streamAll([
+      'Analisi ',
+      'in prosa.',
+      `\n${TRANSCRIPT_MARKER}\n`,
+      SCHEDA,
+    ]);
+    expect(shown).toBe('Analisi in prosa.\n');
+    expect(shown).not.toContain('SCHEDA_JSON');
+    expect(shown).not.toContain('XAU/USD');
+    expect(transcript).toMatchObject({ asset: 'XAU/USD', bias: 'long' });
+  });
+
+  it('non mostra mai un marcatore spezzato tra due delta', () => {
+    // Il marcatore arriva a pezzi: "===SCHE" poi "DA_JSON===".
+    const s = createProseStreamer();
+    let shown = '';
+    shown += s.push('Prosa.');
+    shown += s.push('\n===SCHE');
+    shown += s.push(`DA_JSON===\n${SCHEDA}`);
+    const { remaining } = s.finish();
+    shown += remaining;
+    expect(shown).toBe('Prosa.\n');
+    expect(shown).not.toContain('===SCHE');
+  });
+
+  it('senza marcatore mostra tutta la prosa, transcript null', () => {
+    const { shown, transcript } = streamAll(['Solo ', 'prosa ', 'senza scheda.']);
+    expect(shown).toBe('Solo prosa senza scheda.');
+    expect(transcript).toBeNull();
+  });
+
+  it('invariante: la prosa mostrata è tutto ciò che precede il marcatore', () => {
+    const raw = `Prima riga.\nSeconda riga.\n${TRANSCRIPT_MARKER}\n${SCHEDA}`;
+    // Delta a caratteri singoli: caso peggiore per il buffering.
+    const { shown } = streamAll([...raw]);
+    expect(shown).toBe('Prima riga.\nSeconda riga.\n');
   });
 });

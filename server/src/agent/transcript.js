@@ -59,6 +59,45 @@ function extractJsonObject(str) {
   return null;
 }
 
+// Streamer di prosa (M5): riceve i delta di testo mentre arrivano e restituisce la porzione di
+// PROSA sicura da mostrare, nascondendo il marcatore e il JSON della scheda. Bufferizza una coda
+// lunga quanto il marcatore per non mostrare mai un marcatore parziale. Invariante: la concatenazione
+// di tutti i push() + finish().remaining è esattamente la prosa (tutto ciò che precede il marcatore).
+export function createProseStreamer() {
+  const marker = TRANSCRIPT_MARKER;
+  let full = '';
+  let emitted = 0;
+  let markerIdx = -1;
+
+  return {
+    // Aggiunge un delta e ritorna la nuova prosa da mostrare (stringa, eventualmente vuota).
+    push(delta) {
+      full += typeof delta === 'string' ? delta : '';
+      if (markerIdx !== -1) return ''; // dopo il marcatore è tutto scheda: niente da mostrare
+      const idx = full.indexOf(marker);
+      if (idx !== -1) {
+        markerIdx = idx;
+        const out = full.slice(emitted, idx);
+        emitted = idx;
+        return out;
+      }
+      // Trattieni una coda che potrebbe essere l'inizio del marcatore.
+      const safeEnd = Math.max(emitted, full.length - (marker.length - 1));
+      const out = full.slice(emitted, safeEnd);
+      emitted = safeEnd;
+      return out;
+    },
+    // Chiude lo stream: ritorna la prosa residua non ancora mostrata + la scheda estratta.
+    finish() {
+      const end = markerIdx !== -1 ? markerIdx : full.length;
+      const remaining = full.slice(emitted, end);
+      emitted = end;
+      const { transcript } = splitTranscript(full);
+      return { remaining, transcript };
+    },
+  };
+}
+
 // Separa la risposta in { prose, transcript }. Non lancia mai:
 // - marcatore assente        -> prose = testo intero, transcript = null
 // - JSON dopo marcatore rotto -> prose = testo prima del marcatore, transcript = null

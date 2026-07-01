@@ -98,6 +98,15 @@ intervista M3): gli screenshot si caricano **solo nel form iniziale**; nei follo
 Il **contesto del form (asset, stile, posizione, TF) resta valido per tutta la chat** e l'agente lo ricorda.
 L'agente può fare al massimo una o due domande tecniche, poi opinione in prosa breve, e «lascia la palla al trader».
 
+### 5-ter. M5 — Streaming (deciso 2026-07-01)
+
+La risposta **scorre a pezzi** man mano che l'agente scrive (non più tutta insieme). L'attesa «sta
+analizzando…» dura fino al primo pezzo di testo, poi la prosa cresce progressiva. Se lo streaming si
+**interrompe** a metà: il testo parziale **resta visibile** con un avviso «risposta interrotta, riprova»
+e **non** viene salvato. La scheda JSON (M4) continua a salvarsi a fine risposta e **non compare mai** a
+schermo (il marcatore è nascosto lato server). Niente pulsante «ferma» (anti-scope). Dettaglio motore:
+`aree/AGENTE_AI_SKILL.md §4-ter`.
+
 ### 5-bis. M4 — Persistenza: scheda JSON, non le immagini (deciso 2026-07-01)
 
 Gli screenshot **non si conservano**: vivono solo in volo per l'analisi, poi si scartano. Al loro posto,

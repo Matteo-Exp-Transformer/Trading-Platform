@@ -4,7 +4,36 @@ import {
   buildGeminiPayload,
   parseCompletionResponse,
   requestCompletion,
+  parseSseTextChunks,
+  streamGeminiText,
 } from '../src/agent/providerClient.js';
+
+// Costruisce un finto response.body.getReader() che emette le stringhe passate come chunk UTF-8.
+function fakeStreamResponse(chunks, { ok = true, status = 200 } = {}) {
+  const encoder = new TextEncoder();
+  let i = 0;
+  return {
+    ok,
+    status,
+    text: async () => 'err',
+    body: {
+      getReader: () => ({
+        read: async () =>
+          i < chunks.length
+            ? { value: encoder.encode(chunks[i++]), done: false }
+            : { value: undefined, done: true },
+        releaseLock: () => {},
+      }),
+    },
+  };
+}
+
+function sse(obj) {
+  return `data: ${JSON.stringify(obj)}\n\n`;
+}
+function chunk(text) {
+  return { candidates: [{ content: { parts: [{ text }] } }] };
+}
 
 describe('toGeminiContents', () => {
   it('mappa un turno utente in role user con part testo', () => {
@@ -127,5 +156,62 @@ describe('requestCompletion', () => {
     await expect(
       requestCompletion({ system: 's', messages: [], provider: 'google' }),
     ).rejects.toThrow(/Gemini 429/);
+  });
+});
+
+describe('parseSseTextChunks', () => {
+  it('estrae i testi dai data-line completi e tiene la coda incompleta', () => {
+    const buf = `${sse(chunk('ciao'))}data: ${JSON.stringify(chunk('mondo'))}`; // seconda linea senza \n
+    const { texts, rest } = parseSseTextChunks(buf);
+    expect(texts).toEqual(['ciao']);
+    expect(rest).toContain('mondo'); // resta in coda finché non arriva il newline
+  });
+
+  it('ignora righe non-data e [DONE], non trimma gli spazi del delta', () => {
+    const buf = `: keep-alive\n${sse(chunk(' in '))}data: [DONE]\n`;
+    const { texts } = parseSseTextChunks(buf);
+    expect(texts).toEqual([' in ']); // spazio ai bordi preservato
+  });
+
+  it('non lancia su data-line non-JSON', () => {
+    const { texts } = parseSseTextChunks('data: {rotto\n');
+    expect(texts).toEqual([]);
+  });
+});
+
+describe('streamGeminiText', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('produce i delta di testo nell’ordine di arrivo', async () => {
+    process.env.GOOGLE_API_KEY = 'test-key';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      fakeStreamResponse([sse(chunk('Analisi ')), sse(chunk('in prosa.'))]),
+    );
+    const out = [];
+    for await (const t of streamGeminiText({ system: 'KIT', messages: [], provider: 'google' })) {
+      out.push(t);
+    }
+    expect(out).toEqual(['Analisi ', 'in prosa.']);
+  });
+
+  it('gestisce un data-line spezzato tra due chunk di rete', async () => {
+    process.env.GOOGLE_API_KEY = 'test-key';
+    const full = sse(chunk('pezzo unico'));
+    const half = Math.floor(full.length / 2);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      fakeStreamResponse([full.slice(0, half), full.slice(half)]),
+    );
+    const out = [];
+    for await (const t of streamGeminiText({ system: 'KIT', messages: [], provider: 'google' })) {
+      out.push(t);
+    }
+    expect(out.join('')).toBe('pezzo unico');
+  });
+
+  it('lancia se la risposta non è ok', async () => {
+    process.env.GOOGLE_API_KEY = 'test-key';
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(fakeStreamResponse([], { ok: false, status: 503 }));
+    const gen = streamGeminiText({ system: 'KIT', messages: [], provider: 'google' });
+    await expect(gen.next()).rejects.toThrow(/Gemini 503/);
   });
 });

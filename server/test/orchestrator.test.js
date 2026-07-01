@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockLoad, mockRequest, mockParse } = vi.hoisted(() => ({
+const { mockLoad, mockRequest, mockParse, mockStream } = vi.hoisted(() => ({
   mockLoad: vi.fn(),
   mockRequest: vi.fn(),
   mockParse: vi.fn(),
+  mockStream: vi.fn(),
 }));
 
 vi.mock('../src/agent/skillLoader.js', () => ({
@@ -12,9 +13,23 @@ vi.mock('../src/agent/skillLoader.js', () => ({
 vi.mock('../src/agent/providerClient.js', () => ({
   requestCompletion: mockRequest,
   parseCompletionResponse: mockParse,
+  streamGeminiText: mockStream,
 }));
 
-import { runAnalysis, readHistory } from '../src/agent/orchestrator.js';
+import { runAnalysis, runAnalysisStream, readHistory } from '../src/agent/orchestrator.js';
+
+// Trasforma una lista di stringhe in un async generator (finto streamGeminiText).
+function asStream(chunks) {
+  return (async function* () {
+    for (const c of chunks) yield c;
+  })();
+}
+// Raccoglie tutti gli eventi emessi da runAnalysisStream.
+async function collect(gen) {
+  const events = [];
+  for await (const e of gen) events.push(e);
+  return events;
+}
 
 // Costruisce un finto client Supabase la cui catena from().select().eq().order() risolve `result`.
 function fakeSupabase(result) {
@@ -87,5 +102,41 @@ describe('runAnalysis', () => {
     mockParse.mockReturnValue(null);
     const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
     await expect(runAnalysis({ supabase, chatId: 'c', images: [] })).rejects.toThrow(/risposta valida/);
+  });
+});
+
+describe('runAnalysisStream (M5)', () => {
+  it('emette i delta di prosa e chiude con la scheda; nasconde marcatore/scheda', async () => {
+    mockStream.mockReturnValue(
+      asStream(['Analisi ', 'in prosa.', '\n===SCHEDA_JSON===\n{"asset":"XAU/USD","bias":"long"}']),
+    );
+    const supabase = fakeSupabase({ data: [{ role: 'user', content: 'Analizza' }], error: null });
+    const events = await collect(
+      runAnalysisStream({ supabase, chatId: 'c', images: [{ mimeType: 'image/png', data: 'A' }] }),
+    );
+    const deltas = events.filter((e) => e.type === 'delta').map((e) => e.text).join('');
+    const done = events.find((e) => e.type === 'done');
+    expect(deltas).toBe('Analisi in prosa.\n');
+    expect(deltas).not.toContain('SCHEDA_JSON');
+    expect(done.transcript).toEqual({ asset: 'XAU/USD', bias: 'long' });
+  });
+
+  it('follow-up senza immagini: prosa in streaming, transcript null', async () => {
+    mockStream.mockReturnValue(asStream(['Ecco ', 'la risposta.']));
+    const supabase = fakeSupabase({ data: [{ role: 'user', content: 'Domanda' }], error: null });
+    const events = await collect(runAnalysisStream({ supabase, chatId: 'c', images: [] }));
+    const done = events.find((e) => e.type === 'done');
+    expect(done.transcript).toBeNull();
+    // Senza immagini niente istruzione scheda nel prompt.
+    const sent = mockStream.mock.calls[0][0];
+    expect(JSON.stringify(sent.messages)).not.toContain('SCHEDA_JSON');
+  });
+
+  it('lancia se lo stream non produce prosa', async () => {
+    mockStream.mockReturnValue(asStream([]));
+    const supabase = fakeSupabase({ data: [{ role: 'user', content: 'x' }], error: null });
+    await expect(collect(runAnalysisStream({ supabase, chatId: 'c', images: [] }))).rejects.toThrow(
+      /risposta valida/,
+    );
   });
 });

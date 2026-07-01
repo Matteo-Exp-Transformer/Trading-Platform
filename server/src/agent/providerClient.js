@@ -99,3 +99,88 @@ export function parseCompletionResponse(data) {
   }
   return null;
 }
+
+// --- Streaming (M5) -------------------------------------------------------------------------
+
+// Testo di un chunk di stream, SENZA trim: in streaming gli spazi ai bordi contano (word boundary).
+function extractDeltaText(json) {
+  const parts = json?.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts)) return '';
+  return parts.map((p) => p?.text || '').join('');
+}
+
+// Parser SSE puro (testabile): estrae i testi dai `data:` COMPLETI (terminati da newline) nel buffer.
+// Ritorna { texts, rest }: `rest` è la coda non ancora completa, da riusare col prossimo chunk.
+export function parseSseTextChunks(buffer) {
+  const texts = [];
+  let rest = buffer;
+  let nl;
+  while ((nl = rest.indexOf('\n')) !== -1) {
+    const line = rest.slice(0, nl).trim();
+    rest = rest.slice(nl + 1);
+    if (!line.startsWith('data:')) continue;
+    const payload = line.slice(5).trim();
+    if (!payload || payload === '[DONE]') continue;
+    try {
+      const t = extractDeltaText(JSON.parse(payload));
+      if (t) texts.push(t);
+    } catch {
+      // data-line non-JSON o incompleta: ignora (robustezza, mai crash).
+    }
+  }
+  return { texts, rest };
+}
+
+// Generatore async: produce i delta di testo dallo streaming Gemini (`streamGenerateContent`, SSE).
+// LOCK: unico punto della catena che si adatta al provider; la chiave resta lato server.
+export async function* streamGeminiText({
+  system,
+  messages,
+  model,
+  temperature,
+  maxOutputTokens,
+  thinkingBudget,
+  provider = process.env.AI_PROVIDER || 'google',
+}) {
+  if (provider !== 'google') {
+    throw new Error(`Provider AI non supportato: "${provider}". In M5 è disponibile solo "google" (Gemini).`);
+  }
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) {
+    throw new Error('Chiave AI mancante: imposta GOOGLE_API_KEY in .env.local.');
+  }
+
+  const resolvedModel = model || process.env.AI_MODEL || DEFAULT_MODEL;
+  const payload = buildGeminiPayload({ system, messages, temperature, maxOutputTokens, thinkingBudget });
+  const url = `${GEMINI_BASE}/${resolvedModel}:streamGenerateContent?alt=sse`;
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok || !response.body) {
+    const body = await response.text?.().catch(() => '') ?? '';
+    throw new Error(`Errore Gemini ${response.status}: ${String(body).slice(0, 500)}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  try {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const { texts, rest } = parseSseTextChunks(buffer);
+      buffer = rest;
+      for (const t of texts) yield t;
+    }
+    // Coda finale: forza un newline per chiudere l'ultima data-line eventualmente pendente.
+    const { texts } = parseSseTextChunks(`${buffer}\n`);
+    for (const t of texts) yield t;
+  } finally {
+    reader.releaseLock?.();
+  }
+}
