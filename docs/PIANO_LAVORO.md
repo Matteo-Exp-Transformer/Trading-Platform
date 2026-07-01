@@ -88,7 +88,7 @@ la scheda JSON continua a salvarsi (M4) e non compare mai; validate verde.
 **✅ Verificato live (2026-07-01):** streaming progressivo OK, scheda mai a vista, persistenza M4 intatta
 (DB: analisi in streaming → `attachments` con scheda completa + campo `avvisi`; follow-up → `attachments []`).
 
-## M6 — Impostazioni  🟡  *(deep — tocca `profiles`/RLS + catena agente: modello per-utente)*
+## M6 — Impostazioni  ✅ *(verificato live 2026-07-01 — deep — tocca `profiles`/RLS + catena agente: modello per-utente)*
 **Obiettivo:** tema chiaro/scuro (persistito per utente) · cambio password · **modello AI per-account**.
 **Context:** `context/IMPOSTAZIONI_CONTEXT.md` ✅ (creato 2026-07-01, intervista Senior).
 **Decisioni d'intervista (2026-07-01):**
@@ -105,10 +105,19 @@ la scheda JSON continua a salvarsi (M4) e non compare mai; validate verde.
 
 **Fatto quando:** cambio tema/password e persistono (tema letto dal profilo, indipendente per utente);
 un account con `ai_model='gemini-2.5-pro'` usa Pro, `null`/errato usa il default Flash; validate verde.
+**✅ Verificato live (2026-07-01):** tema, cambio password e modello per-account provati a mano, tutto OK.
 
-## M7 — Estetica beta (rifinitura additiva)  ⬜
-**Obiettivo:** ricostruire lo stile ricco (sfondo animato, palette verde-scuro, font) senza intaccare la
-blindatura del cuore. **Context da creare prima:** `ESTETICA_CONTEXT.md`. **Fatto quando:** look coerente, zero regressioni sui test.
+## M7 — Estetica (rifinitura additiva)  ⬜  *(standard — solo client, nessun LOCK del cuore)*
+**Svolta d'intervista (2026-07-01):** l'estetica definitiva è la **replica fedele della vecchia app**
+(cartella `Esempio/`): **dark su slate + accento ciano**, sobrio, **statico**, font di sistema — *non* più
+"verde-scuro + sfondo animato" (CONTESTO L19). Il tema chiaro/scuro di M6 resta.
+**Context:** `context/ESTETICA_CONTEXT.md` ✅ (creato 2026-07-01, intervista Senior).
+**Obiettivo:** dare alla base sobria di M6 l'aspetto di `Esempio/` **riscrivendo i valori dei token**
+(`index.css`) + l'accento verde→ciano (`tailwind.config.js`), senza toccare struttura, catena, DB o auth.
+**Deliverable:** token slate chiaro/scuro (§5 del context), accento ciano ovunque, rifinitura forme
+(raggi/bordi/shadow) verso Esempio usando i token, tema chiaro derivato e leggibile.
+**Fatto quando:** tema scuro = look di `Esempio/`, tema chiaro coerente e leggibile, toggle e persistenza
+M6 intatti, disclaimer visibile in entrambi i temi, **zero regressioni** (`npm run validate` verde, build OK).
 
 ## M8 — Blindatura demo & deploy  ⬜  *(deep)*
 **Obiettivo:** demo «blindata» per il cliente. **Deliverable:** gestione errori a vista ovunque,

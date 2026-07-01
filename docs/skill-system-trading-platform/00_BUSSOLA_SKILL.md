@@ -76,7 +76,7 @@ file da modificare. I file `*(da creare)*` nascono via intervista nei prossimi g
 | Autenticazione / account / sessione utente | `context/AUTH_CONTEXT.md` ⚠️ deep (§6) |
 | Sidebar / storico chat / nuova chat | `context/SIDEBAR_STORICO_CONTEXT.md` ✅ |
 | Impostazioni (tema · cambio password · modello AI per-account) | `context/IMPOSTAZIONI_CONTEXT.md` ✅ ⚠️ deep (§6) |
-| Estetica / stile UI (sfondo animato, tema verde-scuro) | `context/ESTETICA_CONTEXT.md` *(da creare)* |
+| Estetica / stile UI (palette slate + accento ciano, sobrio) | `context/ESTETICA_CONTEXT.md` ✅ |
 | DB / schema / migrazioni / RLS (Supabase) | `aree/DB_SUPABASE_SKILL.md` ✅ ⚠️ deep (§6) |
 | Test / CI | `aree/TESTING_SKILL.md` |
 | Come rispondere / report / vocabolario | `comunicazione/COMUNICAZIONE_SKILL.md` |

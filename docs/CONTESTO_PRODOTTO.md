@@ -41,6 +41,7 @@ un **agente AI** li legge e li commenta applicando il metodo **Aware Trader** (u
 | L16 | Recupero password / validazione email | **Rimandati a dopo l'intervista cliente** (FU-002, FU-003) | 2026-06-30 | In demo: reset password a mano dall'admin. Richiederanno SMTP + email reali |
 | L17 | Impostazioni (M6) | L'utente gestisce **tema e password**; il **modello AI è per-account e lo assegna solo l'admin** | 2026-07-01 | `profiles.ai_model` è protetto anche a livello DB; gestione manuale ora, console super-admin in FU-016 |
 | L18 | Modello AI di default | **Gemini 2.5 Flash**; Pro resta assegnabile per-account | 2026-07-01 | Test completo su grafici superato: lettura e requisiti dell'analisi già validata con Gemini 2.5 Pro rispettati. Flash scelto per il miglior costo a qualità adeguata |
+| L19 | Estetica (M7) | **Replica fedele della vecchia app** (`Esempio/`): **dark su slate + accento ciano**, sobrio, statico, font di sistema. Tema chiaro/scuro (M6) mantenuto | 2026-07-01 | *Supera* l'ipotesi «verde-scuro + sfondo animato». Niente sfondo animato né font custom. Dettaglio in `context/ESTETICA_CONTEXT.md` |
 
 ---
 
@@ -52,8 +53,9 @@ un **agente AI** li legge e li commenta applicando il metodo **Aware Trader** (u
 - **Impostazioni**: cambio password · tema chiaro/scuro. Il **modello AI per-account** non è
   modificabile dall'utente: lo assegna l'admin (gestione manuale DB nella demo; FU-016 per la console).
 - **Login**: porta d'ingresso; account leggeri reali (su Supabase).
-- **Estetica beta** (rifinitura additiva): stile scuro verde-acqua, sfondo animato. ⚠️ Non è nei file
-  estratti → va **ricostruita**; non deve compromettere la blindatura del cuore.
+- **Estetica** (M7, rifinitura additiva): **replica della vecchia app** (`Esempio/`) — dark su slate
+  + accento ciano, sobrio, statico, font di sistema; tema chiaro/scuro mantenuto (L19). Non deve
+  compromettere la blindatura del cuore. Dettaglio in `context/ESTETICA_CONTEXT.md`.
 
 **Fuori (anti-scope, vedi §9).**
 
@@ -152,9 +154,9 @@ In demo restano **disattivati** per testare l'app liberamente (L12). Si attivera
 - [x] ~~**Modelli nello switcher**~~: lista curata M6 = `gemini-2.5-flash` (default) e
   `gemini-2.5-pro`; assegnazione admin-only per account, nessun selettore utente. Flash ha superato
   il test completo sui grafici mantenendo i requisiti già validati con Pro (L18).
-- [ ] **Estetica**: quali elementi della beta ricostruire (sfondo animato, palette, font) e con che priorità?
-- [~] **Flussi dettagliati** per schermata: Chat, Auth, Sidebar/Storico e Impostazioni mappati.
-  Resta da definire l'Estetica M7.
+- [x] ~~**Estetica**~~: deciso 2026-07-01 (L19) → **replica di `Esempio/`** (dark slate + accento
+  ciano, sobrio, statico). Mappata in `context/ESTETICA_CONTEXT.md`. Niente sfondo animato/font custom.
+- [x] ~~**Flussi dettagliati** per schermata~~: Chat, Auth, Sidebar/Storico, Impostazioni ed Estetica (M7) mappati.
 
 ---
 
