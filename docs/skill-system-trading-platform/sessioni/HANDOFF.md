@@ -9,9 +9,9 @@
 > Gli agenti Esecuzione/Verifica **non** leggono né scrivono questo file: ricevono il loro contesto dal
 > prompt preparato. È il baton del Senior.
 >
-> **Ultimo aggiornamento:** 2026-07-01 — **M3 COMPLETO**: cervello committato, **FU-012 chiusa** (slot
-> per-timeframe + compressione client) e **FU-011 TEST VISTA passato** (analisi su grafici reali verificata
-> dall'utente — rischio #1 rientrato). Prossimo: **M4 — Upload screenshot** (Storage Supabase + policy RLS, FU-005).
+> **Ultimo aggiornamento:** 2026-07-01 — **M3 COMPLETO** (cervello + FU-011 test vista + FU-012 upload) e
+> **M4 COMPLETO e verificato live**: trascrizione JSON dell'analisi al posto dello Storage immagini (svolta
+> d'intervista — niente Storage, FU-005 superata). Prossimo: **M5 — Streaming**.
 
 ---
 
@@ -46,6 +46,12 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
   lettura corretta in stile Aware Trader. **Rischio #1 rientrato** — il prodotto sta in piedi.
 - **FU-012 ✅ chiusa (2026-07-01):** slot screenshot per-timeframe + compressione immagini client
   (`_sessioni-lavoro/2026-07-01/Report-FU-011-FU-012-testvista-upload.md`).
+- **M4 ✅ COMPLETO e verificato live (2026-07-01):** **trascrizione JSON** dell'analisi al posto dello
+  Storage immagini. Gemini emette la scheda nella stessa chiamata (istruzione in coda al turno immagini,
+  kit intatto → caching preservato); il server separa prosa/scheda; la scheda va in `messages.attachments`
+  come `[{type:'transcript',data:…}]`. Le immagini restano solo in volo, poi scartate → **niente Storage**
+  (FU-005 superata). Verificato su DB: analisi reale BTCUSD → scheda completa salvata. Report:
+  `_sessioni-lavoro/2026-07-01/Report-M4-trascrizione-json.md`.
 - **M2** resta interamente chiuso (chat base, sidebar/storico, RLS).
 
 ## 1-bis. Decisioni importanti prese in M3 (per memoria)
@@ -64,11 +70,13 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 2. Prossimo passo concreto
 
-1. **M4 — Upload screenshot [PROSSIMO]:** oggi gli screenshot viaggiano come base64 inline nel payload
-   (compressi lato client, FU-012). M4 li porta su **Supabase Storage** (bucket privato per utente) con
-   **policy RLS** (FU-005, già predisposto con la colonna `messages.attachments` jsonb). Prima
-   dell'esecuzione: intervista → aggiornare `CHAT_ANALISI_CONTEXT` / creare nota Storage → prompt esecutore.
-2. **Poi M5** (streaming) secondo `PIANO_LAVORO.md`.
+1. **M5 — Streaming [PROSSIMO]:** oggi la risposta arriva tutta insieme dopo l'attesa «sta analizzando…».
+   M5 la fa scorrere a pezzi (server→client), con indicatore di elaborazione e gestione errori a vista
+   (interruzione → messaggio chiaro + riprova). Tocca `providerClient` (streaming Gemini) + route + client.
+   ⚠️ Attenzione con M4: la **scheda JSON** arriva in coda alla risposta — in streaming va bufferizzata e
+   il marcatore `===SCHEDA_JSON===` **non deve comparire a schermo** (tagliare prima di mostrare). Prima
+   dell'esecuzione: intervista → aggiornare `CHAT_ANALISI_CONTEXT`/`AGENTE_AI_SKILL` → prompt esecutore.
+2. **Poi M6/M7/M8** secondo `PIANO_LAVORO.md`.
 
 ## 3. Decisioni d'intervista prese e già nei doc
 

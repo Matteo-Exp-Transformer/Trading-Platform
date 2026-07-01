@@ -58,7 +58,7 @@ live). **Fatto (2026-06-30):** `aree/AGENTE_AI_SKILL.md` ✅; kit splittato in `
 lettura corretta e in stile Aware Trader. **Rischio #1 rientrato.** Rifinitura upload (FU-012: slot
 per-timeframe + compressione client) anch'essa chiusa (2026-07-01). **M3 completo.**
 
-## M4 — Persistenza analisi: scheda JSON (niente Storage immagini)  🟡 *(deep — LOCK catena agente)*
+## M4 — Persistenza analisi: scheda JSON (niente Storage immagini)  ✅ *(verificato live 2026-07-01 — deep, LOCK catena agente)*
 **Svolta d'intervista (2026-07-01):** invece di conservare le immagini (Storage + policy), si salva una
 **scheda JSON strutturata** dell'analisi; gli screenshot restano solo in volo e poi si scartano →
 **niente Supabase Storage** (FU-005 superata). **Deliverable:** modulo `server/src/agent/transcript.js`
@@ -69,6 +69,8 @@ route ritorna `transcript`; client `chatData.addMessage(attachments)` + `Chat.js
 Dettaglio: `aree/AGENTE_AI_SKILL.md §4-bis` · `context/CHAT_ANALISI_CONTEXT.md §5-bis`.
 **Fatto quando:** dopo un'analisi la scheda JSON è salvata sul messaggio assistant, isolata per utente,
 e la prosa si rivede riaprendo la chat; validate verde. **NB:** kit intatto, caching Gemini preservato.
+**✅ Verificato live (2026-07-01):** analisi reale su BTCUSD → `messages.attachments` popolato con scheda
+completa (asset/timeframe/livelli/struttura/indicatori/bias) come `[{type:'transcript',data:…}]`; prosa pulita.
 
 ## M5 — Streaming  ⬜
 **Obiettivo:** risposta a pezzi mostrata man mano, senza crash su interruzioni.
