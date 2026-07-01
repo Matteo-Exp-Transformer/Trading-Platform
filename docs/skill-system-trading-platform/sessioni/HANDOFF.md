@@ -9,8 +9,8 @@
 > Gli agenti Esecuzione/Verifica **non** leggono né scrivono questo file: ricevono il loro contesto dal
 > prompt preparato. È il baton del Senior.
 >
-> **Ultimo aggiornamento:** 2026-06-30 — **M3 "cervello" FATTO** (catena agente reale collegata, prima
-> analisi end-to-end con vision verificata live). Prossimo: TEST VISTA su grafici reali.
+> **Ultimo aggiornamento:** 2026-07-01 — **M3 "cervello" FATTO** e **committato**; **FU-012 chiusa**
+> (slot screenshot per-timeframe + compressione immagini client). Prossimo: **TEST VISTA su grafici reali (FU-011)**.
 
 ---
 
@@ -21,12 +21,11 @@
 - **In chiusura:** **prima di commit e push** aggiorna le sezioni 1-4 (è un passo obbligatorio dello
   schema di lavoro — vedi `PREPARA_PROMPT_SKILL.md §5` e `CHIUSURA_SESSIONE.md` Parte B).
 
-## 0-bis. ⚠️ STATO NON COMMITTATO — leggi prima di tutto
+## 0-bis. ✅ STATO GIT — allineato
 
-Tutto il lavoro **M2 slice 2c + 2 fix + l'intero M3** è ancora **nel working tree, non committato**
-(l'ultimo commit è `4992f27`, chiusura 2b). `npm run validate` **verde**: **92 test client + 37 test
-server** (incluse le RLS live). Quando riparti: committa 2c+M3 oppure continua sopra, ma git non li
-registra ancora.
+M2 slice 2c e l'intero M3 sono **committati** (`05b5891` docs, `474b39f` 2c+client, `09d046e` catena,
+`ab2f0d1` kit). FU-012 (slot screenshot per-timeframe + compressione immagini) chiusa e committata sopra.
+`npm run validate` **verde**: **100 test client + 37 test server** (incluse le RLS live).
 
 ## 0-ter. ✅ L'estratto può essere cancellato
 
@@ -61,12 +60,11 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 2. Prossimo passo concreto
 
-1. **TEST VISTA (FU-011) — rischio #1:** avviare l'app (`npm run dev`), fare un'analisi su **grafici reali**
-   (XAU 15m, NAS100…) e valutare la **qualità della lettura** di 2.5 Pro (struttura/livelli/RSI). Decidere
-   il comportamento sul primo errore di lettura. Verificare che `thinkingBudget=4096` basti.
-2. **Rifinire l'upload del form (FU-012):** slot fissi etichettati per timeframe (CHAT_ANALISI §4) +
-   compressione immagini lato client.
-3. **Poi M4/M5** secondo `PIANO_LAVORO.md` (Storage allegati; streaming).
+1. **TEST VISTA (FU-011) — rischio #1 [PROSSIMO]:** avviare l'app (`npm run dev`), fare un'analisi su
+   **grafici reali** (XAU 15m, NAS100…) e valutare la **qualità della lettura** di 2.5 Pro (struttura/
+   livelli/RSI). Decidere il comportamento sul primo errore di lettura. Verificare che `thinkingBudget=4096`
+   basti. Ora il form manda screenshot **etichettati per timeframe** (FU-012): sfruttalo nel test.
+2. **Poi M4/M5** secondo `PIANO_LAVORO.md` (Storage allegati; streaming).
 
 ## 3. Decisioni d'intervista prese e già nei doc
 

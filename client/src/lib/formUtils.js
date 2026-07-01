@@ -69,6 +69,39 @@ export function timeframesFor(stile) {
   return TF_BY_STILE[stile] ?? { contesto: null, decisionale: null };
 }
 
+// Slot screenshot FISSI ed etichettati per timeframe (FU-012 / CHAT_ANALISI_CONTEXT §4).
+// Derivano da stile × obiettivo. Sempre top-down (contesto → decisionale). Il decisionale
+// (5m/15m) è SEMPRE obbligatorio (regola ferma del kit); il contesto è obbligatorio per
+// "Studiare"/"Analisi completa" e opzionale in "Lettura operativa"; GoldenTrend è un extra
+// opzionale solo in "Analisi completa". Torna [] finché non è scelto lo stile operativo.
+export function screenshotSlots(stile, obiettivo) {
+  const tf = timeframesFor(stile);
+  if (!tf.decisionale) return [];
+
+  const operativa = obiettivo === 'Lettura operativa';
+  const slots = [
+    {
+      key: 'contesto',
+      tf: tf.contesto,
+      label: `Contesto ${tf.contesto}`,
+      // obbligatorio solo quando l'obiettivo è scelto e non è la lettura operativa
+      required: Boolean(obiettivo) && !operativa,
+    },
+    {
+      key: 'decisionale',
+      tf: tf.decisionale,
+      label: operativa ? `Decisionale ${tf.decisionale} (attuale)` : `Decisionale ${tf.decisionale}`,
+      required: true,
+    },
+  ];
+
+  if (obiettivo === 'Analisi completa') {
+    slots.push({ key: 'goldentrend', tf: 'GoldenTrend', label: 'GoldenTrend (opz.)', required: false });
+  }
+
+  return slots;
+}
+
 // Contesto strutturato salvato su chats.form_context (jsonb). Resta valido per tutta la chat.
 export function buildFormContext(values) {
   const ctx = {
@@ -92,7 +125,10 @@ export function buildFormContext(values) {
   return ctx;
 }
 
-export function buildSummary(values) {
+// `attachedLabels` (opz.): etichette degli screenshot allegati, NELLO STESSO ORDINE delle
+// immagini inviate al modello. Le mette nel riepilogo così l'agente sa quale grafico è quale
+// timeframe (es. "Screenshot allegati: Contesto 4H, Decisionale 15m") — vision più affidabile.
+export function buildSummary(values, attachedLabels = []) {
   const asset = resolveAsset(values) || 'Asset';
   const parts = [
     `Asset: ${asset}`,
@@ -109,6 +145,10 @@ export function buildSummary(values) {
 
   const idea = (values.idea ?? '').trim();
   if (idea) parts.push(`Idea: ${idea}`);
+
+  if (Array.isArray(attachedLabels) && attachedLabels.length > 0) {
+    parts.push(`Screenshot allegati: ${attachedLabels.join(', ')}`);
+  }
 
   return parts.join(' · ');
 }

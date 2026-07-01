@@ -7,21 +7,10 @@ import {
   buildTitle,
   buildSummary,
   buildFormContext,
-  timeframesFor,
+  screenshotSlots,
   dataUrlToImagePart,
 } from '../../lib/formUtils.js';
-
-const MAX_IMAGES = 3;
-
-// Suggerimento timeframe in base a stile × obiettivo (fedele al kit / CHAT_ANALISI_CONTEXT §4).
-function screenshotHint(stile, obiettivo) {
-  const tf = timeframesFor(stile);
-  if (!tf.decisionale) return 'Carica gli screenshot del grafico (max 3).';
-  if (obiettivo === 'Lettura operativa') {
-    return `Carica il decisionale ${tf.decisionale} attuale (e, se vuoi, il contesto ${tf.contesto}).`;
-  }
-  return `Carica il contesto ${tf.contesto} e il decisionale ${tf.decisionale} (max ${MAX_IMAGES}).`;
-}
+import { compressImageToDataUrl } from '../../lib/imageCompression.js';
 
 const DISCLAIMER =
   "Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.";
@@ -60,44 +49,73 @@ function ToggleGroup({ options, value, onChange, labelMap }) {
   );
 }
 
+// Uno slot screenshot etichettato per timeframe: o mostra l'anteprima caricata, o il picker.
+function ScreenshotSlot({ slot, image, busy, error, onPick, onRemove }) {
+  return (
+    <div className="flex items-center gap-3 p-2 rounded bg-white/5 border border-white/10">
+      <div className="flex-1 min-w-0">
+        <div className="text-sm text-white">
+          {slot.label}
+          {slot.required ? (
+            <span className="text-freedom-accent ml-1" aria-label="obbligatorio">*</span>
+          ) : (
+            <span className="text-white/40 ml-1 text-xs">(opzionale)</span>
+          )}
+        </div>
+        {error && (
+          <p role="alert" className="text-red-400 text-xs mt-1">{error}</p>
+        )}
+      </div>
+
+      {image ? (
+        <div className="relative shrink-0">
+          <img
+            src={image.preview}
+            alt={`${slot.label} — ${image.name}`}
+            className="h-16 w-16 object-cover rounded border border-white/20"
+          />
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label={`Rimuovi ${slot.label}`}
+            className="absolute -top-2 -right-2 bg-black/80 text-white rounded-full w-5 h-5 text-xs leading-none border border-white/30"
+          >
+            ×
+          </button>
+        </div>
+      ) : (
+        <label
+          className={`cursor-pointer text-sm px-3 py-2 rounded border border-white/20 shrink-0 ${
+            busy ? 'text-white/40' : 'text-freedom-accent hover:brightness-110'
+          }`}
+        >
+          {busy ? 'Carico…' : '+ Carica'}
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            disabled={busy}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              onPick(file);
+            }}
+          />
+        </label>
+      )}
+    </div>
+  );
+}
+
 export function NewAnalysisForm({ onSubmit, loading }) {
   const [values, setValues] = useState(INITIAL);
   const [errors, setErrors] = useState({});
-  const [images, setImages] = useState([]); // [{ name, mimeType, data, preview }]
-  const [imageError, setImageError] = useState(null);
+  // Immagini per-slot: { [slotKey]: { name, mimeType, data, preview } }
+  const [slotImages, setSlotImages] = useState({});
+  const [slotErrors, setSlotErrors] = useState({});
+  const [busySlot, setBusySlot] = useState(null); // slot in compressione
 
-  async function handleFiles(fileList) {
-    const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
-    if (files.length === 0) return;
-    const room = MAX_IMAGES - images.length;
-    if (room <= 0) {
-      setImageError(`Massimo ${MAX_IMAGES} screenshot.`);
-      return;
-    }
-    const parts = await Promise.all(
-      files.slice(0, room).map(
-        (file) =>
-          new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const part = dataUrlToImagePart(reader.result);
-              resolve(part ? { ...part, name: file.name, preview: reader.result } : null);
-            };
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(file);
-          }),
-      ),
-    );
-    const valid = parts.filter(Boolean);
-    if (valid.length) {
-      setImages((prev) => [...prev, ...valid]);
-      setImageError(null);
-    }
-  }
-
-  function removeImage(idx) {
-    setImages((prev) => prev.filter((_, i) => i !== idx));
-  }
+  const slots = screenshotSlots(values.stileOperativo, values.obiettivo);
 
   function set(field, value) {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -109,25 +127,94 @@ export function NewAnalysisForm({ onSubmit, loading }) {
     });
   }
 
+  // Cambiare "come operi" cambia i timeframe: gli screenshot già caricati non valgono più.
+  function handleStileChange(v) {
+    set('stileOperativo', v);
+    setSlotImages({});
+    setSlotErrors({});
+  }
+
   function handleObiettivoChange(o) {
     set('obiettivo', o);
     if (o !== 'Lettura operativa') set('hasPosizione', '');
+    // Lo slot GoldenTrend esiste solo in "Analisi completa": scartalo altrove.
+    if (o !== 'Analisi completa') {
+      setSlotImages((prev) => {
+        if (!prev.goldentrend) return prev;
+        const next = { ...prev };
+        delete next.goldentrend;
+        return next;
+      });
+    }
+  }
+
+  async function handleSlotFile(slotKey, file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setSlotErrors((prev) => ({ ...prev, [slotKey]: 'Formato non valido: carica un’immagine.' }));
+      return;
+    }
+    setBusySlot(slotKey);
+    setSlotErrors((prev) => {
+      const next = { ...prev };
+      delete next[slotKey];
+      return next;
+    });
+    try {
+      const dataUrl = await compressImageToDataUrl(file);
+      const part = dataUrlToImagePart(dataUrl);
+      if (!part) {
+        setSlotErrors((prev) => ({ ...prev, [slotKey]: 'Immagine non leggibile. Riprova.' }));
+        return;
+      }
+      setSlotImages((prev) => ({
+        ...prev,
+        [slotKey]: { ...part, name: file.name, preview: dataUrl },
+      }));
+    } catch {
+      setSlotErrors((prev) => ({ ...prev, [slotKey]: 'Caricamento non riuscito. Riprova.' }));
+    } finally {
+      setBusySlot(null);
+    }
+  }
+
+  function removeSlot(slotKey) {
+    setSlotImages((prev) => {
+      const next = { ...prev };
+      delete next[slotKey];
+      return next;
+    });
   }
 
   function handleSubmit(e) {
     e.preventDefault();
     const result = validateForm(values);
-    const noImages = images.length === 0;
-    if (noImages) setImageError('Carica almeno uno screenshot del grafico.');
-    if (!result.valid || noImages) {
+
+    // Screenshot: ogni slot obbligatorio deve avere un'immagine.
+    const nextSlotErrors = {};
+    for (const slot of slots) {
+      if (slot.required && !slotImages[slot.key]) {
+        nextSlotErrors[slot.key] = 'Screenshot obbligatorio.';
+      }
+    }
+    const slotsOk = Object.keys(nextSlotErrors).length === 0;
+
+    if (!result.valid || !slotsOk) {
       setErrors(result.errors);
+      setSlotErrors(nextSlotErrors);
       return;
     }
+
+    // Immagini + etichette nello stesso ordine (top-down): il modello sa quale grafico è quale.
+    const attached = slots.filter((s) => slotImages[s.key]);
     onSubmit({
       title: buildTitle(values),
-      summary: buildSummary(values),
+      summary: buildSummary(values, attached.map((s) => s.label)),
       formContext: buildFormContext(values),
-      images: images.map(({ mimeType, data }) => ({ mimeType, data })),
+      images: attached.map((s) => {
+        const img = slotImages[s.key];
+        return { mimeType: img.mimeType, data: img.data };
+      }),
     });
   }
 
@@ -177,7 +264,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
           <ToggleGroup
             options={STILE_OPTIONS}
             value={values.stileOperativo}
-            onChange={(v) => set('stileOperativo', v)}
+            onChange={handleStileChange}
           />
           {errors.stileOperativo && (
             <p role="alert" className="text-red-400 text-xs">
@@ -298,55 +385,35 @@ export function NewAnalysisForm({ onSubmit, loading }) {
           />
         </fieldset>
 
-        {/* Screenshot — vision obbligatoria nel primo turno */}
-        <fieldset className="flex flex-col gap-2">
+        {/* Screenshot — slot fissi per timeframe (vision obbligatoria nel primo turno) */}
+        <fieldset className="flex flex-col gap-3">
           <legend className="text-sm text-white/70">Screenshot del grafico</legend>
-          <p className="text-xs text-white/40">
-            {screenshotHint(values.stileOperativo, values.obiettivo)}
-          </p>
 
-          {images.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {images.map((img, idx) => (
-                <div key={idx} className="relative">
-                  <img
-                    src={img.preview}
-                    alt={img.name}
-                    className="h-20 w-20 object-cover rounded border border-white/20"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(idx)}
-                    aria-label={`Rimuovi ${img.name}`}
-                    className="absolute -top-2 -right-2 bg-black/80 text-white rounded-full w-5 h-5 text-xs leading-none border border-white/30"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {images.length < MAX_IMAGES && (
-            <label className="cursor-pointer text-sm text-freedom-accent hover:brightness-110 w-fit">
-              + Aggiungi screenshot
-              <input
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  handleFiles(e.target.files);
-                  e.target.value = '';
-                }}
-              />
-            </label>
-          )}
-
-          {imageError && (
-            <p role="alert" className="text-red-400 text-xs">
-              {imageError}
+          {slots.length === 0 ? (
+            <p className="text-xs text-white/40">
+              Scegli <span className="text-white/60">«Come operi»</span> e{' '}
+              <span className="text-white/60">«Cosa vuoi da questa analisi»</span> per vedere quali
+              grafici caricare.
             </p>
+          ) : (
+            <>
+              <p className="text-xs text-white/40">
+                Carica lo screenshot giusto per ogni timeframe. Il decisionale è sempre obbligatorio.
+              </p>
+              <div className="flex flex-col gap-3">
+                {slots.map((slot) => (
+                  <ScreenshotSlot
+                    key={slot.key}
+                    slot={slot}
+                    image={slotImages[slot.key]}
+                    busy={busySlot === slot.key}
+                    error={slotErrors[slot.key]}
+                    onPick={(file) => handleSlotFile(slot.key, file)}
+                    onRemove={() => removeSlot(slot.key)}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </fieldset>
 

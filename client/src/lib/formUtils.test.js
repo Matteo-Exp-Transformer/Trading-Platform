@@ -5,6 +5,7 @@ import {
   buildSummary,
   buildFormContext,
   timeframesFor,
+  screenshotSlots,
   dataUrlToImagePart,
 } from './formUtils.js';
 
@@ -166,6 +167,16 @@ describe('buildSummary', () => {
     const s = buildSummary({ ...BASE, hasPosizione: 'no' });
     expect(s).not.toContain('Posizione');
   });
+
+  it('elenca le etichette degli screenshot allegati quando presenti', () => {
+    const s = buildSummary(BASE, ['Contesto 4H', 'Decisionale 15m']);
+    expect(s).toContain('Screenshot allegati: Contesto 4H, Decisionale 15m');
+  });
+
+  it('omette la riga screenshot se non ci sono etichette', () => {
+    expect(buildSummary(BASE)).not.toContain('Screenshot allegati');
+    expect(buildSummary(BASE, [])).not.toContain('Screenshot allegati');
+  });
 });
 
 describe('timeframesFor', () => {
@@ -177,6 +188,42 @@ describe('timeframesFor', () => {
   });
   it('stile ignoto → null', () => {
     expect(timeframesFor('')).toEqual({ contesto: null, decisionale: null });
+  });
+});
+
+describe('screenshotSlots', () => {
+  it('[] finché lo stile operativo non è scelto', () => {
+    expect(screenshotSlots('', 'Studiare')).toEqual([]);
+    expect(screenshotSlots(undefined, 'Studiare')).toEqual([]);
+  });
+
+  it('Studiare → contesto + decisionale, entrambi obbligatori', () => {
+    const slots = screenshotSlots('Intraday', 'Studiare');
+    expect(slots).toHaveLength(2);
+    expect(slots[0]).toMatchObject({ key: 'contesto', tf: '4H', required: true });
+    expect(slots[1]).toMatchObject({ key: 'decisionale', tf: '15m', required: true });
+  });
+
+  it('Lettura operativa → contesto opzionale, decisionale obbligatorio ed etichettato "(attuale)"', () => {
+    const slots = screenshotSlots('Intraday', 'Lettura operativa');
+    expect(slots).toHaveLength(2);
+    expect(slots[0]).toMatchObject({ key: 'contesto', required: false });
+    expect(slots[1]).toMatchObject({ key: 'decisionale', required: true });
+    expect(slots[1].label).toContain('(attuale)');
+  });
+
+  it('Analisi completa → aggiunge lo slot GoldenTrend opzionale', () => {
+    const slots = screenshotSlots('Intraday', 'Analisi completa');
+    expect(slots).toHaveLength(3);
+    expect(slots[2]).toMatchObject({ key: 'goldentrend', required: false });
+    expect(slots[0].required).toBe(true);
+  });
+
+  it('obiettivo non ancora scelto → decisionale resta obbligatorio, contesto no', () => {
+    const slots = screenshotSlots('Intraday', '');
+    expect(slots).toHaveLength(2);
+    expect(slots[0].required).toBe(false);
+    expect(slots[1].required).toBe(true);
   });
 });
 
