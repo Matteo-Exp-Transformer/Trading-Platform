@@ -43,16 +43,19 @@ sessione persistente · recupero password + validazione email = **FU-002/FU-003*
 ## M2 — Chat base (senza AI)  ⬜
 **Obiettivo:** invio messaggio, salvataggio chat/messaggi, storico in sidebar, isolamento verificato.
 **Deliverable:** schema DB (chat, messaggi), pagina Chat, Sidebar+Storico, «nuova chat».
-**Context da creare prima:** `CHAT_ANALISI_CONTEXT.md`, `SIDEBAR_STORICO_CONTEXT.md`, `DB_SUPABASE_SKILL.md`.
+**Context:** `CHAT_ANALISI_CONTEXT.md` ✅ · `SIDEBAR_STORICO_CONTEXT.md` ✅ (creato 2026-06-30, intervista slice 2c) · `DB_SUPABASE_SKILL.md` ✅.
 **Fatto quando:** creo una chat, scrivo, ricarico e la ritrovo nello storico.
 
-## M3 — Innesto del cervello + TEST VISTA  ⬜  *(deep — LOCK kit/catena agente)*
+## M3 — Innesto del cervello + TEST VISTA  🟧 *(catena FATTA; resta il TEST VISTA — FU-011)*  *(deep — LOCK kit/catena agente)*
 **Obiettivo:** collego la catena agente + kit + Gemini; risposta reale (prima anche non-streaming).
 E **subito** il test vista su grafici reali (decide se il prodotto sta in piedi — rischio #1).
-**Deliverable:** adapter Gemini in `providerClient`, modello da `.env`, prima analisi end-to-end.
-**Context/area da creare prima:** `AGENTE_AI_SKILL.md`; **portare il kit v3** (`kit/Trade_Analysis_Agent_Kit_v3_1_.md`)
-e splittarlo nei file caricabili `kit/01,02,04,06,07,08,09` (sostituendo i placeholder). **Fatto quando:** carico un
-grafico e l'analisi è in stile Aware Trader, coerente con lo screenshot; esito test vista documentato.
+**Deliverable:** ✅ adapter Gemini in `providerClient` (modello da `.env`), catena adattata
+(`skillLoader/promptBuilder/orchestrator`), route `server/src/routes/agent.js` (isolata per utente),
+client con attesa «sta analizzando…», migrazione `form_context`, prima analisi end-to-end (vision verificata
+live). **Fatto (2026-06-30):** `aree/AGENTE_AI_SKILL.md` ✅; kit splittato in `kit/01,02,04,06,07,08,09`
+**col contenuto reale del monolite** (placeholder dell'estratto scartati), monolite rimosso. Validate verde.
+**Resta:** ⬜ **TEST VISTA su grafici reali** (FU-011) — carico un grafico vero e valuto se l'analisi è in
+stile Aware Trader e coerente con lo screenshot; esito da documentare.
 
 ## M4 — Upload screenshot  ⬜
 **Obiettivo:** allegati immagine robusti. **Deliverable:** upload + base64, storage Supabase, validazione

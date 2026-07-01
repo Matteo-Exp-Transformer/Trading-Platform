@@ -69,6 +69,8 @@ già collaudato di `profiles` (M1).
 - `title text not null default 'Nuova analisi'` — **modificabile a mano** dall'utente (decisione M2)
 - `created_at timestamptz not null default now()`
 - `updated_at timestamptz not null default now()` — usato per ordinare lo storico (sidebar)
+- `form_context jsonb not null default '{}'::jsonb` — **M3 (FU-010)**: contesto del form (asset/stile/
+  obiettivo/posizione/TF) valido per tutta la chat. RLS ereditata dalla chat (nessuna policy nuova)
 
 **`messages`**
 - `id uuid pk` (default `gen_random_uuid()`)
@@ -102,6 +104,7 @@ già collaudato di `profiles` (M1).
 | `m2_hardening_revoke_trigger_fn` | `revoke execute on function public.update_chat_updated_at() from public, anon, authenticated` — la funzione è trigger-only, non RPC |
 | `m2_hardening_messages_insert_policy` | Riscrittura policy `messages_insert_own` con doppio check: `user_id = (select auth.uid()) AND (select user_id from chats where id = chat_id) = (select auth.uid())` — blocca l'inserimento in chat altrui |
 | `m2_hardening_messages_update_parent_check` | Riscrittura policy `messages_update_own` con lo stesso doppio check nel `WITH CHECK` — blocca lo **spostamento** di un proprio messaggio in una chat altrui (simmetria con INSERT). Aggiunta in revisione M2 |
+| `m3_chats_form_context` (2026-06-30) | Colonna `chats.form_context jsonb not null default '{}'` (FU-010). Additiva, RLS già coperta dalla chat: nessuna policy nuova. Advisor security: nessun nuovo rilievo |
 
 ## 5. LOCK di area (invarianti locali)
 

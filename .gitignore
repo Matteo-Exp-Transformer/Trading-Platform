@@ -26,6 +26,8 @@ coverage/
 uploads/
 server/uploads/*
 !server/uploads/.gitkeep
+# Screenshot reali di test (grafici) — dati locali, non versionati
+Asset analisi/
 
 # Privato / non-obbligatorio per gli agenti
 _private/

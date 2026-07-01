@@ -1,8 +1,9 @@
 # Chat di analisi — file di contesto
 
 > Mappa di dettaglio della zona **cuore** del prodotto: l'avvio analisi (form guidato), la chat e i
-> follow-up. Il **motore agente/kit** ha la sua casa in `aree/AGENTE_AI_SKILL.md` *(da creare, giro 6)*:
-> qui sta la **UI/flusso**, là gli **interni dell'AI**. Fonte del metodo: `kit/Trade_Analysis_Agent_Kit_v3_1_.md`.
+> follow-up. Il **motore agente/kit** ha la sua casa in `aree/AGENTE_AI_SKILL.md` ✅:
+> qui sta la **UI/flusso**, là gli **interni dell'AI**. Fonte del metodo: `kit/01..09` (splittato a M3 dal
+> monolite reale; il monolite `Trade_Analysis_Agent_Kit_v3_1_.md` è stato rimosso).
 >
 > **Trigger di routing:** «chat», «analisi», «avvio analisi», «form», «nuova analisi», «follow-up»,
 > «screenshot», «streaming» → questo file.
@@ -86,15 +87,26 @@ Idea utente: "RSI risale, esco o tengo?"
 
 ## 5. Flusso follow-up
 
-Dopo la prima analisi **niente più form**: chat libera a due voci (stile kit). L'utente può fare domande,
-allegare un decisionale aggiornato, dire «sono entrato/uscito a X». Il **contesto del form (asset, stile,
-posizione, TF) resta valido per tutta la chat** e l'agente lo ricorda. L'agente può fare al massimo una o
-due domande tecniche, poi opinione in prosa breve, e «lascia la palla al trader».
+> **Stato M3 (2026-06-30):** ✅ implementato. Prima analisi reale end-to-end (form→screenshot→Gemini
+> vision→prosa kit, salvata e mostrata) + follow-up testuali con contesto. Catena in `aree/AGENTE_AI_SKILL.md`.
+> Route `server/src/routes/agent.js`; client `agentApi.js` + `Chat.jsx`/`ChatPanel.jsx` (attesa «sta
+> analizzando…»). Upload nel form: versione minimale (max 3, ≥1) — slot fissi per-TF = FU-012.
+
+Dopo la prima analisi **niente più form**: chat libera a due voci (stile kit). L'utente può fare domande
+testuali e dire «sono entrato/uscito a X». **Niente nuovi screenshot nei follow-up** (deciso 2026-06-30,
+intervista M3): gli screenshot si caricano **solo nel form iniziale**; nei follow-up la chat è solo testo.
+Il **contesto del form (asset, stile, posizione, TF) resta valido per tutta la chat** e l'agente lo ricorda.
+L'agente può fare al massimo una o due domande tecniche, poi opinione in prosa breve, e «lascia la palla al trader».
 
 ## 6. Questioni tecniche aperte (default proposti, da confermare in M3/M5)
 
-- **Storia conversazionale al modello:** *default* tutta la storia testuale + immagini **del turno corrente**
-  (non ri-inviare tutti gli screenshot passati). Da confermare col test vista.
+- **Storia conversazionale al modello (deciso M3):** ✅ implementato — tutta la storia **testuale** + immagini
+  **solo del primo turno** (il form). Nei follow-up niente immagini (vedi §5) → token minimi. Il modello è
+  stateless: «ricorda» la lettura perché gli si rimanda la sua stessa risposta testuale precedente. **Da
+  riconfermare col test vista (FU-011).**
+- **Caching del contesto (deciso M3):** ✅ implementato — caching **automatico/implicito** di Gemini 2.5: il
+  kit è il **blocco fisso e identico in testa** (`skillLoader` → `systemInstruction`). Caching esplicito
+  gestito = leva futura (FU-013), non in M3.
 - **Titolo chat:** da «Idea utente» o asset + obiettivo (deciso nel giro 5, Sidebar/Storico).
 - **GoldenTrend:** plugin di terzi (kit §12); screenshot opzionale, trattato come opinione visiva, non sovrascrive la struttura.
 

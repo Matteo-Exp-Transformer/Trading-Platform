@@ -136,7 +136,7 @@ In demo restano **disattivati** per testare l'app liberamente (L12). Si attivera
 | D3 | Account: SPEC dice «demo senza login», utente vuole profilo+password+storico | Si fanno **account leggeri reali** su Supabase (L2) |
 | D4 | Scalabilità: utente vuole «pronti a migliaia», doc dicono «demo prima» | **Scale-ready, non scale-features** (§6.1) |
 | D5 | Due «skill system» con nome simile | Disambiguati (§4): Skill System Trading Platform vs Kit Aware Trader |
-| D6 | I file `kit/` dell'estratto erano **placeholder** generici (in inglese, pro-elenchi) che contraddicevano lo stile prodotto | Sostituiti dal **kit v3 reale** (`kit/Trade_Analysis_Agent_Kit_v3_1_.md`), intraday/scalping; da splittare in `kit/01..09` al milestone M3 |
+| D6 | I file `kit/` dell'estratto erano **placeholder** generici (in inglese, pro-elenchi) che contraddicevano lo stile prodotto | **Risolto (M3, 2026-06-30):** il kit v3 reale è stato splittato in `kit/01,02,04,06,07,08,09` col contenuto autentico del monolite; placeholder dell'estratto scartati; monolite `Trade_Analysis_Agent_Kit_v3_1_.md` rimosso |
 
 ---
 
