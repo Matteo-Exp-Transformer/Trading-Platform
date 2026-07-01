@@ -5,7 +5,10 @@ import { FeatureCards } from './FeatureCards.jsx';
 describe('FeatureCards', () => {
   it('mostra le 4 card della panoramica app', () => {
     render(<FeatureCards />);
-    const section = screen.getByRole('region', { name: /Panoramica dell'app/i });
+    const section = screen.getByRole('region', { name: 'Cosa puoi fare' });
+    expect(
+      within(section).getByRole('heading', { name: 'Cosa puoi fare' }),
+    ).toBeInTheDocument();
     expect(within(section).getByRole('heading', { name: 'Analisi assistita' })).toBeInTheDocument();
     expect(within(section).getByRole('heading', { name: 'Memoria sessioni' })).toBeInTheDocument();
     expect(within(section).getByRole('heading', { name: 'Journal' })).toBeInTheDocument();

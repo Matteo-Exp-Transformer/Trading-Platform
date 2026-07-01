@@ -75,10 +75,10 @@ describe('Home (landing immersiva)', () => {
     expect(screen.getByText(/non è consulenza finanziaria/i)).toBeInTheDocument();
   });
 
-  it('mostra i due CTA reali', () => {
+  it('mostra soltanto il CTA Nuova analisi nel blocco centrale', () => {
     renderHome();
     expect(screen.getByRole('button', { name: 'Nuova analisi' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Le mie analisi' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Le mie analisi' })).toBeNull();
   });
 
   it('porta alla pagina Nuova analisi', () => {
@@ -87,9 +87,9 @@ describe('Home (landing immersiva)', () => {
     expect(screen.getByText('PAGINA NUOVA ANALISI')).toBeInTheDocument();
   });
 
-  it('apre lo storico direttamente sulla Home dal CTA', async () => {
+  it('mantiene lo storico accessibile dal menu laterale', async () => {
     renderHome();
-    fireEvent.click(screen.getByRole('button', { name: 'Le mie analisi' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Apri menu' }));
     const menu = await screen.findByRole('complementary', { name: 'Menu' });
     // La chat compare nella lista dello storico (oltre che nella card "Riprendi sessione").
     expect(within(menu).getByText('Analisi BTC')).toBeInTheDocument();

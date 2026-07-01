@@ -13,7 +13,7 @@ const DISCLAIMER =
 // Home = landing dopo il login (rotta «/»). È SEMPRE scura e immersiva: il wrapper forza la
 // classe `dark` — così i token slate+ciano valgono qui a prescindere dal toggle globale (M6),
 // senza toccare il toggle dell'app. Header e Sidebar sono gli stessi condivisi con le altre
-// pagine autenticate: l'hamburger e il CTA «Le mie analisi» aprono lo stesso drawer, qui sulla Home.
+// pagine autenticate: l'hamburger apre lo stesso drawer condiviso anche qui sulla Home.
 export default function Home() {
   const storico = useStorico();
 
@@ -28,7 +28,7 @@ export default function Home() {
       />
 
       <main className="relative z-10 flex flex-1 flex-col items-center gap-14 py-16">
-        <Hero onOpenStorico={storico.openSidebar} />
+        <Hero />
 
         {/* Sotto l'hero: prima l'azione reale (riprendi sessione, se esiste), poi la
             panoramica descrittiva dell'app. Card sessione = dati interni; feature = statiche. */}

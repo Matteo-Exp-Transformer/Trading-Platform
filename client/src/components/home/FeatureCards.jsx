@@ -81,7 +81,13 @@ const FEATURES = [
 
 export function FeatureCards() {
   return (
-    <section aria-label="Panoramica dell'app" className="w-full">
+    <section aria-labelledby="feature-cards-title" className="w-full">
+      <h2
+        id="feature-cards-title"
+        className="mb-4 text-xl font-semibold text-content sm:text-2xl"
+      >
+        Cosa puoi fare
+      </h2>
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {FEATURES.map(({ key, title, desc, Icon }) => (
           <li

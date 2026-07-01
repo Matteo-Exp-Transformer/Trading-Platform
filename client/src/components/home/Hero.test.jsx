@@ -1,16 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Hero } from './Hero.jsx';
 
 // Hero monta HomeCta (usa useNavigate): serve un Router.
-function renderHero(onOpenStorico = vi.fn()) {
-  const view = render(
+function renderHero() {
+  return render(
     <MemoryRouter>
-      <Hero onOpenStorico={onOpenStorico} />
+      <Hero />
     </MemoryRouter>,
   );
-  return { ...view, onOpenStorico };
 }
 
 describe('Hero', () => {
@@ -19,9 +18,16 @@ describe('Hero', () => {
     expect(screen.getByText(/Trading Intelligence Workspace/i)).toBeInTheDocument();
   });
 
-  it('mostra il titolo grande', () => {
+  it('presenta il prodotto come agente di analisi tecnica', () => {
     renderHero();
-    expect(screen.getByRole('heading', { name: /Analizza i mercati/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Il tuo agente di analisi tecnica' }),
+    ).toBeInTheDocument();
+    const productName = screen.getByText('FREEDOM TRADING SYSTEM');
+    expect(productName.parentElement).toHaveTextContent(
+      'Studia i mercati con FREEDOM TRADING SYSTEM.',
+    );
+    expect(productName).toHaveClass('text-freedom-accent');
   });
 
   it('rende il decoro a candele (decorativo, aria-hidden)', () => {
@@ -29,15 +35,9 @@ describe('Hero', () => {
     expect(container.querySelector('svg.home-candle')).not.toBeNull();
   });
 
-  it('mostra i CTA reali', () => {
+  it('mostra soltanto il CTA Nuova analisi', () => {
     renderHero();
     expect(screen.getByRole('button', { name: 'Nuova analisi' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Le mie analisi' })).toBeInTheDocument();
-  });
-
-  it('inoltra l’apertura dello storico al CTA', () => {
-    const { onOpenStorico } = renderHero();
-    fireEvent.click(screen.getByRole('button', { name: 'Le mie analisi' }));
-    expect(onOpenStorico).toHaveBeenCalledOnce();
+    expect(screen.queryByRole('button', { name: 'Le mie analisi' })).toBeNull();
   });
 });

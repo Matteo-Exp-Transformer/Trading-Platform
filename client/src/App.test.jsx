@@ -54,7 +54,9 @@ describe('<App /> — autenticato', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Nuova analisi' })).toBeInTheDocument();
     });
-    // La Home ha l'ingresso allo storico ma NON il form di analisi (che vive nella Chat).
-    expect(screen.getByRole('button', { name: 'Le mie analisi' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Il tuo agente di analisi tecnica' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Cosa puoi fare' })).toBeInTheDocument();
   });
 });
