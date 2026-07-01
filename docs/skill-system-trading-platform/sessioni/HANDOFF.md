@@ -15,8 +15,16 @@
 > Home sempre scura, CTA solo verso rotte esistenti, palette slate+ciano. Revisione dedicata passata,
 > `validate` verde (156+78) e build OK. Viste dall'utente ("per ora va bene così"). Aggiunte skill `aree/
 > TESTING_SKILL.md` + project skill `avvia-app`; comandi npm confermati in `CLAUDE.md`/Bussola (eseguire
-> dalla root). **Aperto:** FU-017 (verifica visiva live M7/Home), FU-018→025 (elementi Home rimandati),
-> e le FU-018→025 (elementi Home rimandati). `Esempio/` **rimossa** (scopo esaurito). Prossimo: **FU-017 (verifica visiva) + M8**.
+> dalla root). **Aperto:** FU-017 (verifica visiva live M7/Home), FU-019/020/023/024/025 (elementi Home rimandati).
+> `Esempio/` **rimossa** (scopo esaurito). Prossimo: **FU-017 (verifica visiva) + M8**.
+>
+> **Aggiornamento 2026-07-01 (sessione Home cards):** **FU-021 + FU-022 FATTE** (Home più completa):
+> card "Riprendi sessione" (`ActiveSessionCard`+`useActiveSession`, chat più recente via RLS, sparisce se
+> nessuna sessione) sopra la griglia di 4 **FeatureCards** descrittive (`FeatureCards.jsx`, nessun link,
+> Journal="in arrivo"). Helper `lib/dateFormat.js`. Tutto **solo client, nessuna licenza di terzi**.
+> **FU-019 (mercati live) PARCHEGGIATA** per licenze commerciali (ricerca in `FOLLOW_UP.md` FU-019:
+> azioni/indici real-time = licenze borse costose; crypto/forex solo con piano commerciale a pagamento).
+> `validate` verde (190+78), build OK.
 
 ---
 

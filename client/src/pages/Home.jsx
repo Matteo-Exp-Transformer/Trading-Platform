@@ -1,4 +1,6 @@
+import { ActiveSessionCard } from '../components/home/ActiveSessionCard.jsx';
 import { AnimatedTradingBackground } from '../components/home/AnimatedTradingBackground.jsx';
+import { FeatureCards } from '../components/home/FeatureCards.jsx';
 import { Hero } from '../components/home/Hero.jsx';
 import { MarketStatus } from '../components/home/MarketStatus.jsx';
 import { AppHeader } from '../components/layout/AppHeader.jsx';
@@ -25,8 +27,15 @@ export default function Home() {
         right={<MarketStatus />}
       />
 
-      <main className="relative z-10 flex flex-1 flex-col items-center justify-center py-16">
+      <main className="relative z-10 flex flex-1 flex-col items-center gap-14 py-16">
         <Hero onOpenStorico={storico.openSidebar} />
+
+        {/* Sotto l'hero: prima l'azione reale (riprendi sessione, se esiste), poi la
+            panoramica descrittiva dell'app. Card sessione = dati interni; feature = statiche. */}
+        <div className="flex w-full max-w-5xl flex-col gap-8 px-6">
+          <ActiveSessionCard onReprendi={storico.selectChat} />
+          <FeatureCards />
+        </div>
       </main>
 
       <footer

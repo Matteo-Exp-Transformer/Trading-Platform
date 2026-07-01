@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import Home from './Home.jsx';
 
@@ -89,11 +89,10 @@ describe('Home (landing immersiva)', () => {
   it('apre lo storico direttamente sulla Home dal CTA', async () => {
     renderHome();
     fireEvent.click(screen.getByRole('button', { name: 'Le mie analisi' }));
-    await waitFor(() => {
-      expect(screen.getByRole('complementary', { name: 'Menu' })).toBeInTheDocument();
-    });
-    expect(screen.getByText('Analisi BTC')).toBeInTheDocument();
-    expect(mockListChats).toHaveBeenCalledOnce();
+    const menu = await screen.findByRole('complementary', { name: 'Menu' });
+    // La chat compare nella lista dello storico (oltre che nella card "Riprendi sessione").
+    expect(within(menu).getByText('Analisi BTC')).toBeInTheDocument();
+    expect(mockListChats).toHaveBeenCalled();
   });
 
   it('apre lo stesso menu dall’hamburger', async () => {
@@ -102,7 +101,13 @@ describe('Home (landing immersiva)', () => {
     await waitFor(() => {
       expect(screen.getByRole('complementary', { name: 'Menu' })).toBeInTheDocument();
     });
-    expect(mockListChats).toHaveBeenCalledOnce();
+    expect(mockListChats).toHaveBeenCalled();
+  });
+
+  it('mostra la card "Riprendi sessione" con la chat più recente', async () => {
+    renderHome();
+    const card = await screen.findByRole('button', { name: /Riprendi sessione/i });
+    expect(card).toHaveTextContent('Analisi BTC');
   });
 
   it('raggiunge Impostazioni soltanto dal menu', async () => {

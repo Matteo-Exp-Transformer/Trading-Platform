@@ -83,10 +83,10 @@ RULE      Disclaimer sempre visibile e leggibile anche in Home. Test per ogni co
 Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano insieme più avanti:
 
 - **FU-018** MarketStatusBar: ~~stato mercati Londra/New York/Tokyo (aperto/chiuso)~~ **fatto (2026-07-01)** — stato mercati in alto a destra nella Home (vedi §6). **Orologio live** non incluso (utente: solo stato mercati) → eventuale FU futura.
-- **FU-019** MarketOverview: griglia ~9 asset (BTC, ETH, Oro, S&P500, Nasdaq, EUR/USD, GBP/USD, Petrolio, DAX) con prezzo/variazione/sparkline + **fonte dati reale** (niente mock se ci sono dati veri).
-- **FU-020** TradingCalendar: calendario mensile con giorno corrente evidenziato.
-- **FU-021** FeatureCards "panoramica app" (Analisi assistita · Memoria sessioni · Journal · Monitoraggio mercati).
-- **FU-022** ActiveSessionCard: card "riapri sessione" se esiste una sessione aperta.
+- **FU-019** MarketOverview: griglia ~9 asset con prezzo/variazione/sparkline. **PARCHEGGIATA (2026-07-01)** — fuori dalla demo per **licenze commerciali**: dati azioni/indici real-time richiedono licenze di display delle borse (costose/per-utente); crypto/forex integrabili solo con piano commerciale a pagamento (CoinGecko ~$35/mese + attribuzione). Regola utente = niente licenze commerciali → non integrata. La card "Monitoraggio mercati" (in FU-021) resta **descrittiva**, senza ticker. Dettaglio in `FOLLOW_UP.md` FU-019.
+- **FU-020** TradingCalendar: calendario mensile con giorno corrente evidenziato. *(Aperta, non in scope demo: decorativa senza dati dietro.)*
+- **FU-021** FeatureCards "panoramica app" (Analisi assistita · Memoria sessioni · Journal · Monitoraggio mercati). **FATTO (2026-07-01)** — 4 card statiche descrittive (nessun link), sotto l'hero (vedi §6). Journal = "in arrivo".
+- **FU-022** ActiveSessionCard: card "riapri sessione" (chat più recente dell'utente). **FATTO (2026-07-01)** — dati interni via `listChats()` (RLS), sopra le FeatureCards. **Se non c'è sessione (o loading/errore) → la card non compare** (vedi §6).
 - **FU-023** Pagina **Journal** (funzionalità nuova, non solo estetica).
 - **FU-024** Pagina **Trading Live** (funzionalità nuova).
 - **FU-025** Font **Space Grotesk** per i titoli della Home (opzionale, "premium").
@@ -103,6 +103,9 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 | `client/src/components/layout/Sidebar.jsx` | Navigazione Home/Nuova analisi, storico, Impostazioni ed Esci. | **IMPLEMENTATO** |
 | `client/src/components/home/AnimatedTradingBackground.jsx` | Sfondo animato (canvas+rAF, reduced-motion→statico, meno particelle su mobile). | **IMPLEMENTATO** |
 | `client/src/components/home/{Hero,HomeCta}.jsx` | Sotto-componenti piccoli. | **IMPLEMENTATO** |
+| `client/src/components/home/ActiveSessionCard.jsx` + `useActiveSession.js` | Card "Riprendi sessione" (FU-022): chat più recente via `listChats()` (RLS); sparisce se nessuna sessione/loading/errore. | **IMPLEMENTATO (FU-022)** |
+| `client/src/components/home/FeatureCards.jsx` | Panoramica app (FU-021): 4 card statiche descrittive (icone SVG inline, hover ciano), nessun link. | **IMPLEMENTATO (FU-021)** |
+| `client/src/lib/dateFormat.js` | `relativeDayLabel()`: etichetta "oggi/ieri/N giorni fa/data breve" per l'ultimo aggiornamento della sessione. | **IMPLEMENTATO (FU-022)** |
 | `client/src/components/home/useMarketStatus.js` | Stato aperto/chiuso di Londra/New York/Tokyo: orari **locali** per piazza via `Intl`+fuso IANA (DST-safe, solo lun–ven), refresh 60s. | **IMPLEMENTATO (FU-018)** |
 | `client/src/components/home/MarketStatus.jsx` | Stato mercati nella Home; pallino **verde** aperto / grigio chiuso. Desktop: inline a destra dell'header. Mobile: riga orizzontale a tutta larghezza **sopra** il nome app. | **IMPLEMENTATO (FU-018)** |
 | `client/src/App.jsx` | Home su `/`, Chat su `/nuova-analisi`, redirect `*` e post-login aggiornati. | **IMPLEMENTATO** |
