@@ -113,6 +113,9 @@ create trigger on_auth_user_created
 
 - **Sessione persistente:** comportamento default di supabase-js (token in `localStorage`, refresh
   automatico). «Esci» = `signOut()`.
+- **Listener auth:** `onAuthStateChange` aggiorna solo lo stato sessione. Il profilo viene caricato
+  in un effetto React successivo: fare query Supabase direttamente nel callback può bloccare le
+  chiamate successive del client. Un errore profilo non invalida la sessione e applica il tema default.
 - **Rotte:** `react-router-dom`. `/login` pubblica; tutto il resto **protetto** → senza sessione
   redirige a `/login`. Dopo il login → `/` (per M1 un guscio autenticato minimo: nome+email del
   profilo + «Esci», a prova che auth/profilo/RLS funzionano). La Chat vera è **M2**.

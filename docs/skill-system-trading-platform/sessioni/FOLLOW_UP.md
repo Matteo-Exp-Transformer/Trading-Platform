@@ -24,4 +24,6 @@
 
 | FU-015 | 2026-07-01 | **Segnalazione screenshot non valido**: emerso in QA M4 — caricando una foto (paesaggio 4K) al posto di un grafico, il modello ha capito che l'immagine non andava ma **non l'ha segnalato**, dando comunque la lettura. L'utente deve essere avvisato che quell'immagine è inutilizzabile e che l'analisi può essere incompleta. | QA M4 (utente, 2026-07-01) | **fatto** (2026-07-01) — direttiva `buildImageCheckInstruction()` nel turno immagini (kit intatto): segnala quale immagine non è valida + avvisa di analisi incompleta, poi procede; campo `avvisi` aggiunto alla scheda JSON. +2 test. **Verificato live (2026-07-01):** l'utente ha ricaricato la foto errata e l'agente l'ha segnalata correttamente. Vedi `AGENTE_AI_SKILL §4-bis` |
 
+| FU-016 | 2026-07-01 | **Console super-admin**: UI riservata all'admin (te) per gestire gli utenti, **assegnare il modello AI per account** (oggi si fa a mano dal DB — vedi M6) e visualizzare le statistiche per-utente (analisi, uso, ecc.). Sostituirà la gestione manuale del modello introdotta in M6. Area «admin» non ancora prevista nel piano: definire scope e sicurezza (accesso solo admin) prima di costruirla. | intervista M6 (utente, 2026-07-01) | aperto |
+
 > Stati: `aperto` · `in corso` · `fatto` (con data di chiusura) · `scartato` (con motivo).

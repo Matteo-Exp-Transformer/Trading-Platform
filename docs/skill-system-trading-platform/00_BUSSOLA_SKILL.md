@@ -75,7 +75,7 @@ file da modificare. I file `*(da creare)*` nascono via intervista nei prossimi g
 | Motore agente / kit Aware Trader (skillLoader→promptBuilder→providerClient→orchestrator) | `aree/AGENTE_AI_SKILL.md` ✅ ⚠️ LOCK §2 |
 | Autenticazione / account / sessione utente | `context/AUTH_CONTEXT.md` ⚠️ deep (§6) |
 | Sidebar / storico chat / nuova chat | `context/SIDEBAR_STORICO_CONTEXT.md` ✅ |
-| Impostazioni (tema · cambio password · scelta modello) | `context/IMPOSTAZIONI_CONTEXT.md` *(da creare)* |
+| Impostazioni (tema · cambio password · modello AI per-account) | `context/IMPOSTAZIONI_CONTEXT.md` ✅ ⚠️ deep (§6) |
 | Estetica / stile UI (sfondo animato, tema verde-scuro) | `context/ESTETICA_CONTEXT.md` *(da creare)* |
 | DB / schema / migrazioni / RLS (Supabase) | `aree/DB_SUPABASE_SKILL.md` ✅ ⚠️ deep (§6) |
 | Test / CI | `aree/TESTING_SKILL.md` |

@@ -88,9 +88,21 @@ la scheda JSON continua a salvarsi (M4) e non compare mai; validate verde.
 **✅ Verificato live (2026-07-01):** streaming progressivo OK, scheda mai a vista, persistenza M4 intatta
 (DB: analisi in streaming → `attachments` con scheda completa + campo `avvisi`; follow-up → `attachments []`).
 
-## M6 — Impostazioni  ⬜
-**Obiettivo:** tema chiaro/scuro (persistito per utente) · cambio password · **selettore modello** (lista curata 2–3 Gemini).
-**Context da creare prima:** `IMPOSTAZIONI_CONTEXT.md`. **Fatto quando:** cambio tema/modello/password e persistono.
+## M6 — Impostazioni  🟡  *(deep — tocca `profiles`/RLS + catena agente: modello per-utente)*
+**Obiettivo:** tema chiaro/scuro (persistito per utente) · cambio password · **modello AI per-account**.
+**Context:** `context/IMPOSTAZIONI_CONTEXT.md` ✅ (creato 2026-07-01, intervista Senior).
+**Decisioni d'intervista (2026-07-01):**
+- **Modello = attributo dell'account, deciso dall'admin** (non una tendina utente): serve a differenziare
+  i tier (Flash base / Pro «pro»). Colonna `profiles.ai_model` (nullable → default `.env`), impostata
+  **a mano dal DB** per ora. Lista curata: `gemini-2.5-pro` (default) · `gemini-2.5-flash`. Valore
+  fuori lista/`null` → fallback al default (mai rompere). Innesto: route → orchestrator → providerClient
+  (già accetta `model`); **kit e caching intatti**. UI di gestione = **FU-016** (console super-admin, fuori M6).
+- **Impostazioni utente (UI) = solo tema + cambio password.** Il modello non compare qui.
+- **Tema** per-utente su DB (`profiles.theme`, default `dark`); Tailwind `darkMode:'class'`.
+- **Cambio password** richiede la password attuale (riverifica `signInWithPassword` → `updateUser`).
+
+**Fatto quando:** cambio tema/password e persistono (tema letto dal profilo, indipendente per utente);
+un account con `ai_model='gemini-2.5-flash'` usa Flash, `null`/errato usa il default Pro; validate verde.
 
 ## M7 — Estetica beta (rifinitura additiva)  ⬜
 **Obiettivo:** ricostruire lo stile ricco (sfondo animato, palette verde-scuro, font) senza intaccare la

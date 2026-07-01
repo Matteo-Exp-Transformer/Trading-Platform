@@ -9,10 +9,12 @@
 > Gli agenti Esecuzione/Verifica **non** leggono né scrivono questo file: ricevono il loro contesto dal
 > prompt preparato. È il baton del Senior.
 >
-> **Ultimo aggiornamento:** 2026-07-01 — **M3·M4·M5 COMPLETI e verificati live**. M3 (cervello + test vista
-> FU-011 + upload FU-012). M4 (trascrizione JSON al posto dello Storage — FU-005 superata). FU-015 (agente
-> segnala screenshot non validi). **M5 (streaming risposta a pezzi)**. Il cuore del prodotto è finito.
-> Prossimo: **M6 — Impostazioni** (tema · cambio password · selettore modello). Serve `IMPOSTAZIONI_CONTEXT.md` (da creare via intervista).
+> **Ultimo aggiornamento:** 2026-07-01 — **M3·M4·M5·M6 COMPLETI**. M3 (cervello + test vista FU-011 + upload
+> FU-012). M4 (trascrizione JSON — FU-005 superata). FU-015 (screenshot non validi). M5 (streaming).
+> **M6 — Impostazioni ✅**: tema chiaro/scuro persistito per-utente (palette semantica su **tutta** l'app +
+> `color-scheme` dinamico), cambio password con riverifica, **modello AI per-account** admin-only (blindato
+> con privilegi di colonna DB). `IMPOSTAZIONI_CONTEXT.md` esiste ed è allineato. `validate` verde (132+77),
+> build OK. **Da verificare live** (tema/password/Flash). Prossimo: **M7 — estetica** (palette ricca), poi M8.
 
 ---
 
@@ -23,11 +25,12 @@
 - **In chiusura:** **prima di commit e push** aggiorna le sezioni 1-4 (è un passo obbligatorio dello
   schema di lavoro — vedi `PREPARA_PROMPT_SKILL.md §5` e `CHIUSURA_SESSIONE.md` Parte B).
 
-## 0-bis. ✅ STATO GIT — allineato
+## 0-bis. ⚠️ STATO GIT — M6 da committare
 
-M2 slice 2c e l'intero M3 sono **committati** (`05b5891` docs, `474b39f` 2c+client, `09d046e` catena,
-`ab2f0d1` kit). FU-012 (slot screenshot per-timeframe + compressione immagini) chiusa e committata sopra.
-`npm run validate` **verde**: **100 test client + 37 test server** (incluse le RLS live).
+M3·M4·M5 e FU-015 sono **committati** (ultimo: `81ad779` docs M5). **M6 NON è ancora committato**: le
+modifiche (migrazione già applicata sul DB remoto; nuovi file `models.js`/`theme.js`/`Settings.jsx` + palette
+semantica) sono in working tree, in attesa del "report finale" dell'utente per commit+push.
+`npm run validate` **verde**: **132 test client + 77 test server** (incluse le RLS live). Build produzione OK.
 
 ## 0-ter. ✅ L'estratto può essere cancellato
 
@@ -61,6 +64,15 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
   `_sessioni-lavoro/2026-07-01/Report-M5-streaming.md`.
 - **DB verificato (2026-07-01):** analisi in streaming → `messages.attachments` con scheda completa + `avvisi`;
   follow-up → `attachments []`; prosa sempre pulita (marcatore mai a vista).
+- **M6 ✅ COMPLETO (2026-07-01):** pagina **Impostazioni** (`/impostazioni`, ingresso dal drawer).
+  (a) **Tema** chiaro/scuro persistito su `profiles.theme`, applicato all'avvio (`AuthProvider` + default
+  in `main.jsx`) e ad ogni cambio; ora attivo su **tutta** l'app via **palette semantica** centralizzata
+  (`index.css` variabili chiaro/scuro + token in `tailwind.config.js`), `color-scheme` dinamico.
+  (b) **Cambio password** con riverifica (`signInWithPassword` vecchia → `updateUser` nuova), errori chiari.
+  (c) **Modello AI per-account**: `profiles.ai_model` (lista curata `models.js` + `resolveUserModel`), letto in
+  `routes/agent.js` e passato `orchestrator → providerClient` (**providerClient invariato**, kit/caching intatti);
+  `null`/fuori-lista → default `.env` (fallback mai-crash). **Blindato**: `ai_model` non scrivibile dall'utente
+  (privilegi di colonna DB; solo `service_role`). Report: `_sessioni-lavoro/2026-07-01/Report-M6-impostazioni.md`.
 - **M2** resta interamente chiuso (chat base, sidebar/storico, RLS).
 
 ## 1-bis. Decisioni importanti prese in M3 (per memoria)
@@ -79,13 +91,14 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 2. Prossimo passo concreto
 
-1. **M6 — Impostazioni [PROSSIMO]:** tema chiaro/scuro (persistito per utente) · cambio password ·
-   **selettore modello** (lista curata 2-3 Gemini). ⚠️ **Serve prima `context/IMPOSTAZIONI_CONTEXT.md`**
-   (non esiste ancora): da creare via intervista, come da schema di lavoro (nessun codice della zona prima
-   del suo context). Note utili: il modello è già letto da `.env` (`AI_MODEL`) e `providerClient` è uno
-   switcher → il selettore modello si innesta lì; il tema va persistito per-utente (colonna su `profiles`
-   o preferenze). Auth/RLS già pronti (M1).
-2. **Poi M7 (estetica) e M8 (blindatura+deploy)** secondo `PIANO_LAVORO.md`.
+1. **Verifica live M6 [PROSSIMO]:** tema (cambia ovunque + resta dopo reload, indipendente per account),
+   cambio password (vecchia corretta/errata), modello per-account (`ai_model='gemini-2.5-flash'` → analisi con
+   Flash; `null`/errato → default Pro). Poi commit+push M6 (su conferma utente).
+2. **M7 — estetica:** palette **ricca** (verde-scuro raffinato, sfondo animato, font, ridisegno). In M6 c'è
+   solo la **base sobria** su tutta l'app: M7 la rifinisce riusando i token semantici già in `index.css`.
+3. **M8 (blindatura + deploy)** secondo `PIANO_LAVORO.md`.
+4. **FU-016 — console super-admin:** quando servirà, UI admin per assegnare `ai_model` (oggi a mano dal DB) +
+   statistiche per-utente. Modello è già blindato lato DB (solo `service_role` scrive `ai_model`).
 
 ## 3. Decisioni d'intervista prese e già nei doc
 
@@ -99,10 +112,12 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
   reale (richiedono SMTP). In demo: reset a mano dell'admin, email finte ammesse.
 - **FU-004 (bassa priorità):** attivare «leaked password protection» nel pannello Supabase Auth prima del prodotto.
 - **FU-013 (leva futura):** caching esplicito gestito del blocco kit quando i volumi cresceranno (ora automatico).
-- **M6:** decidere la lista curata di modelli Gemini per il selettore (2-3) — da fissare nell'intervista M6.
-- Più avanti: deploy target · estetica beta — `CONTESTO_PRODOTTO.md §11`.
-- ~~FU-005 (Storage)~~ **superata** (M4: scheda JSON, niente file). ~~FU-011 (test vista)~~, ~~FU-014 (chiave)~~,
-  ~~FU-015 (screenshot non validi)~~ **risolte** (2026-07-01).
+- **FU-016 (nuova area admin):** console super-admin per assegnare il modello (oggi a mano dal DB) + statistiche
+  per-utente. Sostituirà la gestione manuale introdotta in M6. Definire scope e sicurezza (accesso solo admin).
+- **M6 — modello per-account:** la lista curata è `gemini-2.5-flash` / `gemini-2.5-pro` (default). Aggiungerne uno
+  = una riga in `server/src/agent/models.js` (nessuna migrazione: `ai_model` senza CHECK di proposito).
+- Più avanti: deploy target · estetica beta (M7) — `CONTESTO_PRODOTTO.md §11`.
+- ~~FU-005 (Storage)~~ **superata** (M4). ~~FU-011 (test vista)~~, ~~FU-014 (chiave)~~, ~~FU-015 (screenshot non validi)~~ **risolte** (2026-07-01).
 
 ## 5. Puntatori (la verità vive lì, non qui)
 
@@ -112,6 +127,7 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 | Decisioni LOCKED + questioni aperte | `docs/CONTESTO_PRODOTTO.md §2, §11` |
 | Interni dell'AI (catena, kit, adattamenti) | `aree/AGENTE_AI_SKILL.md` |
 | UI/flusso chat | `context/CHAT_ANALISI_CONTEXT.md` |
-| Debiti tecnici aperti | `sessioni/FOLLOW_UP.md` (aperti: FU-002, FU-003, FU-004, FU-005, FU-011, FU-012, FU-013, FU-014) |
+| Impostazioni (tema, password, modello per-account) | `context/IMPOSTAZIONI_CONTEXT.md` |
+| Debiti tecnici aperti | `sessioni/FOLLOW_UP.md` (aperti: FU-002, FU-003, FU-004, FU-013, FU-016) |
 | Storia cronologica sessioni | `sessioni/SESSION_LOG.md` |
-| Dettaglio ultima sessione | `_sessioni-lavoro/2026-06-30/Report-M3-catena-agente-cervello.md` (gitignored) |
+| Dettaglio ultima sessione | `_sessioni-lavoro/2026-07-01/Report-M6-impostazioni.md` (gitignored) |

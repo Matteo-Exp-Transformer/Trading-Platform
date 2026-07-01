@@ -4,7 +4,7 @@
 > (Senior, Esecutore, Verifica) e l'utente. Le skill e i `context/` rimandano qui per il «perché».
 > La cronologia datata delle decisioni vive qui e nei report di sessione, **non** nelle skill vive.
 >
-> Aggiornato: 2026-06-30 · Fase: **0 — demo pre-intervista** · Stato: setup documentale (codice da costruire).
+> Aggiornato: 2026-07-01 · Fase: **0 — demo pre-intervista** · Stato: M6 Impostazioni implementata.
 
 ---
 
@@ -39,6 +39,7 @@ un **agente AI** li legge e li commenta applicando il metodo **Aware Trader** (u
 | L14 | Avvio analisi | **Form guidato** che genera il primo prompt + slot screenshot fissi per timeframe | 2026-06-30 | Dettaglio in `context/CHAT_ANALISI_CONTEXT.md` §4 |
 | L15 | Login (M1) | **Email + password**; account creati **a mano** (no registrazione aperta); conferma email **disattivata**, email finte/interne ammesse; sessione persistente fino a «Esci» | 2026-06-30 | Niente SMTP in demo. Dettaglio in `context/AUTH_CONTEXT.md` |
 | L16 | Recupero password / validazione email | **Rimandati a dopo l'intervista cliente** (FU-002, FU-003) | 2026-06-30 | In demo: reset password a mano dall'admin. Richiederanno SMTP + email reali |
+| L17 | Impostazioni (M6) | L'utente gestisce **tema e password**; il **modello AI è per-account e lo assegna solo l'admin** | 2026-07-01 | `profiles.ai_model` è protetto anche a livello DB; gestione manuale ora, console super-admin in FU-016 |
 
 ---
 
@@ -47,7 +48,8 @@ un **agente AI** li legge e li commenta applicando il metodo **Aware Trader** (u
 **Dentro (da costruire e blindare):**
 - **Chat di analisi** (il cuore): scrivo + carico screenshot → l'agente risponde in stile Aware Trader, **in streaming**.
 - **Sidebar**: profilo utente + **storico chat** (clic = riapro) + «nuova chat».
-- **Impostazioni**: cambio password · tema chiaro/scuro · **scelta del modello** AI (lista curata).
+- **Impostazioni**: cambio password · tema chiaro/scuro. Il **modello AI per-account** non è
+  modificabile dall'utente: lo assegna l'admin (gestione manuale DB nella demo; FU-016 per la console).
 - **Login**: porta d'ingresso; account leggeri reali (su Supabase).
 - **Estetica beta** (rifinitura additiva): stile scuro verde-acqua, sfondo animato. ⚠️ Non è nei file
   estratti → va **ricostruita**; non deve compromettere la blindatura del cuore.
@@ -146,9 +148,11 @@ In demo restano **disattivati** per testare l'app liberamente (L12). Si attivera
 - [x] ~~**Auth demo**~~: deciso 2026-06-30 → **su invito / a mano** (no registrazione aperta).
 - [x] ~~**Freno costi**~~: deciso 2026-06-30 → **nessun limite** (demo controllata). Resta solo `MAX_SCREENSHOT_PER_ANALISI` per la finestra di contesto, non per i costi.
 - [ ] **Deploy**: la demo si prova all'intervista in modo controllato (il cliente non riceve accesso) → può bastare locale o URL privato? Target di deploy da definire.
-- [ ] **Modelli nello switcher**: quali 2–3 Gemini nella lista curata delle Impostazioni?
+- [x] ~~**Modelli nello switcher**~~: lista curata M6 = `gemini-2.5-pro` (default) e
+  `gemini-2.5-flash`; assegnazione admin-only per account, nessun selettore utente.
 - [ ] **Estetica**: quali elementi della beta ricostruire (sfondo animato, palette, font) e con che priorità?
-- [~] **Flussi dettagliati** per schermata: **Chat + Avvio analisi (form) + follow-up** (`CHAT_ANALISI_CONTEXT.md`) e **Auth** (`AUTH_CONTEXT.md`) mappati. Restano: Sidebar/Storico, Impostazioni, Estetica.
+- [~] **Flussi dettagliati** per schermata: Chat, Auth, Sidebar/Storico e Impostazioni mappati.
+  Resta da definire l'Estetica M7.
 
 ---
 
