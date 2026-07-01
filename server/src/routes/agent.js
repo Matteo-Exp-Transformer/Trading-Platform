@@ -11,6 +11,8 @@ import { runAnalysis, runAnalysisStream } from '../agent/orchestrator.js';
 import { resolveUserModel } from '../agent/models.js';
 import { classificaTesto } from '../agent/topicGuard.js';
 import { testoRifiuto } from '../agent/security.js';
+import { creaLimitatore } from '../lib/rateLimit.js';
+import { erroreScreenshot } from '../lib/screenshots.js';
 
 export const agentRouter = Router();
 
@@ -18,6 +20,10 @@ const MAX_IMAGES = Number(process.env.MAX_SCREENSHOT_PER_ANALISI) || 3;
 // Limite approfondimenti per sessione: la prima analisi non conta, poi max MAX_FOLLOW_UPS
 // follow-up testuali. Il client è la prima barriera (blocco scrittura); questa è l'autorità.
 const MAX_FOLLOW_UPS = Number(process.env.MAX_FOLLOW_UP_PER_SESSIONE) || 5;
+// Rate limit anti-abuso (costi AI): analisi per minuto per sessione (chiave = token).
+// Il max si legge a ogni richiesta così i test possono stubbarlo; default 6.
+const limitatore = creaLimitatore({ finestraMs: 60_000 });
+const maxAnalisiPerMinuto = () => Number(process.env.MAX_ANALISI_PER_MINUTO) || 6;
 
 // Client Supabase per-richiesta, vincolato al token dell'utente: la RLS filtra alle sue chat.
 function userClient(token) {
@@ -52,15 +58,23 @@ async function authorizeAnalyze(req, res) {
     return null;
   }
 
+  // Rate limit prima di qualsiasi lavoro (anche prima delle letture DB): frena l'abuso a monte.
+  if (!limitatore.consenti(token, maxAnalisiPerMinuto())) {
+    res.status(429).json({ error: 'Troppe richieste ravvicinate. Attendi un minuto e riprova.' });
+    return null;
+  }
+
   const { chatId, images } = req.body || {};
   if (!chatId) {
     res.status(400).json({ error: 'Richiesta incompleta: manca la chat.' });
     return null;
   }
 
+  // Validazione screenshot lato server (numero, formato, dimensione): mai fidarsi del client.
   const imgs = Array.isArray(images) ? images : [];
-  if (imgs.length > MAX_IMAGES) {
-    res.status(400).json({ error: `Troppi screenshot: massimo ${MAX_IMAGES}.` });
+  const errImg = erroreScreenshot(imgs, MAX_IMAGES);
+  if (errImg) {
+    res.status(400).json({ error: errImg });
     return null;
   }
 

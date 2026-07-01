@@ -179,6 +179,36 @@ describe('POST /api/agent/analyze', () => {
     expect(res.body.error).toMatch(/Troppi screenshot/);
   });
 
+  it('400 se il formato di uno screenshot non è ammesso (validazione server)', async () => {
+    const res = await request(app)
+      .post('/api/agent/analyze')
+      .set('Authorization', 'Bearer tok')
+      .send({ chatId: 'chat-1', images: [{ mimeType: 'application/pdf', data: 'AAAA' }] });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/Formato screenshot non supportato/);
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+
+  it('429 rate limit: oltre il tetto per minuto la richiesta è respinta', async () => {
+    vi.stubEnv('MAX_ANALISI_PER_MINUTO', '2');
+    try {
+      // Token dedicato: il registro del limitatore è condiviso dentro questo file di test.
+      const call = () =>
+        request(app)
+          .post('/api/agent/analyze')
+          .set('Authorization', 'Bearer tok-rate-limit')
+          .send({ chatId: 'chat-1', images: [] });
+      expect((await call()).status).toBe(200);
+      expect((await call()).status).toBe(200);
+      const res = await call();
+      expect(res.status).toBe(429);
+      expect(res.body.error).toMatch(/Troppe richieste ravvicinate/);
+      expect(mockRun).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it('429 se superato il limite di follow-up (prima analisi esclusa + 5)', async () => {
     // 7 messaggi utente = 1 analisi + 6 follow-up → oltre il limite di 5.
     mockMessagesCount.mockResolvedValue({ count: 7, error: null });

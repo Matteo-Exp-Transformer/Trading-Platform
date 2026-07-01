@@ -9,3 +9,7 @@ try {
 } catch {
   // variabili già in process.env (CI) oppure .env.local assente
 }
+
+// Rate limit alto nei test: i test della route fanno decine di chiamate con lo stesso token.
+// Il comportamento del limitatore ha test dedicati (rateLimit.test.js + stub nella route).
+process.env.MAX_ANALISI_PER_MINUTO = '1000';
