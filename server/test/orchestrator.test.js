@@ -70,10 +70,12 @@ describe('runAnalysis', () => {
     });
     expect(out.text).toBe('Analisi in prosa');
     expect(out.transcript).toEqual({ asset: 'XAU/USD', bias: 'long' });
-    // L'istruzione scheda è nel turno utente (parte variabile), non nel system/kit.
+    // Le istruzioni (controllo immagini + scheda) sono nel turno utente, non nel system/kit.
     const sent = mockRequest.mock.calls[0][0];
     expect(sent.system).toBe('KIT');
-    expect(JSON.stringify(sent.messages)).toContain('SCHEDA_JSON');
+    const messagesStr = JSON.stringify(sent.messages);
+    expect(messagesStr).toContain('SCHEDA_JSON');
+    expect(messagesStr.toLowerCase()).toContain('segnala'); // direttiva controllo immagini
   });
 
   it('lancia se non c’è storia da analizzare', async () => {

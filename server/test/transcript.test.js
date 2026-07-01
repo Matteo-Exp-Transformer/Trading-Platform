@@ -1,18 +1,30 @@
 import { describe, it, expect } from 'vitest';
 import {
   TRANSCRIPT_MARKER,
+  buildImageCheckInstruction,
   buildTranscriptInstruction,
   splitTranscript,
 } from '../src/agent/transcript.js';
 
-const SCHEDA = '{"asset":"XAU/USD","timeframe":{"Contesto 4H":"rialzista"},"livelli":["2350","2360"],"struttura":"HH/HL","indicatori":"RSI 58","bias":"long","posizione":null}';
+const SCHEDA = '{"asset":"XAU/USD","timeframe":{"Contesto 4H":"rialzista"},"livelli":["2350","2360"],"struttura":"HH/HL","indicatori":"RSI 58","bias":"long","posizione":null,"avvisi":null}';
+
+describe('buildImageCheckInstruction', () => {
+  it('chiede di segnalare gli screenshot non validi e avvisare di analisi incompleta', () => {
+    const t = buildImageCheckInstruction();
+    expect(t.toLowerCase()).toContain('segnala');
+    expect(t.toLowerCase()).toContain('incompleta');
+    // Deve comunque procedere con ciò che è leggibile (non blocca).
+    expect(t.toLowerCase()).toContain('procedi');
+  });
+});
 
 describe('buildTranscriptInstruction', () => {
-  it('cita il marcatore e i campi della scheda', () => {
+  it('cita il marcatore e i campi della scheda (incluso avvisi)', () => {
     const t = buildTranscriptInstruction();
     expect(t).toContain(TRANSCRIPT_MARKER);
     expect(t).toContain('asset');
     expect(t).toContain('bias');
+    expect(t).toContain('avvisi');
   });
 });
 

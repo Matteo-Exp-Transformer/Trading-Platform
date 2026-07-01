@@ -141,6 +141,7 @@ trascrizione non servono più. Conseguenza: **niente Supabase Storage**, **FU-00
 | Solo con immagini | La scheda si chiede **solo** nel turno con screenshot (vera analisi), mai nei follow-up testuali. | Coerente §3 "immagini solo nel primo turno". |
 | Prosa pulita | Gemini scrive l'analisi + in fondo il marcatore `===SCHEDA_JSON===` + JSON. Il **server separa**: l'utente vede solo la prosa; la scheda va in `messages.attachments` (jsonb, già predisposto). | Stile risposta kit intatto (utente non vede il JSON). |
 | Mai bloccare | Scheda mancante o JSON illeggibile → si salva l'analisi lo stesso, `transcript = null`. | RULE "mai crash a vista". |
+| Screenshot non valido (FU-015, 2026-07-01) | Se uno screenshot NON è un grafico leggibile (es. una foto), l'agente lo **segnala esplicitamente** a inizio risposta indicando quale + avvisa che l'analisi può essere **incompleta**; procede con ciò che è leggibile. Direttiva `buildImageCheckInstruction()`, nel turno immagini (kit intatto). Anche nel JSON: campo `avvisi`. | Consapevolezza utente; coerente §3 vision. |
 
 **Innesto nel codice (M4):** modulo nuovo `server/src/agent/transcript.js` (marcatore +
 `buildTranscriptInstruction()` + `splitTranscript()`, puri e testati); `orchestrator` inietta l'istruzione

@@ -6,7 +6,7 @@
 import { loadSkillPrompt } from './skillLoader.js';
 import { buildMessages } from './promptBuilder.js';
 import { requestCompletion, parseCompletionResponse } from './providerClient.js';
-import { buildTranscriptInstruction, splitTranscript } from './transcript.js';
+import { buildImageCheckInstruction, buildTranscriptInstruction, splitTranscript } from './transcript.js';
 
 // Legge la storia testuale della chat (role + content) ordinata cronologicamente.
 export async function readHistory(supabase, chatId) {
@@ -30,7 +30,11 @@ export async function runAnalysis({ supabase, chatId, images = [] }) {
     throw new Error('Nessun messaggio da analizzare per questa chat.');
   }
 
-  const instruction = images.length > 0 ? buildTranscriptInstruction() : '';
+  // Solo nel turno con immagini: controlla gli screenshot (segnala i non validi) + chiedi la scheda JSON.
+  const instruction =
+    images.length > 0
+      ? `${buildImageCheckInstruction()}\n\n${buildTranscriptInstruction()}`
+      : '';
   const { system, messages } = buildMessages(systemPrompt, history, images, instruction);
 
   const response = await requestCompletion({ system, messages });
