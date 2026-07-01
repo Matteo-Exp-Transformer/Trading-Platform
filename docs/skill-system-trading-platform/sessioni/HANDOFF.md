@@ -79,8 +79,8 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 ## 4. Questioni aperte da portare all'utente
 
 - ~~Esito test vista (FU-011)~~ **risolto (2026-07-01):** lettura corretta su grafici reali, rischio #1 rientrato.
-- **`GOOGLE_API_KEY` formato inusuale (FU-014):** la chiave inizia con `AQ.Ab8...` (non `AIza...`);
-  funziona ora ma va confermata come key stabile prima di demo/prod.
+- ~~`GOOGLE_API_KEY` formato inusuale (FU-014)~~ **risolto (2026-07-01):** `AQ.Ab8...` è il nuovo
+  formato ufficiale delle Google API key. Chiave valida e stabile, nessuna azione.
 - **Policy Storage allegati (FU-005):** da scrivere a M4, prima di spostare gli screenshot su Storage.
 - Più avanti: deploy target · modelli nello switcher · estetica beta — `CONTESTO_PRODOTTO.md §11`.
 
