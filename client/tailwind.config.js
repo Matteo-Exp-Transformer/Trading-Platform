@@ -7,10 +7,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Accento del brand: verde, identico in tema chiaro e scuro. `bg` resta per compatibilità.
+        // Accento del brand: ciano (M7, era verde), identico in tema chiaro e scuro.
         freedom: {
-          bg: '#0b1f1a',
-          accent: '#2dd4a7',
+          bg: '#020617',
+          accent: '#06b6d4',
+          accentHover: '#22d3ee',
         },
         // Token semantici del tema (M6): valori reali in src/index.css (:root chiaro / .dark scuro).
         // `<alpha-value>` mantiene funzionanti le utility con opacità (es. text-muted/70).

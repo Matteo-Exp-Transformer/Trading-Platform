@@ -49,7 +49,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="bg-surface-strong border border-line rounded px-3 py-2 text-content placeholder:text-faint focus:outline-none focus:border-freedom-accent"
+                className="bg-surface-strong border border-line rounded-xl px-3 py-2 text-content placeholder:text-faint focus:outline-none focus:border-freedom-accent"
                 placeholder="email@esempio.com"
               />
             </div>
@@ -65,7 +65,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="bg-surface-strong border border-line rounded px-3 py-2 text-content placeholder:text-faint focus:outline-none focus:border-freedom-accent"
+                className="bg-surface-strong border border-line rounded-xl px-3 py-2 text-content placeholder:text-faint focus:outline-none focus:border-freedom-accent"
                 placeholder="••••••••"
               />
             </div>
@@ -79,7 +79,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-freedom-accent text-black font-semibold py-2 rounded hover:brightness-110 disabled:opacity-50"
+              className="bg-freedom-accent text-slate-950 font-semibold py-2 rounded-2xl hover:bg-freedom-accentHover disabled:opacity-50 transition-colors"
             >
               {loading ? 'Accesso in corso…' : 'Accedi'}
             </button>

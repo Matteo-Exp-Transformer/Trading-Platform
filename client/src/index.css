@@ -3,35 +3,36 @@
 @tailwind utilities;
 
 /*
-  Palette semantica del tema (M6). Un solo punto-verità dei colori: i componenti usano token
-  semantici (app/surface/content/muted/faint/line) mappati in tailwind.config.js su queste variabili.
-  Base = tema CHIARO; la classe `.dark` (impostata da lib/theme.js su <html>) attiva il tema SCURO.
-  I valori sono terne "R G B" così le utility con opacità (es. text-content/70) continuano a funzionare.
-  L'accento del brand (freedom-accent, verde) resta uguale in entrambi i temi. Palette ricca = M7.
+  Palette semantica del tema (M6, valori M7). Un solo punto-verità dei colori: i componenti usano
+  token semantici (app/surface/content/muted/faint/line) mappati in tailwind.config.js su queste
+  variabili. Base = tema CHIARO; la classe `.dark` (impostata da lib/theme.js su <html>) attiva il
+  tema SCURO. I valori sono terne "R G B" così le utility con opacità (es. text-content/70)
+  continuano a funzionare. M7 replica lo stile di Esempio/ (dark slate + accento ciano) nel tema
+  scuro e ne deriva una variante chiara leggibile (§5 ESTETICA_CONTEXT.md).
 */
 :root {
-  /* Tema chiaro */
+  /* Tema chiaro — variante slate-light derivata */
   --color-app: 255 255 255;
-  --color-surface: 241 245 244;
-  --color-surface-strong: 230 236 234;
-  --color-surface-stronger: 218 226 223;
-  --color-content: 15 26 23;
-  --color-muted: 71 85 82;
-  --color-faint: 140 155 150;
-  --color-line: 219 226 223;
+  --color-surface: 241 245 249;
+  --color-surface-strong: 226 232 240;
+  --color-surface-stronger: 203 213 225;
+  --color-content: 15 23 42;
+  --color-muted: 71 85 105;
+  --color-faint: 148 163 184;
+  --color-line: 226 232 240;
   color-scheme: light;
 }
 
 .dark {
-  /* Tema scuro (default del prodotto) */
-  --color-app: 11 31 26;
-  --color-surface: 20 38 33;
-  --color-surface-strong: 31 49 44;
-  --color-surface-stronger: 44 60 55;
-  --color-content: 255 255 255;
-  --color-muted: 199 209 205;
-  --color-faint: 130 145 140;
-  --color-line: 42 58 53;
+  /* Tema scuro — replica Esempio (slate) */
+  --color-app: 2 6 23;
+  --color-surface: 15 23 42;
+  --color-surface-strong: 30 41 59;
+  --color-surface-stronger: 51 65 85;
+  --color-content: 241 245 249;
+  --color-muted: 148 163 184;
+  --color-faint: 100 116 139;
+  --color-line: 30 41 59;
   color-scheme: dark;
 }
 

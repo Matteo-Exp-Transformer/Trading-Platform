@@ -29,7 +29,7 @@ function SidebarChatRow({ chat, active, onSelect, onRename }) {
   return (
     <li
       onClick={() => !editing && onSelect(chat.id)}
-      className={`group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer ${
+      className={`group flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer ${
         active ? 'bg-surface-stronger' : 'hover:bg-surface'
       }`}
     >
@@ -44,7 +44,7 @@ function SidebarChatRow({ chat, active, onSelect, onRename }) {
             if (e.key === 'Escape') setEditing(false);
           }}
           onClick={(e) => e.stopPropagation()}
-          className="flex-1 bg-surface-strong border border-freedom-accent rounded px-2 py-1 text-sm text-content focus:outline-none"
+          className="flex-1 bg-surface-strong border border-freedom-accent rounded-lg px-2 py-1 text-sm text-content focus:outline-none"
         />
       ) : (
         <div className="flex-1 min-w-0">
@@ -103,7 +103,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={onNuovaChat}
-            className="w-full bg-freedom-accent text-black rounded-full px-4 py-2 text-sm font-semibold hover:brightness-110 transition-opacity"
+            className="w-full bg-freedom-accent text-slate-950 rounded-full px-4 py-2 text-sm font-semibold hover:bg-freedom-accentHover transition-colors"
           >
             + Nuova chat
           </button>
@@ -142,7 +142,7 @@ export function Sidebar({
           <Link
             to="/impostazioni"
             onClick={onClose}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted hover:bg-surface hover:text-content"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-muted hover:bg-surface hover:text-content"
           >
             <span aria-hidden="true">⚙</span> Impostazioni
           </Link>

@@ -9,12 +9,14 @@
 > Gli agenti Esecuzione/Verifica **non** leggono né scrivono questo file: ricevono il loro contesto dal
 > prompt preparato. È il baton del Senior.
 >
-> **Ultimo aggiornamento:** 2026-07-01 — **M3·M4·M5·M6 COMPLETI**. M3 (cervello + test vista FU-011 + upload
-> FU-012). M4 (trascrizione JSON — FU-005 superata). FU-015 (screenshot non validi). M5 (streaming).
-> **M6 — Impostazioni ✅**: tema chiaro/scuro persistito per-utente (palette semantica su **tutta** l'app +
-> `color-scheme` dinamico), cambio password con riverifica, **modello AI per-account** admin-only (blindato
-> con privilegi di colonna DB). `IMPOSTAZIONI_CONTEXT.md` esiste ed è allineato. `validate` verde (132+77),
-> build OK. **Da verificare live** (tema/password/Flash). Prossimo: **M7 — estetica** (palette ricca), poi M8.
+> **Ultimo aggiornamento:** 2026-07-01 — **M3·M4·M5·M6·M7 COMPLETI e COMMITTATI**. M6 verificato live
+> dall'utente (tema/password/Flash OK) e committato. **M7 — Estetica ✅**: replica di `Esempio/` (dark
+> slate + accento ciano al posto del verde) su tutta l'app, riscrivendo i **valori** dei token M6 (nessun
+> hardcoded nuovo); revisione dedicata passata, `validate` verde (137+78). Aggiunte due skill: `aree/
+> TESTING_SKILL.md` e project skill `.claude/skills/avvia-app/`. **Aperto:** FU-017 (verifica visiva M7 in
+> browser, la fa l'utente) e la **decisione su `Esempio/`** legata a una nuova **pagina Home** richiesta
+> dall'utente (sfondo animato stile app vecchia — vedi §4). Prossimo: **M8 — blindatura + deploy** (o la
+> Home come mini-milestone prima, se l'utente la conferma).
 
 ---
 
@@ -25,12 +27,12 @@
 - **In chiusura:** **prima di commit e push** aggiorna le sezioni 1-4 (è un passo obbligatorio dello
   schema di lavoro — vedi `PREPARA_PROMPT_SKILL.md §5` e `CHIUSURA_SESSIONE.md` Parte B).
 
-## 0-bis. ⚠️ STATO GIT — M6 da committare
+## 0-bis. STATO GIT — allineato a M7
 
-M3·M4·M5 e FU-015 sono **committati** (ultimo: `81ad779` docs M5). **M6 NON è ancora committato**: le
-modifiche (migrazione già applicata sul DB remoto; nuovi file `models.js`/`theme.js`/`Settings.jsx` + palette
-semantica) sono in working tree, in attesa del "report finale" dell'utente per commit+push.
-`npm run validate` **verde**: **132 test client + 77 test server** (incluse le RLS live). Build produzione OK.
+M3·M4·M5·**M6·M7 committati e pushati**. M6: `fcbf0a6`/`088b2e8`/`e29b19c`. Poi doc M6/M7 (`58070ae`,
+`7d0ebca`) e la chiusura M7 (estetica + skill) in cima. `npm run validate` **verde: 137 client + 78 server**
+(incluse le RLS live), build OK. Working tree pulito **tranne `Esempio/`** (untracked, non gitignorata):
+è la fonte di riferimento visiva, **decisione in sospeso** (§4) — non committata, non cancellata.
 
 ## 0-ter. ✅ L'estratto può essere cancellato
 
@@ -91,11 +93,14 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 2. Prossimo passo concreto
 
-1. **Verifica live M6 [PROSSIMO]:** tema (cambia ovunque + resta dopo reload, indipendente per account),
-   cambio password (vecchia corretta/errata), modello per-account (`ai_model='gemini-2.5-flash'` → analisi con
-   Flash; `null`/errato → default Pro). Poi commit+push M6 (su conferma utente).
-2. **M7 — estetica:** palette **ricca** (verde-scuro raffinato, sfondo animato, font, ridisegno). In M6 c'è
-   solo la **base sobria** su tutta l'app: M7 la rifinisce riusando i token semantici già in `index.css`.
+1. **Decisione Home + `Esempio/` [PROSSIMO — con l'utente]:** l'utente vuole una **pagina Home** (oggi
+   all'avvio si entra diretti in «nuova analisi») con **sfondo animato** in stile app vecchia (oggetti/righe
+   in movimento, elementi moderni). Ha chiesto: quello sfondo/quella Home sono dentro `Esempio/`? **Verificato:
+   NON ci sono** (Esempio ha solo Dashboard/Workspace/Journal statiche, `index.css` minimale, nessun componente
+   di animazione). Quindi: o si recupera l'animazione da un'altra fonte, o si costruisce nuova. Da qui dipende
+   se `Esempio/` si tiene o si cancella. **Non toccare `Esempio/` finché l'utente non decide.**
+2. **FU-017 — verifica visiva M7:** l'utente apre l'app e controlla a occhio tema chiaro/scuro su
+   Login/Chat/Sidebar/Impostazioni (desktop+mobile), niente flash, disclaimer leggibile.
 3. **M8 (blindatura + deploy)** secondo `PIANO_LAVORO.md`.
 4. **FU-016 — console super-admin:** quando servirà, UI admin per assegnare `ai_model` (oggi a mano dal DB) +
    statistiche per-utente. Modello è già blindato lato DB (solo `service_role` scrive `ai_model`).
@@ -116,8 +121,12 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
   per-utente. Sostituirà la gestione manuale introdotta in M6. Definire scope e sicurezza (accesso solo admin).
 - **M6 — modello per-account:** la lista curata è `gemini-2.5-flash` / `gemini-2.5-pro` (default). Aggiungerne uno
   = una riga in `server/src/agent/models.js` (nessuna migrazione: `ai_model` senza CHECK di proposito).
-- Più avanti: deploy target · estetica beta (M7) — `CONTESTO_PRODOTTO.md §11`.
-- ~~FU-005 (Storage)~~ **superata** (M4). ~~FU-011 (test vista)~~, ~~FU-014 (chiave)~~, ~~FU-015 (screenshot non validi)~~ **risolte** (2026-07-01).
+- **Home + sfondo animato (nuova richiesta 2026-07-01):** l'utente vuole una Home d'ingresso con sfondo
+  animato stile app vecchia. **Non è in `Esempio/`** (verificato). Decidere: fonte dell'animazione (altra
+  cartella dell'app vecchia? da ricostruire?), scope, e se sarà una mini-milestone prima di M8. Da questa
+  decisione dipende il destino di `Esempio/` (tenere/cancellare).
+- Più avanti: deploy target (M8) — `CONTESTO_PRODOTTO.md §11`.
+- ~~FU-005 (Storage)~~ **superata** (M4). ~~FU-011~~, ~~FU-014~~, ~~FU-015~~ **risolte**. ~~M7 estetica~~ **fatta** (2026-07-01).
 
 ## 5. Puntatori (la verità vive lì, non qui)
 

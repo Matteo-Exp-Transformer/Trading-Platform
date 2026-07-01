@@ -26,4 +26,6 @@
 
 | FU-016 | 2026-07-01 | **Console super-admin**: UI riservata all'admin (te) per gestire gli utenti, **assegnare il modello AI per account** (oggi si fa a mano dal DB — vedi M6) e visualizzare le statistiche per-utente (analisi, uso, ecc.). Sostituirà la gestione manuale del modello introdotta in M6. Area «admin» non ancora prevista nel piano: definire scope e sicurezza (accesso solo admin) prima di costruirla. | intervista M6 (utente, 2026-07-01) | aperto |
 
+| FU-017 | 2026-07-01 | **M7 — Verifica visiva live in browser reale**: in questa sessione ho verificato i valori dei token nel CSS compilato e la suite `npm run validate`/`npm run build`, ma non ho potuto aprire un browser reale (nessuno strumento di automazione — `chromium-cli`/Playwright — disponibile in questo ambiente). Da controllare a occhio: tema chiaro E scuro su Login/Chat (bolle, composer, form nuova analisi, dropzone screenshot)/Sidebar/Impostazioni, desktop e mobile; nessun flash all'avvio; disclaimer leggibile in entrambi i temi. | `_sessioni-lavoro/2026-07-01/Report-M7-estetica-slate-ciano.md` | aperto |
+
 > Stati: `aperto` · `in corso` · `fatto` (con data di chiusura) · `scartato` (con motivo).

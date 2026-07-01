@@ -121,20 +121,23 @@ freedom: {
 > **Testo sull'accento:** Esempio usa **testo scuro** sui bottoni ciano (`text-slate-950`). Dove oggi
 > un bottone accento ha testo bianco, valutare il passaggio a testo scuro per fedeltà + contrasto.
 
-## 6. File coinvolti (previsti)
+## 6. File coinvolti (implementati 2026-07-01)
 
 | File | Ruolo | Stato |
 |------|-------|-------|
-| `client/src/index.css` | Riscrittura **valori** dei token chiaro/scuro (§5). | esiste (M6) |
-| `client/tailwind.config.js` | Accento verde → ciano (`freedom.accent`); eventuale `accentHover`. | esiste (M6) |
-| `client/src/components/chat/*` | Rifinitura forme (raggi/bordi/shadow) verso Esempio, **usando i token**. | esiste |
-| `client/src/components/layout/Sidebar.jsx` | Idem; il drawer resta superficie opaca (`.sidebar-panel`). | esiste |
-| `client/src/pages/{Chat,Login,Settings}.jsx` | Idem, allineamento estetico ai token/forme. | esiste |
-| _hover accento_ | Dove serve `hover:` sull'accento, usare ciano-400 (token o utility). | — |
+| `client/src/index.css` | Riscrittura **valori** dei token chiaro/scuro (§5). | **IMPLEMENTATO** |
+| `client/tailwind.config.js` | Accento verde → ciano (`freedom.accent = #06b6d4`); `freedom.accentHover = #22d3ee`. | **IMPLEMENTATO** |
+| `client/src/components/chat/MessageBubble.jsx` | Bolle su `surface-strong` (utente) / `surface-stronger` (agente) — non più `accent` sulla bolla utente, per fedeltà a `Esempio/`. `rounded-xl shadow-sm`. | **IMPLEMENTATO** |
+| `client/src/components/chat/ChatPanel.jsx` | Bolla streaming allineata a MessageBubble; bottone invio `text-slate-950` + hover `accentHover`. | **IMPLEMENTATO** |
+| `client/src/components/chat/NewAnalysisForm.jsx` | Raggi `rounded`→`rounded-xl`/`rounded-2xl` su bottoni/input/select/textarea/riquadri; testo `text-slate-950` sui bottoni accento. | **IMPLEMENTATO** |
+| `client/src/components/layout/Sidebar.jsx` | Righe storico e voce Impostazioni `rounded-xl`; bottone "+ Nuova chat" `text-slate-950`. Il drawer resta superficie opaca (`.sidebar-panel`). | **IMPLEMENTATO** |
+| `client/src/pages/{Login,Settings}.jsx` | Input `rounded-xl`, bottoni principali `rounded-2xl` + `text-slate-950`. | **IMPLEMENTATO** |
+| `client/src/pages/Chat.jsx` | Nessuna modifica necessaria: nessuna classe di colore/forma hardcoded, eredita tutto dai token. | **verificato, invariato** |
 
 > Le 9 occorrenze di `freedom-accent` (grep): `Login.jsx · Settings.jsx · NewAnalysisForm.jsx ·
-> Sidebar.jsx · MessageBubble.jsx · ChatPanel.jsx · Chat.jsx · index.css · Home.jsx`. Cambiando il
-> valore in config diventano ciano automaticamente. `Home.jsx` è legacy non instradato: irrilevante.
+> Sidebar.jsx · MessageBubble.jsx · ChatPanel.jsx · Chat.jsx · index.css · Home.jsx`. Il valore in
+> config è ora ciano ovunque (verificato nel CSS di produzione compilato). `Home.jsx` è legacy non
+> instradato: non toccato, come previsto.
 
 ## 7. Come si verifica M7 (il «fatto quando»)
 
@@ -144,6 +147,13 @@ freedom: {
 - Il toggle tema (M6) continua a funzionare e a persistere per utente; nessun flash all'avvio.
 - Disclaimer visibile e leggibile in entrambi i temi.
 - **Nessuna regressione:** `npm run validate` verde (client + server); build produzione OK.
+
+> **Stato verifica (2026-07-01):** i primi 5 punti sono verificati **da codice** (token/valori
+> corretti, confermato anche nel CSS compilato) ma **non ancora da uno screenshot/uso reale in
+> browser** — in questo ambiente di lavoro non era disponibile uno strumento di automazione browser
+> (`chromium-cli`/Playwright). L'ultimo punto (validate + build) è verificato: 137 test client + 78
+> server verdi, build produzione OK. Vedi `FOLLOW_UP.md` **FU-017** per il controllo visivo live
+> ancora dovuto.
 
 ## 8. Come estendere senza rompere / follow-up collegati
 

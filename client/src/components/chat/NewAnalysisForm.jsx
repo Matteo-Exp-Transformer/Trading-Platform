@@ -36,9 +36,9 @@ function ToggleGroup({ options, value, onChange, labelMap }) {
           key={opt}
           type="button"
           onClick={() => onChange(opt)}
-          className={`px-4 py-2 rounded border text-sm transition-colors ${
+          className={`px-4 py-2 rounded-xl border text-sm transition-colors ${
             value === opt
-              ? 'bg-freedom-accent border-freedom-accent text-black font-semibold'
+              ? 'bg-freedom-accent border-freedom-accent text-slate-950 font-semibold'
               : 'border-line text-muted hover:border-muted'
           }`}
         >
@@ -52,7 +52,7 @@ function ToggleGroup({ options, value, onChange, labelMap }) {
 // Uno slot screenshot etichettato per timeframe: o mostra l'anteprima caricata, o il picker.
 function ScreenshotSlot({ slot, image, busy, error, onPick, onRemove }) {
   return (
-    <div className="flex items-center gap-3 p-2 rounded bg-surface border border-line">
+    <div className="flex items-center gap-3 p-2 rounded-xl bg-surface border border-line">
       <div className="flex-1 min-w-0">
         <div className="text-sm text-content">
           {slot.label}
@@ -72,7 +72,7 @@ function ScreenshotSlot({ slot, image, busy, error, onPick, onRemove }) {
           <img
             src={image.preview}
             alt={`${slot.label} — ${image.name}`}
-            className="h-16 w-16 object-cover rounded border border-line"
+            className="h-16 w-16 object-cover rounded-lg border border-line"
           />
           <button
             type="button"
@@ -85,8 +85,8 @@ function ScreenshotSlot({ slot, image, busy, error, onPick, onRemove }) {
         </div>
       ) : (
         <label
-          className={`cursor-pointer text-sm px-3 py-2 rounded border border-line shrink-0 ${
-            busy ? 'text-faint' : 'text-freedom-accent hover:brightness-110'
+          className={`cursor-pointer text-sm px-3 py-2 rounded-xl border border-line shrink-0 ${
+            busy ? 'text-faint' : 'text-freedom-accent hover:text-freedom-accentHover transition-colors'
           }`}
         >
           {busy ? 'Carico…' : '+ Carica'}
@@ -232,7 +232,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
           <select
             value={values.asset}
             onChange={(e) => set('asset', e.target.value)}
-            className="bg-surface-strong border border-line rounded px-3 py-2 text-content focus:outline-none focus:border-freedom-accent"
+            className="bg-surface-strong border border-line rounded-xl px-3 py-2 text-content focus:outline-none focus:border-freedom-accent"
           >
             <option value="" className="bg-app text-content">— Seleziona —</option>
             {ASSET_OPTIONS.map((a) => (
@@ -248,7 +248,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
               placeholder="Es. USOIL, GBPJPY…"
               value={values.altroAsset}
               onChange={(e) => set('altroAsset', e.target.value)}
-              className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
+              className="bg-surface-strong border border-line rounded-xl px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
             />
           )}
           {errors.asset && (
@@ -311,7 +311,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
           )}
 
           {values.hasPosizione === 'si' && (
-            <div className="flex flex-col gap-3 mt-1 p-3 rounded bg-surface border border-line">
+            <div className="flex flex-col gap-3 mt-1 p-3 rounded-xl bg-surface border border-line">
               {/* Direzione */}
               <div className="flex flex-col gap-1">
                 <span className="text-xs text-muted">Direzione</span>
@@ -337,7 +337,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
                   placeholder="Es. 2350.50"
                   value={values.prezzoApertura}
                   onChange={(e) => set('prezzoApertura', e.target.value)}
-                  className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
+                  className="bg-surface-strong border border-line rounded-xl px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
                 />
                 {errors.prezzoApertura && (
                   <p role="alert" className="text-red-600 dark:text-red-400 text-xs">
@@ -355,7 +355,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
                     placeholder="Es. 2330"
                     value={values.sl}
                     onChange={(e) => set('sl', e.target.value)}
-                    className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
+                    className="bg-surface-strong border border-line rounded-xl px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -365,7 +365,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
                     placeholder="Es. 2400"
                     value={values.tp}
                     onChange={(e) => set('tp', e.target.value)}
-                    className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
+                    className="bg-surface-strong border border-line rounded-xl px-3 py-2 text-content text-sm focus:outline-none focus:border-freedom-accent"
                   />
                 </div>
               </div>
@@ -381,7 +381,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
             value={values.idea}
             onChange={(e) => set('idea', e.target.value)}
             rows={2}
-            className="bg-surface-strong border border-line rounded px-3 py-2 text-content text-sm resize-none focus:outline-none focus:border-freedom-accent"
+            className="bg-surface-strong border border-line rounded-2xl px-3 py-2 text-content text-sm resize-none focus:outline-none focus:border-freedom-accent"
           />
         </fieldset>
 
@@ -422,7 +422,7 @@ export function NewAnalysisForm({ onSubmit, loading }) {
         <button
           type="submit"
           disabled={loading}
-          className="bg-freedom-accent text-black font-semibold py-3 rounded hover:brightness-110 disabled:opacity-50 transition-opacity"
+          className="bg-freedom-accent text-slate-950 font-semibold py-3 rounded-2xl hover:bg-freedom-accentHover disabled:opacity-50 transition-colors"
         >
           {loading ? 'Avvio in corso…' : 'Avvia analisi'}
         </button>

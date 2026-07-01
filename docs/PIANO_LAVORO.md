@@ -107,7 +107,7 @@ la scheda JSON continua a salvarsi (M4) e non compare mai; validate verde.
 un account con `ai_model='gemini-2.5-pro'` usa Pro, `null`/errato usa il default Flash; validate verde.
 **✅ Verificato live (2026-07-01):** tema, cambio password e modello per-account provati a mano, tutto OK.
 
-## M7 — Estetica (rifinitura additiva)  ⬜  *(deep — tocca più di una view; solo client, nessun LOCK del cuore)*
+## M7 — Estetica (rifinitura additiva)  ✅ *(revisione passata, validate verde 137+78 — 2026-07-01)*  *(deep — tocca più di una view; solo client, nessun LOCK del cuore)*
 **Svolta d'intervista (2026-07-01):** l'estetica definitiva è la **replica fedele della vecchia app**
 (cartella `Esempio/`): **dark su slate + accento ciano**, sobrio, **statico**, font di sistema — *non* più
 "verde-scuro + sfondo animato" (CONTESTO L19). Il tema chiaro/scuro di M6 resta.
@@ -118,6 +118,10 @@ un account con `ai_model='gemini-2.5-pro'` usa Pro, `null`/errato usa il default
 (raggi/bordi/shadow) verso Esempio usando i token, tema chiaro derivato e leggibile.
 **Fatto quando:** tema scuro = look di `Esempio/`, tema chiaro coerente e leggibile, toggle e persistenza
 M6 intatti, disclaimer visibile in entrambi i temi, **zero regressioni** (`npm run validate` verde, build OK).
+**✅ Fatto (2026-07-01):** token slate chiaro/scuro + accento ciano su tutta l'app, bolle chat allineate a
+`Esempio/`, forme rifinite. Revisione dedicata passata (nessun blocco). Verifica visiva live in browser =
+**FU-017** (la fa l'utente). **Aperto collegato:** pagina **Home** con sfondo animato (nuova richiesta) —
+non presente in `Esempio/`, da decidere separatamente.
 
 ## M8 — Blindatura demo & deploy  ⬜  *(deep)*
 **Obiettivo:** demo «blindata» per il cliente. **Deliverable:** gestione errori a vista ovunque,

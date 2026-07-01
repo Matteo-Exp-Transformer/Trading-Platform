@@ -108,14 +108,14 @@ export default function Settings() {
   }
 
   const segBtn = (active) =>
-    `flex-1 px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
+    `flex-1 px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
       active
-        ? 'bg-freedom-accent text-black'
+        ? 'bg-freedom-accent text-slate-950'
         : 'text-muted hover:text-content'
     }`;
 
   const inputCls =
-    'bg-surface-strong border border-line rounded px-3 py-2 ' +
+    'bg-surface-strong border border-line rounded-xl px-3 py-2 ' +
     'text-content placeholder:text-faint ' +
     'focus:outline-none focus:border-freedom-accent';
 
@@ -233,7 +233,7 @@ export default function Settings() {
               <button
                 type="submit"
                 disabled={pwLoading}
-                className="bg-freedom-accent text-black font-semibold py-2 rounded hover:brightness-110 disabled:opacity-50"
+                className="bg-freedom-accent text-slate-950 font-semibold py-2 rounded-2xl hover:bg-freedom-accentHover disabled:opacity-50 transition-colors"
               >
                 {pwLoading ? 'Aggiornamento…' : 'Aggiorna password'}
               </button>

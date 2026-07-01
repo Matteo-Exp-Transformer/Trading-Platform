@@ -55,7 +55,7 @@ export function ChatPanel({
         {/* Streaming (M5): la prosa in arrivo come bolla assistant, con cursore mentre scorre. */}
         {hasStreaming && (
           <div className="flex justify-start" aria-live="polite">
-            <div className="max-w-[85%] sm:max-w-[70%] px-4 py-3 rounded-2xl rounded-bl-sm text-sm leading-relaxed whitespace-pre-wrap break-words bg-surface-strong text-content">
+            <div className="max-w-[85%] sm:max-w-[70%] px-4 py-3 rounded-xl shadow-sm text-sm leading-relaxed whitespace-pre-wrap break-words bg-surface-stronger text-content">
               {streamingText}
               {analyzing && <span className="animate-pulse">▋</span>}
             </div>
@@ -94,7 +94,7 @@ export function ChatPanel({
           <button
             type="submit"
             disabled={!text.trim() || busy}
-            className="bg-freedom-accent text-black px-4 py-2 rounded-full text-sm font-semibold disabled:opacity-50 hover:brightness-110 transition-opacity"
+            className="bg-freedom-accent text-slate-950 px-4 py-2 rounded-full text-sm font-semibold disabled:opacity-50 hover:bg-freedom-accentHover transition-colors"
           >
             Invia
           </button>
