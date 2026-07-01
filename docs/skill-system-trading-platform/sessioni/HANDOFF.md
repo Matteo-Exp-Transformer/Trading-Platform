@@ -9,8 +9,9 @@
 > Gli agenti Esecuzione/Verifica **non** leggono né scrivono questo file: ricevono il loro contesto dal
 > prompt preparato. È il baton del Senior.
 >
-> **Ultimo aggiornamento:** 2026-07-01 — **M3 "cervello" FATTO** e **committato**; **FU-012 chiusa**
-> (slot screenshot per-timeframe + compressione immagini client). Prossimo: **TEST VISTA su grafici reali (FU-011)**.
+> **Ultimo aggiornamento:** 2026-07-01 — **M3 COMPLETO**: cervello committato, **FU-012 chiusa** (slot
+> per-timeframe + compressione client) e **FU-011 TEST VISTA passato** (analisi su grafici reali verificata
+> dall'utente — rischio #1 rientrato). Prossimo: **M4 — Upload screenshot** (Storage Supabase + policy RLS, FU-005).
 
 ---
 
@@ -35,13 +36,16 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 1. Dove siamo adesso
 
-- **M3 — "accendere il cervello": ✅ FATTO.** Catena `skillLoader→promptBuilder→providerClient→
-  orchestrator` portata e adattata a **Gemini 2.5 Pro + Supabase**. Dalla chat parte una **prima analisi
-  reale**: form (con upload screenshot) → Gemini **legge i grafici** (vision) → risposta in prosa kit →
-  salvata e mostrata; follow-up testuali con contesto; errori gestiti (mai crash). Report:
+- **M3 — "accendere il cervello": ✅ COMPLETO.** Catena `skillLoader→promptBuilder→providerClient→
+  orchestrator` portata e adattata a **Gemini 2.5 Pro + Supabase**. Dalla chat parte un'**analisi
+  reale**: form (con upload screenshot **etichettati per timeframe** + compressione client) → Gemini
+  **legge i grafici** (vision) → risposta in prosa kit → salvata e mostrata; follow-up testuali con
+  contesto; errori gestiti (mai crash). Report M3:
   `_sessioni-lavoro/2026-06-30/Report-M3-catena-agente-cervello.md`.
-- **Verificato live** contro Gemini reale: connessione, vision (immagine inline letta), catena completa
-  col kit reale → risposta nello stile del kit. Manca solo il **test vista su grafici reali** (FU-011).
+- **TEST VISTA (FU-011) ✅ passato (2026-07-01):** analisi su grafici reali verificata dall'utente,
+  lettura corretta in stile Aware Trader. **Rischio #1 rientrato** — il prodotto sta in piedi.
+- **FU-012 ✅ chiusa (2026-07-01):** slot screenshot per-timeframe + compressione immagini client
+  (`_sessioni-lavoro/2026-07-01/Report-FU-011-FU-012-testvista-upload.md`).
 - **M2** resta interamente chiuso (chat base, sidebar/storico, RLS).
 
 ## 1-bis. Decisioni importanti prese in M3 (per memoria)
@@ -60,11 +64,11 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 2. Prossimo passo concreto
 
-1. **TEST VISTA (FU-011) — rischio #1 [PROSSIMO]:** avviare l'app (`npm run dev`), fare un'analisi su
-   **grafici reali** (XAU 15m, NAS100…) e valutare la **qualità della lettura** di 2.5 Pro (struttura/
-   livelli/RSI). Decidere il comportamento sul primo errore di lettura. Verificare che `thinkingBudget=4096`
-   basti. Ora il form manda screenshot **etichettati per timeframe** (FU-012): sfruttalo nel test.
-2. **Poi M4/M5** secondo `PIANO_LAVORO.md` (Storage allegati; streaming).
+1. **M4 — Upload screenshot [PROSSIMO]:** oggi gli screenshot viaggiano come base64 inline nel payload
+   (compressi lato client, FU-012). M4 li porta su **Supabase Storage** (bucket privato per utente) con
+   **policy RLS** (FU-005, già predisposto con la colonna `messages.attachments` jsonb). Prima
+   dell'esecuzione: intervista → aggiornare `CHAT_ANALISI_CONTEXT` / creare nota Storage → prompt esecutore.
+2. **Poi M5** (streaming) secondo `PIANO_LAVORO.md`.
 
 ## 3. Decisioni d'intervista prese e già nei doc
 
@@ -74,10 +78,10 @@ dal monolite del repo, non dai placeholder dell'estratto — vedi §1-bis.)
 
 ## 4. Questioni aperte da portare all'utente
 
-- **Esito test vista (FU-011):** dopo il test su grafici reali, se la lettura è debole si rivaluta il
-  modello/prompt. È la conferma che mancava alle decisioni M3.
+- ~~Esito test vista (FU-011)~~ **risolto (2026-07-01):** lettura corretta su grafici reali, rischio #1 rientrato.
 - **`GOOGLE_API_KEY` formato inusuale (FU-014):** la chiave inizia con `AQ.Ab8...` (non `AIza...`);
   funziona ora ma va confermata come key stabile prima di demo/prod.
+- **Policy Storage allegati (FU-005):** da scrivere a M4, prima di spostare gli screenshot su Storage.
 - Più avanti: deploy target · modelli nello switcher · estetica beta — `CONTESTO_PRODOTTO.md §11`.
 
 ## 5. Puntatori (la verità vive lì, non qui)
