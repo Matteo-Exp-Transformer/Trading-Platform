@@ -49,7 +49,7 @@ All'avvio, l'agente mostra in chat una breve checklist tipo:
 
 ```
 📋 Avvio sessione — allineamento skill system
-- Profilo riconosciuto: {{Esecuzione | Verifica | Meta}}
+- Profilo riconosciuto: {{Prepara/Senior | Esecuzione | Verifica | Meta}}
 - Parole di vocabolario rilevate nel tuo messaggio: {{elenco o «nessuna»}}
 - File di contesto che caricherò: {{elenco}}
 - LOCK toccati da questo task: {{elenco o «nessuno»}}
@@ -59,9 +59,9 @@ All'avvio, l'agente mostra in chat una breve checklist tipo:
 Se mancano informazioni per scegliere bene → l'agente chiede **prima** di procedere
 (regola anti-buco della Bussola §0.3).
 
-### 2b. Anteprima strutturale UI — compito dell'agente PREPARA-PROMPT
+### 2b. Anteprima strutturale UI — candidata, NON attiva
 
-> Vale **solo per l'agente prepara-prompt** (il filtro d'ingresso), NON per l'agente esecutore.
+> È ancora in `PROPOSTE.md`: non eseguirla automaticamente finché l'utente non la approva.
 
 Quando il lavoro tocca UI o responsive design e l'agente prepara-prompt deve farti **domande che
 ti fanno decidere la UI** (layout, posizione elementi, comportamento responsive), genera una
@@ -74,7 +74,8 @@ rispondi guardando invece che immaginando.
 - Quando: solo se la tua decisione UI sblocca il prompt. Se la UI è già chiara, non serve.
 - L'agente esecutore NON fa questo: riceve già il prompt con le decisioni prese.
 
-> Questa pratica è registrata come voce in `PROPOSTE.md` finché non approvata e promossa.
+> Se l'utente la richiede esplicitamente in una sessione, può autorizzarla per quel singolo task
+> senza promuoverla a regola globale.
 
 ---
 

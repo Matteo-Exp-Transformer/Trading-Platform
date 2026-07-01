@@ -1,17 +1,17 @@
-# hooks/ — enforcement vero (fine-chat + guard PROD)
+# hooks/ — template opzionali, non installati
 
-> Questi file portano due fasi critiche da governance soft (l'agente *dovrebbe*) a **enforcement
-> vero**: una macchina che legge i file/payload e ferma o rilancia l'agente. Sono opzionali — copiali
-> nel progetto solo se l'IDE/piattaforma supporta gli hook di lifecycle.
+> In questa repository **non c'è enforcement hook attivo**. I file `*.template` sono esempi generici:
+> contengono path, formato data e regex da adattare prima di copiarli nella configurazione dell'IDE.
+> Finché non esiste una config installata e testata, valgono soltanto le regole Markdown.
 
 ## Cosa c'è qui
 
 | File | Evento | Cosa fa |
 |------|--------|---------|
-| `fine-sessione-nudge.mjs` | `stop` (Cursor) | A fine chat legge i `Report-*.md` freschi e verifica la sezione 11 «Domande di chiusura»: per ogni `❓ Q` controlla che la `✅ R` non sia vuota/placeholder. Risposte mancanti → **blocca e insiste**; tutte presenti → silenzio. Il cold-check «mente fredda» va messo al pre-commit, non nello `stop`, per evitare rilanci ripetuti a fine risposta. |
-| `guard-prod.mjs` | `beforeMCPExecution` + `beforeShellExecution` (Cursor) | Ferma le **scritture sul DB di PRODUZIONE** (via MCP o shell) e chiede conferma (`permission: "ask"`). Letture e operazioni su TEST passano lisce. Riconosce PROD dal **nome del server MCP**, non dall'URL. |
-| `fine-sessione-senior.mjs` | `Stop` (Claude Code) | **AVANZATO/OPZIONALE.** Gemello del nudge per chi adotta il ruolo «Meta senior»: stessa logica §11 + 2 promemoria senior (propagazione template v.0 + Playbook). Sintassi Claude Code (`stop_hook_active`, `decision:block`). Installa solo se usi il ruolo senior. |
-| `hooks.json` | — | Registra gli hook Cursor: `stop` (loop_limit 3) + `beforeMCPExecution`/`beforeShellExecution` (guard-prod). |
+| `fine-sessione-nudge.mjs.template` | `stop` (Cursor) | esempio generico per report |
+| `guard-prod.mjs.template` | pre-esecuzione (Cursor) | esempio generico di guardia PROD |
+| `fine-sessione-senior.mjs.template` | `Stop` (Claude Code) | esempio avanzato |
+| `hooks.json.template` | — | config Cursor da copiare/adattare |
 
 ## Perché v4 (da «titolo» a «risposta»)
 
@@ -24,19 +24,19 @@ rileggere diff e file → la verifica intelligente la fa lui, l'hook controlla s
 
 ## Come si installa (Cursor)
 
-1. Copia gli script dove preferisci (es. `.cursor/hooks/`).
-2. Fondi il contenuto di `hooks.json` in `.cursor/hooks.json` (se ne hai già uno, **unisci** le
+1. Copia gli script senza suffisso `.template` dove preferisci (es. `.cursor/hooks/`).
+2. Fondi il contenuto di `hooks.json.template` in `.cursor/hooks.json` (se ne hai già uno, **unisci** le
    sezioni invece di sovrascrivere). Allinea i `command` ai percorsi reali.
 3. Verifica che `node` sia sul PATH dell'IDE.
 4. Verifica che Git invochi davvero Husky: `git config core.hooksPath` deve restituire `.husky`.
    Se restituisce `nul`, riattiva con `git config core.hooksPath .husky`. Su Windows il file
    `.husky/pre-commit` deve iniziare con `#!/usr/bin/env sh`, altrimenti Git puo fallire con
    `cannot spawn .husky/pre-commit`.
-5. Per il guard-prod: apri `guard-prod.mjs` e adatta i valori in « CONFIG DA ADATTARE » (nome server
+5. Per il guard-prod: apri la copia di `guard-prod.mjs.template` e adatta i valori in « CONFIG DA ADATTARE » (nome server
    MCP prod/test, comandi shell). Senza questo passaggio non riconosce il tuo ambiente.
 
 Per Claude Code: registra gli hook in `.claude/settings.local.json` (`PreToolUse` per guard-prod,
-`Stop` per `fine-sessione-senior.mjs`).
+`Stop` per la copia adattata di `fine-sessione-senior.mjs.template`).
 
 ## Da adattare negli script (segnati in « CONFIG » in testa a ogni file)
 
@@ -55,5 +55,4 @@ Per Claude Code: registra gli hook in `.claude/settings.local.json` (`PreToolUse
   a volte è legittima). Nota Claude Code: un `ask` NON vince un `allow` già concesso in settings — togli
   gli `allow` espliciti sui tool di scrittura PROD perché la guard morda.
 
-> Mappa di quali hook iniettano/bloccano per piattaforma: `comunicazione/EVOLUZIONE_SKILLS.md`
-> §2-quater.
+> Stato enforcement del progetto: `comunicazione/EVOLUZIONE_SKILLS.md` §1.

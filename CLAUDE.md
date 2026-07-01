@@ -35,7 +35,7 @@ si scrive codice di una zona prima che il suo file di `context/` esista. Dettagl
 | File | Perché è importante |
 |------|---------------------|
 | `kit/` | Metodo Aware Trader (system prompt dell'AI). LOCK: solo server, mai esposto, mai citare il nome-metodo proibito. |
-| `server/src/agent/` | Catena agente (skillLoader→promptBuilder→providerClient→orchestrator). LOCK: riusare; si adatta solo providerClient (Gemini+streaming). |
+| `server/src/agent/` | Catena agente (skillLoader→promptBuilder→providerClient→orchestrator). LOCK: preservare ordine/responsabilità; formato e chiamata Gemini restano in providerClient. |
 | `.env.local` | Chiavi Gemini + Supabase service key (root, gitignored; modello in `.env.example`). LOCK: solo server, mai nel client. |
 | `docs/CONTESTO_PRODOTTO.md` | Fonte di verità di prodotto e decisioni LOCKED. |
 
@@ -50,6 +50,9 @@ npm run validate       # gate pre-PR = lint + test (NON typecheck: JS, non TS)
 npm run build          # build produzione del client
 node --check <file.js> # check sintassi dopo modifiche JS (solo .js, non .jsx)
 ```
+
+> Su PowerShell con esecuzione script disabilitata usare `npm.cmd`. `validate` avvia anche i test
+> RLS sul Supabase remoto: prima confermare che la destinazione sia l'ambiente di test previsto.
 
 ## Convenzioni
 

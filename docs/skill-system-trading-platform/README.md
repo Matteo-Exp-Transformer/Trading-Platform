@@ -1,8 +1,9 @@
-# Skill System v.0 — Template riusabile
+# Skill System — FREEDOM TRADING SYSTEM
 
-> Kit pronto per dare a un nuovo progetto lo stesso sistema operativo per agenti AI
-> già testato sul progetto-madre. Copia questa cartella nel nuovo progetto, segui
-> `MANUALE_AVVIO.md`, riempi i `{{segnaposto}}`, cancella ciò che non serve.
+> Questa cartella è la **copia operativa** del progetto, non un template da inizializzare.
+> Per lavorare all'app entra da `AGENTS.md` e dalla skill `$freedom-trading-workflow`.
+> `MANUALE_AVVIO.md`, `*.template`, `_TEMPLATE_*`, `ESEMPIO_*` e i segnaposto `{{...}}`
+> sono materiale riusabile/inattivo: non sono regole del progetto corrente.
 
 ---
 
@@ -36,7 +37,7 @@ comportamento dell'agente). Sostituisce il «rispiegare tutto da capo» a ogni n
 vivo + profilo scolastico + roadmap skill, con lezione e richiamo *spaced-repetition* a fine chat.
 Vive nella cartella privata, si attiva dal `MANUALE_AVVIO.md` (passo 8-bis). **Solo l'agente
 senior/Meta** lo usa, mai gli agenti di lavoro normali. Vedi `comunicazione/EVOLUZIONE_SKILLS.md`
-Playbook §6.
+stato in §3. In questo progetto non è attivo.
 
 ## Struttura della cartella
 
@@ -63,13 +64,13 @@ _skill-system-v0/
 │   ├── PROPOSTE.md                ← parole candidate in attesa di approvazione
 │   ├── ERRORI_PROCESSO.md         ← pattern di errore ricorrenti
 │   ├── REVISIONE.md               ← compiti dell'agente Meta (chi affina il sistema)
-│   ├── EVOLUZIONE_SKILLS.md       ← roadmap del sistema: milestone + idee + Playbook senior
+│   ├── EVOLUZIONE_SKILLS.md       ← roadmap operativa del sistema + idee
 │   ├── CHIUSURA_SESSIONE.md       ← guida unica della fase fine-chat (report + commit/push/DB/terminali)
 │   └── COMUNICAZIONE_SKILL.md     ← stile di risposta (breve, concreto, no gergo)
 │
 ├── hooks/                         ← (opzionale) enforcement vero della fase fine-chat
-│   ├── fine-sessione-nudge.mjs    ← hook `stop`: rilancia l'agente se il report è incompleto
-│   ├── hooks.json                 ← registra l'hook sull'evento `stop`
+│   ├── fine-sessione-nudge.mjs.template ← esempio hook `stop` non installato
+│   ├── hooks.json.template        ← esempio config da adattare
 │   └── README.md                  ← come installarlo e cosa adattare
 │
 └── sessioni/
@@ -78,13 +79,13 @@ _skill-system-v0/
     └── FOLLOW_UP.md               ← debiti tecnici differiti (FU-NNN)
 ```
 
-## Come si usa (sintesi — il dettaglio è in `MANUALE_AVVIO.md`)
+## Come si usa nel progetto corrente
 
-1. Copia `_skill-system-v0/` nel nuovo progetto (o estraila come kit a sé).
-2. Apri `MANUALE_AVVIO.md` e segui i 7 passi.
-3. Sostituisci tutti i `{{segnaposto}}`.
-4. Cancella i file `ESEMPIO_*` e `_TEMPLATE_*` una volta capito il modello.
-5. Da lì in poi il sistema cresce da solo, una sessione alla volta.
+1. Leggi `00_BUSSOLA_SKILL.md`.
+2. Scegli il profilo per il deliverable e carica solo skill/context instradati.
+3. Verifica codice e lockfile per valori e comportamento effettivi.
+4. Se codice e documenti divergono, segnala il drift e aggiorna la fonte competente nello stesso lavoro.
+5. Usa `MANUALE_AVVIO.md` solo quando estrai il sistema per un progetto nuovo.
 
 ## Principi di design (perché è fatto così)
 
@@ -101,7 +102,7 @@ _skill-system-v0/
   l'IDE lo permette, un hook `stop` (`hooks/`) la blinda: rilancia l'agente se il report è incompleto.
 - **Markdown vs enforcement vero.** Una regola `.md` l'agente *dovrebbe* seguirla; un hook la
   *esegue la macchina*. Quando un comportamento critico viene saltato nonostante la regola, serve
-  l'hook — non un'altra regola markdown. Vedi `comunicazione/EVOLUZIONE_SKILLS.md` (Playbook senior).
+  l'hook — non un'altra regola markdown. Vedi `comunicazione/EVOLUZIONE_SKILLS.md`.
 - **Didattica = governance soft, solo senior.** L'introduzione-termini e la lezione-fine-chat si
   verificano solo dalla *conversazione*, non dai file → nessun hook: solo regola nel Playbook senior
   + file vivi privati. E vale **solo** per l'agente senior/Meta, non per gli agenti di lavoro normali.
@@ -109,4 +110,5 @@ _skill-system-v0/
 
 ---
 
-*Template estratto dal progetto-madre il 2026-05-29. Versione 0.*
+*Copia operativa riallineata al progetto il 2026-07-02; i file esplicitamente marcati template
+restano riusabili per altri progetti.*

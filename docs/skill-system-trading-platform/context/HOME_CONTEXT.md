@@ -1,13 +1,12 @@
 # Home — file di contesto (M7-bis)
 
-> Mappa della **pagina Home**: la landing che l'utente vede **dopo il login**, prima di entrare in
-> analisi. Oggi non esiste: dopo il login si finisce dritti in Chat (`/`). Zona **deep** (nuovo
-> componente + nuova rotta + ricablaggio del landing), ma **solo client**: non tocca catena agente,
+> Mappa della **pagina Home** implementata su `/`: la landing che l'utente vede **dopo il login**,
+> prima di entrare in analisi. Zona client: non tocca catena agente,
 > kit, DB, auth. Fonte prodotto: `docs/CONTESTO_PRODOTTO.md` · piano: `docs/PIANO_LAVORO.md` (M7-bis).
 >
 > **Trigger di routing:** «home», «landing», «pagina d'arrivo», «sfondo animato», «dashboard d'ingresso»
 > → questo file (+ `ESTETICA_CONTEXT.md` per i token).
-> Aggiornato: 2026-07-01 (navigazione autenticata condivisa).
+> Aggiornato: 2026-07-02.
 
 ---
 
@@ -16,9 +15,8 @@
 L'utente vuole una **porta d'ingresso** all'app: dopo il login non deve trovarsi subito nel form di
 analisi, ma in una **Home moderna e immersiva** che comunichi "piattaforma di trading premium", da cui
 lanciare le azioni. Nasce da un prompt descrittivo (app vecchia, non più disponibile come codice):
-quel prompt descrive **molti** elementi (mercati, calendario, orologio, ecc.), ma **per ora si fa solo
-la pagina + il tema + lo sfondo animato + l'hero con i CTA reali**. Tutto ciò che richiede **dati o
-funzioni nuove** è rimandato a follow-up.
+la pagina è poi cresciuta con stato piazze, ultima sessione e card descrittive. Dati di mercato
+live, calendario e funzioni senza backend restano fuori scope.
 
 ## 2. Decisioni d'intervista (2026-07-01)
 
@@ -28,7 +26,7 @@ funzioni nuove** è rimandato a follow-up.
 | **Tema Home** | **Sempre scura, immersiva.** Ignora il toggle chiaro/scuro (M6). | Il toggle continua a valere nelle pagine app (Chat/Impostazioni). La Home forza la palette **scura** localmente anche se `<html>` non ha `.dark`. |
 | **Font** | **Di sistema** (coerente con l'app). | Space Grotesk (dal prompt) NON incluso ora → **FU** (opzionale, solo titoli). |
 | **Landing** | La Home diventa **`/`** (post-login). La Chat si sposta su una **rotta propria** (es. `/nuova-analisi`). | Va ricablata ogni navigazione che oggi assume `/` = Chat. |
-| **Scope** | Solo **pagina + tema + sfondo animato + hero con CTA reali**. | Il resto (dati/funzioni) → §5 FU. |
+| **Scope attuale** | pagina + tema + sfondo + hero/CTA + stato piazze + ultima sessione + card descrittive | Niente quotazioni live o dati mock. |
 | **Navigazione autenticata** | Header condiviso con hamburger + nome app cliccabile verso Home; Sidebar disponibile su Home, Chat e Impostazioni. | Impostazioni ed Esci vivono solo nella Sidebar. Nessuna freccia indietro ora: arriverà con future pagine secondarie. |
 
 ## 3. Cosa si costruisce ORA (dentro scope)
@@ -87,7 +85,9 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 - **FU-020** TradingCalendar: calendario mensile con giorno corrente evidenziato. *(Aperta, non in scope demo: decorativa senza dati dietro.)*
 - **FU-021** FeatureCards "panoramica app" (Analisi assistita · Memoria sessioni · Journal · Monitoraggio mercati). **FATTO (2026-07-01)** — sezione introdotta dal titolo **«Cosa puoi fare»**, con 4 card statiche descrittive (nessun link), sotto l'hero (vedi §6). Journal = "in arrivo".
 - **FU-022** ActiveSessionCard: card "riapri sessione" (chat più recente dell'utente). **FATTO (2026-07-01)** — dati interni via `listChats()` (RLS), sopra le FeatureCards. **Se non c'è sessione (o loading/errore) → la card non compare** (vedi §6).
-- **FU-023** Pagina **Journal** (funzionalità nuova, non solo estetica).
+- **FU-023** Pagina **Journal** (funzionalità nuova). **FATTO (2026-07-02)** — pagina `/journal`
+  (diario di trading integrato con le analisi). In Home la card *Journal* di `FeatureCards` è ora un
+  **link reale** verso `/journal` (non più "in arrivo"). Dettaglio in `context/JOURNAL_CONTEXT.md`.
 - **FU-024** Pagina **Trading Live** (funzionalità nuova).
 - **FU-025** Font **Space Grotesk** per i titoli della Home (opzionale, "premium").
 
@@ -104,7 +104,7 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 | `client/src/components/home/AnimatedTradingBackground.jsx` | Sfondo animato (canvas+rAF, reduced-motion→statico, meno particelle su mobile). | **IMPLEMENTATO** |
 | `client/src/components/home/{Hero,HomeCta}.jsx` | Hero centrata sull’agente di analisi tecnica e unico CTA «Nuova analisi»; storico nel menu laterale. | **IMPLEMENTATO** |
 | `client/src/components/home/ActiveSessionCard.jsx` + `useActiveSession.js` | Card "Riprendi sessione" (FU-022): chat più recente via `listChats()` (RLS); sparisce se nessuna sessione/loading/errore. | **IMPLEMENTATO (FU-022)** |
-| `client/src/components/home/FeatureCards.jsx` | Sezione «Cosa puoi fare» e panoramica app (FU-021): 4 card statiche descrittive (icone SVG inline, hover ciano), nessun link. | **IMPLEMENTATO (FU-021)** |
+| `client/src/components/home/FeatureCards.jsx` | Sezione «Cosa puoi fare» e panoramica app (FU-021): 4 card (icone SVG inline, hover ciano). La card *Journal* è un **link** verso `/journal` (FU-023, 2026-07-02); le altre restano descrittive. | **IMPLEMENTATO (FU-021 · link Journal FU-023)** |
 | `client/src/lib/dateFormat.js` | `relativeDayLabel()`: etichetta "oggi/ieri/N giorni fa/data breve" per l'ultimo aggiornamento della sessione. | **IMPLEMENTATO (FU-022)** |
 | `client/src/components/home/useMarketStatus.js` | Stato aperto/chiuso di Londra/New York/Tokyo: orari **locali** per piazza via `Intl`+fuso IANA (DST-safe, solo lun–ven), refresh 60s. | **IMPLEMENTATO (FU-018)** |
 | `client/src/components/home/MarketStatus.jsx` | Stato mercati nella Home; pallino **verde** aperto / grigio chiuso. Desktop: inline a destra dell'header. Mobile: riga orizzontale a tutta larghezza **sopra** il nome app. | **IMPLEMENTATO (FU-018)** |
@@ -120,6 +120,10 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 > **Verde stato mercati (FU-018):** il LOCK §4 dice "niente verde". Il pallino "aperto" di
 > `MarketStatus.jsx` usa **verde** (`bg-green-500`) per **scelta esplicita dell'utente** (2026-07-01):
 > eccezione autorizzata e confinata al micro-indicatore di stato. "Chiuso" resta grigio (token `faint`).
+
+> **Gap audit 2026-07-02:** Tokyo è codificata 09:00–15:00 continuativo, ma la sessione cash TSE è
+> 09:00–11:30 e 12:30–15:30. Tutte e tre le piazze ignorano festività/chiusure speciali: finché
+> non corretto, descrivere il widget come indicativo e non come calendario ufficiale.
 
 ## 7. Come si verifica (il «fatto quando»)
 
@@ -137,6 +141,5 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 
 - Le sezioni dati (mercati/calendario/sessione) si aggiungono come **componenti separati** dentro la Home
   quando le rispettive FU entrano in scope; riusano `AnimatedTradingBackground` e i token.
-- Nuove rotte (Journal, Trading Live) = pagine protette separate; i CTA della Home le collegano allora.
+- Nuove rotte richiedono pagina protetta e context dedicato prima di collegare CTA.
 - Mai introdurre dati **mock** dove esistono dati reali; mai librerie pesanti per animazioni semplici.
-</content>

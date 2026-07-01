@@ -10,14 +10,15 @@ agente AI li legge e li commenta applicando il metodo **Aware Trader**.
 
 ## Stato
 
-🚧 **Fase 0 — demo pre-intervista.** In costruzione: attualmente repo in setup documentale, il codice
-viene pianificato per milestone. Vedi [`docs/PIANO_LAVORO.md`](docs/PIANO_LAVORO.md).
+🟡 **Fase 0 — demo pre-intervista, M8 in corso.** La demo è funzionante: login, Home, nuova analisi
+multimodale, streaming, storico, impostazioni e blindatura base dell'agente sono implementati.
+Restano QA end-to-end, hardening e deploy. Vedi [`docs/PIANO_LAVORO.md`](docs/PIANO_LAVORO.md).
 
 ## Stack
 
 - **Client:** React + Vite + Tailwind + Zustand
 - **Server:** Node.js + Express
-- **Dati & auth:** Supabase (Postgres + Auth + Storage)
+- **Dati & auth:** Supabase (Postgres + Auth); gli screenshot non vengono conservati in Storage
 - **AI:** Google Gemini (modello con vista) via uno *switcher* di provider
 
 ## Struttura
@@ -29,8 +30,8 @@ viene pianificato per milestone. Vedi [`docs/PIANO_LAVORO.md`](docs/PIANO_LAVORO
 │   ├── CONTESTO_PRODOTTO.md  fonte di verità del prodotto
 │   ├── PIANO_LAVORO.md       piano a milestone
 │   └── skill-system-trading-platform/   sistema operativo per gli agenti
-├── client/                   frontend (in arrivo)
-├── server/                   backend + agente AI (in arrivo)
+├── client/                   frontend React funzionante
+├── server/                   API Express + agente AI funzionante
 └── kit/                      metodo Aware Trader (system prompt, lato server)
 ```
 
@@ -52,4 +53,15 @@ I segreti (chiavi Gemini e Supabase) vivono **solo lato server** in un file `.en
 
 ## Setup
 
-_Istruzioni in arrivo con la milestone M0 (fondamenta repo & tooling)._
+```bash
+npm install
+npm run dev
+npm run build
+npm run lint
+npm test
+```
+
+Su PowerShell con esecuzione script disabilitata usa `npm.cmd`. `npm run validate` include test RLS
+che creano e cancellano dati sul progetto Supabase remoto: eseguilo solo dopo aver confermato che
+l'ambiente collegato è quello di test previsto. Dettaglio in
+[`TESTING_SKILL.md`](docs/skill-system-trading-platform/aree/TESTING_SKILL.md).

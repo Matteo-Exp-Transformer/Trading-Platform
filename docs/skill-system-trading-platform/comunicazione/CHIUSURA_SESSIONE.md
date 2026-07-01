@@ -42,7 +42,9 @@ In ordine cronologico, in **linguaggio utente** (non «ho modificato X» ma «or
 Tabella o elenco: file + perché. Compresi i file dello skill system, se li hai toccati.
 
 ### 4. Test eseguiti e risultato
-Il comando di verifica del progetto (`{{comando_validate}}`) + esito reale. Niente «tutto ok» generico.
+I comandi eseguiti e l'esito reale. Il gate completo è `npm run validate`, ma include test RLS
+remoti: senza ambiente confermato riportare il gate locale sicuro di `aree/TESTING_SKILL.md` e le
+suite escluse. Niente «tutto ok» generico.
 
 ### 5. «File di skill aggiornati» (tabella obbligatoria, anche «nessuno»)
 Colonne: **file · modifica · perché**. Elenca TUTTI i file skill toccati (Bussola, file di `context/`,
@@ -82,7 +84,8 @@ Colonne: **file · modifica · perché**. Elenca TUTTI i file skill toccati (Bus
 ### 8-bis. «Lezione della chat» (OPZIONALE — solo se il sottosistema didattico è attivo, solo profilo senior/Meta)
 
 > ⚠️ **Solo l'agente senior/Meta.** Gli agenti di lavoro normali (Esecuzione/Verifica) NON danno lezioni:
-> saltano interamente questa sezione. Fonte del mandato: `EVOLUZIONE_SKILLS.md` Playbook §6.
+> saltano interamente questa sezione. Il sottosistema risulta non attivo in
+> `EVOLUZIONE_SKILLS.md` §3, quindi questa sezione oggi si salta.
 > Questa è la **fonte unica** del momento «lezione»: la Bussola §5 rimanda qui, non duplica.
 
 **Vincolo d'ordine: si chiede PRIMA di chiudere il report.** L'agente chiede all'utente:
@@ -114,7 +117,8 @@ Sincronizza con `sessioni/FOLLOW_UP.md` (nuove righe FU-NNN; stato `fatto` se ch
 
 > Sei domande a **risposta obbligata**, valide per QUALSIASI report (esecuzione, verifica, meta).
 > Formato rigido: una riga `❓ Q… —` e sotto/accanto una riga `✅ R… :` con la risposta PIENA.
-> L'hook `fine-sessione-nudge.mjs` estrae ogni coppia e **blocca la chiusura** se una `✅ R` è vuota
+> Il template `hooks/fine-sessione-nudge.mjs.template`, se adattato e installato, estrae ogni
+> coppia e **blocca la chiusura** se una `✅ R` è vuota
 > o placeholder (`...`, `TODO`, `-`). Per Q2 e Q3 DEVI rileggere il diff e i file: è il punto della
 > sezione (la verifica intelligente la fai tu, l'hook controlla solo che tu abbia risposto).
 
@@ -181,11 +185,12 @@ linguaggio umano («permesso negato», non il codice grezzo). Default sintetico,
 
 ## Cos'è l'hook di fine-chat (così non ti confonde)
 
-Se il progetto ha installato l'hook `stop` (vedi `hooks/`), a fine chat un processo legge i
+In questa repository l'hook non è installato: `hooks/` contiene soltanto template. Se in futuro
+viene adattato e installato, a fine chat un processo legge i
 `Report-*.md` che hai appena scritto e **rilancia un turno** (non un promemoria passivo: vedi sotto
-e il Playbook senior in `EVOLUZIONE_SKILLS.md` §2-ter). Ti dice se manca una sezione obbligatoria e
+e `EVOLUZIONE_SKILLS.md` §1). Ti dice se manca una sezione obbligatoria e
 ti ricorda di scrivere la **sezione 8** (la tua lettura). **È normale e voluto: assecondalo, completa
-ciò che segnala, non è un errore.** Non blocca la chiusura (smart-allow). Se la chat non aveva report
+ciò che segnala, non è un errore.** Può bloccare fino al limite configurato. Se la chat non aveva report
 (domanda veloce, light), l'hook tace.
 
 ---
@@ -217,12 +222,12 @@ aggiornala **ora**, non dopo il merge. Approvare un merge con la skill stale las
   il follow-up `sessioni/FOLLOW_UP.md` e le skill toccate (già tracciati → commit normale).
 - Aggiungi SOLO i tuoi file: non includere modifiche/untracked altrui nel commit del task.
 
-## 3. Allineamento branch di lavoro → branch principale (se richiesto)
-- Verifica fast-forward pulito: `git merge-base --is-ancestor {{main}} {{branch_lavoro}}` → se «sì», ff.
+## 3. Allineamento branch di lavoro → `main` (solo se richiesto)
+- Il progetto usa oggi `main`; non inventare un branch di lavoro. Se l'utente ne indica uno,
+  verifica prima che il merge sia fast-forward.
 - Se il working tree ha modifiche non tue che bloccano il checkout → `git stash push <file>`, fai il
   merge, torna sul branch di lavoro, `git stash pop` (preserva il lavoro altrui senza committarlo).
-- `git checkout {{main}} && git merge --ff-only {{branch_lavoro}} && git push origin {{main}}`, poi
-  torna sul branch di lavoro.
+- Commit, merge e push richiedono sempre conferma esplicita; usare i nomi branch reali letti da Git.
 
 ## 4. Allineamento ambienti DB (se richiesto)
 - **Sola lettura per default.** Verifica **dove sei** prima di toccare qualsiasi cosa: il progetto

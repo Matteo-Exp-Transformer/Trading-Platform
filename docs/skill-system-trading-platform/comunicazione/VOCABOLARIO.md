@@ -57,6 +57,22 @@ L'agente di lavoro **non decide** promozione/regressione: scrive solo i dati. De
 > Le parole ricorrenti dell'utente → comportamento dell'agente. Parti da poche voci e fai
 > crescere il file dall'uso.
 
+### «lavoro ok» — Liv. 1
+- **Intende:** il task è accettato; va chiusa la memoria della sessione senza pubblicare.
+- **Comportamento agente:** applica `CHIUSURA_SESSIONE.md` secondo la modalità, scrive report/log/
+  follow-up pertinenti e non esegue commit o push.
+- **Livello:** 1
+- **Approvata il:** 01-07-26
+- **Origine:** `AGENTS.md` e protocollo di chiusura approvati dall'utente.
+
+### «report finale» — Liv. 1
+- **Intende:** il capitolo è pronto per la verifica finale e la proposta di pubblicazione.
+- **Comportamento agente:** controlla report/diff/context, prepara scope e messaggi di commit/push,
+  ma chiede comunque conferma esplicita prima di mutare Git remoto.
+- **Livello:** 1
+- **Approvata il:** 01-07-26
+- **Origine:** `AGENTS.md` e protocollo di chiusura approvati dall'utente.
+
 ### «{{parola — es. lavoro ok}}» — Liv. {{N}}
 - **Intende:** {{...}}
 - **Comportamento agente:** {{...}}

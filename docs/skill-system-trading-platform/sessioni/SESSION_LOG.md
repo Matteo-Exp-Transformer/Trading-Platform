@@ -1,6 +1,6 @@
 # SESSION_LOG — indice cronologico delle sessioni
 
-> Una riga per sessione, in ordine cronologico (più recente in alto). Ogni riga punta al report
+> Una riga per sessione, in ordine cronologico (più recente in fondo). Ogni riga punta al report
 > completo in `_sessioni-lavoro/AAAA-MM-GG/` — cartella **gitignored** (i report sono lavoro locale,
 > non su GitHub). Questo indice invece è **committato**: è la storia leggera che un agente legge per
 > capire il passato recente senza aprire i report.
@@ -28,4 +28,3 @@
 | 2026-07-01 | Meta | **Fix nota comandi**: `npm run validate` risultava "non definito" a un agente → in realtà è a root (`lint && test`); corretta la nota "provvisori" stantia in `CLAUDE.md` + Bussola §4/§5 (comandi confermati, eseguire dalla root, aggiunto `build`) | — |
 | 2026-07-01 | Esecuzione | **FU-018 — Stato mercati in Home**: Londra/New York/Tokyo con pallino aperto/chiuso in alto nella Home (`useMarketStatus.js` orari locali via `Intl`/fuso IANA DST-safe lun–ven + `MarketStatus.jsx`), slot destro in `AppHeader` (Chat/Impostazioni invariate). Verde=aperto (scelta utente), orologio escluso. Mobile: riga in alto a tutta larghezza sopra il nome app. Verificato a video dall'utente. +11 test (182 client + 78 server), validate verde | `_sessioni-lavoro/2026-07-01/Report-FU-018-market-status.md` |
 | 2026-07-01 | Verifica (standard) | **Home copy e azioni**: hero accorciata sulla proposta C, unico CTA «Nuova analisi», titolo «Cosa puoi fare», storico preservato nel drawer; skill system riallineato. Validate verde (199 client + 109 server), build OK | `_sessioni-lavoro/2026-07-01/Report-Home-copy-revisione.md` |
-| {{AAAA-MM-GG}} | {{Esecuzione}} | {{cosa fatto in breve}} | `_sessioni-lavoro/{{AAAA-MM-GG}}/Report-{{tema}}.md` |

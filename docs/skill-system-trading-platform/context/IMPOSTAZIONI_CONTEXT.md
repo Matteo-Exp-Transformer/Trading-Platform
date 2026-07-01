@@ -8,7 +8,7 @@
 >
 > **Trigger di routing:** «impostazioni», «tema», «chiaro/scuro», «dark mode», «cambio password»,
 > «selettore modello», «modello per utente», «preferenze» → questo file.
-> Aggiornato: 2026-07-01 (intervista M6, Senior). I path segnati *(nuovo)* sono da creare in esecuzione.
+> Aggiornato: 2026-07-02. M6 implementata; qui è descritto il flusso reale.
 
 ---
 
@@ -40,16 +40,15 @@ ha rispettato i requisiti dell'analisi già validata con Pro, con un costo infer
 
 | File | Ruolo | Stato |
 |------|-------|-------|
-| _migrazione DB_ | `profiles.ai_model text` (nullable) + `profiles.theme text default 'dark'`. Additiva; RLS update-only-owner **già** presente su `profiles` (M1). | *(nuovo — via MCP `apply_migration`)* |
-| `client/src/pages/Settings.jsx` | Pagina Impostazioni: tema + cambio password. | *(nuovo)* |
-| `client/src/App.jsx` | Aggiungere rotta **protetta** `/impostazioni`. | esiste (solo `/login`, `/`) |
-| `client/src/components/layout/Sidebar.jsx` | Voce/ingresso «Impostazioni». | esiste |
-| `client/src/auth/AuthProvider.jsx` | Già carica `profiles.*` (`select('*')`) → espone `profile.theme`/`profile.ai_model`. Aggiungere un modo per **ricaricare** il profilo dopo un cambio tema. | esiste |
-| `client/src/lib/theme.js` | Applica il tema (classe `dark` su `<html>`) + salva su `profiles`. | *(nuovo)* |
-| `client/tailwind.config.js` | Aggiungere `darkMode: 'class'` (oggi assente). | esiste |
-| `server/src/routes/agent.js` | In `authorizeAnalyze`: leggere `profiles.ai_model` dell'utente (RLS: la sua riga) e passarlo giù. | esiste |
-| `server/src/agent/orchestrator.js` | `runAnalysis`/`runAnalysisStream` accettano `model` e lo passano a `requestCompletion`/`streamGeminiText`. | esiste |
-| `server/src/agent/providerClient.js` | **Nessuna modifica**: accetta già `model` (fallback `.env` → `DEFAULT_MODEL`). | esiste |
+| Schema remoto | `profiles.ai_model` nullable + `profiles.theme default 'dark'`; SQL non ancora versionato localmente | attivo |
+| `client/src/pages/Settings.jsx` | tema + cambio password | attivo |
+| `client/src/App.jsx` | rotta protetta `/impostazioni` | attivo |
+| `client/src/components/layout/Sidebar.jsx` | ingresso Impostazioni | attivo |
+| `client/src/auth/AuthProvider.jsx` | profilo, applicazione tema, `reloadProfile` | attivo |
+| `client/src/lib/theme.js` | normalizza/applica/persiste tema | attivo |
+| `client/tailwind.config.js` | `darkMode: 'class'` + token semantici | attivo |
+| `server/src/routes/agent.js` | legge `profiles.ai_model` via RLS | attivo |
+| `server/src/agent/{models,orchestrator,providerClient}.js` | filtra e inoltra il modello | attivo |
 
 ## 4. Invarianti / LOCK locali
 
@@ -138,13 +137,11 @@ riga del proprio account (SQL/pannello), rifare un'analisi già fatta con Pro e 
   (`.dark`): token `app · surface(/strong/stronger) · content · muted · faint · line`, mappati in
   `tailwind.config.js` con `rgb(var(--…) / <alpha-value>)`. Tutte le superfici utente (Chat, ChatPanel,
   Sidebar, MessageBubble, NewAnalysisForm, Login, Settings) usano questi token → il tema cambia **ovunque**,
-  subito, in entrambi i temi leggibile. `freedom-accent` (verde) resta identico nei due temi.
+  subito, in entrambi i temi leggibile. `freedom-accent` è ciano.
 - **`color-scheme` dinamico:** impostato in `index.css` (`:root` = light, `.dark` = dark) → scrollbar e
   menu di sistema seguono il tema. (Chiude la nota "color-scheme fisso" dell'esecutore.)
-- **NB M7:** la palette **ricca** (verde-scuro raffinato, sfondo animato, font custom, ridisegno layout) è
-  **M7**. In M6 c'è la **base sobria e leggibile** su tutta l'app, non il restyle.
-- **Legacy:** `pages/Home.jsx` (vecchia shell M1) **non è instradata** in `App.jsx` (sostituita da `Chat`
-  in M2): resta con colori hardcoded, è codice non in uso.
+- La Home è una landing attiva su `/`, forza localmente il tema scuro e usa uno sfondo animato;
+  il toggle continua a governare Chat e Impostazioni.
 
 ## 8. Cambio password
 
@@ -156,9 +153,12 @@ riga del proprio account (SQL/pannello), rifare un'analisi già fatta con Pro e 
 
 ## 9. UI / routing / accesso
 
-- Rotta **protetta** `/impostazioni` in `App.jsx` (dentro `ProtectedRoute`), come `/`.
+- Rotta **protetta** `/impostazioni` in `App.jsx`.
 - Ingresso dalla **Sidebar** (drawer esistente): voce «Impostazioni» + «Esci» lì vicino.
-- Stile sobrio (M7 rifinisce): tema come toggle/segmented, password come form. Disclaimer visibile.
+- Tema come toggle/segmented, password come form.
+
+> **Gap audit 2026-07-02:** la pagina Impostazioni non rende attualmente il disclaimer, nonostante
+> il LOCK globale. Va corretto nel codice e coperto da test; non è una nuova decisione UX.
 
 ## 10. Come si verifica M6 (il «fatto quando»)
 

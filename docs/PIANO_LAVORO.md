@@ -5,7 +5,7 @@
 > file `context/` dello skill system. Regola: **nessun codice di una zona prima che esista il suo
 > `context/`**. Vedi `CONTESTO_PRODOTTO.md` §Schema di lavoro.
 >
-> Aggiornato: 2026-07-01 · Legenda stato: ⬜ da fare · 🟡 in corso · ✅ fatto · 🔒 bloccato da dipendenza.
+> Aggiornato: 2026-07-02 · Legenda stato: ⬜ da fare · 🟡 in corso · ✅ fatto · 🔒 bloccato da dipendenza.
 
 ---
 
@@ -40,11 +40,12 @@ guscio autenticato minimo (profilo + «Esci»), routing protetto, disclaimer in 
 sessione persistente · recupero password + validazione email = **FU-002/FU-003** (dopo intervista cliente).
 **Fatto quando:** due utenti di test non vedono i dati l'uno dell'altro (verificato con `server/test/auth-rls.test.js`).
 
-## M2 — Chat base (senza AI)  ⬜
+## M2 — Chat base (senza AI)  ✅ *(2026-06-30)*
 **Obiettivo:** invio messaggio, salvataggio chat/messaggi, storico in sidebar, isolamento verificato.
 **Deliverable:** schema DB (chat, messaggi), pagina Chat, Sidebar+Storico, «nuova chat».
 **Context:** `CHAT_ANALISI_CONTEXT.md` ✅ · `SIDEBAR_STORICO_CONTEXT.md` ✅ (creato 2026-06-30, intervista slice 2c) · `DB_SUPABASE_SKILL.md` ✅.
-**Fatto quando:** creo una chat, scrivo, ricarico e la ritrovo nello storico.
+**Esito:** chat/messaggi, storico, rinomina e nuova analisi implementati; isolamento coperto dai
+test RLS live originari. Lo schema remoto non è ancora versionato nella repository (debito M8).
 
 ## M3 — Innesto del cervello + TEST VISTA  ✅ *(catena + TEST VISTA passato — 2026-07-01)*  *(deep — LOCK kit/catena agente)*
 **Obiettivo:** collego la catena agente + kit + Gemini; risposta reale (prima anche non-streaming).
@@ -108,20 +109,21 @@ un account con `ai_model='gemini-2.5-pro'` usa Pro, `null`/errato usa il default
 **✅ Verificato live (2026-07-01):** tema, cambio password e modello per-account provati a mano, tutto OK.
 
 ## M7 — Estetica (rifinitura additiva)  ✅ *(revisione passata, validate verde 137+78 — 2026-07-01)*  *(deep — tocca più di una view; solo client, nessun LOCK del cuore)*
-**Svolta d'intervista (2026-07-01):** l'estetica definitiva è la **replica fedele della vecchia app**
-(cartella `Esempio/`): **dark su slate + accento ciano**, sobrio, **statico**, font di sistema — *non* più
+**Svolta d'intervista (2026-07-01):** l'estetica definitiva deriva dalla vecchia app:
+**dark su slate + accento ciano**, sobrio, **statico**, font di sistema — *non* più
 "verde-scuro + sfondo animato" (CONTESTO L19). Il tema chiaro/scuro di M6 resta.
 **Context:** `context/ESTETICA_CONTEXT.md` ✅ (creato 2026-07-01, intervista Senior).
-**Obiettivo:** dare alla base sobria di M6 l'aspetto di `Esempio/` **riscrivendo i valori dei token**
+**Obiettivo:** dare alla base sobria di M6 il linguaggio visivo concordato **riscrivendo i valori dei token**
 (`index.css`) + l'accento verde→ciano (`tailwind.config.js`), senza toccare struttura, catena, DB o auth.
 **Deliverable:** token slate chiaro/scuro (§5 del context), accento ciano ovunque, rifinitura forme
 (raggi/bordi/shadow) verso Esempio usando i token, tema chiaro derivato e leggibile.
-**Fatto quando:** tema scuro = look di `Esempio/`, tema chiaro coerente e leggibile, toggle e persistenza
+**Fatto quando:** tema scuro slate/ciano, tema chiaro coerente e leggibile, toggle e persistenza
 M6 intatti, disclaimer visibile in entrambi i temi, **zero regressioni** (`npm run validate` verde, build OK).
 **✅ Fatto (2026-07-01):** token slate chiaro/scuro + accento ciano su tutta l'app, bolle chat allineate a
-`Esempio/`, forme rifinite. Revisione dedicata passata (nessun blocco). Verifica visiva live in browser =
+linguaggio concordato, forme rifinite. La cartella di riferimento è stata rimossa a lavoro concluso.
+Revisione dedicata passata (nessun blocco). Verifica visiva live in browser =
 **FU-017** (la fa l'utente). **Aperto collegato:** pagina **Home** con sfondo animato (nuova richiesta) —
-non presente in `Esempio/`, da decidere separatamente.
+decisa separatamente.
 
 ## M7-bis — Home (landing dopo login)  ✅ *(revisione passata, validate 156+78 + build verdi — 2026-07-01)*  *(deep — nuovo componente + nuova rotta; solo client)*
 **Richiesta d'intervista (2026-07-01):** una **Home immersiva** come pagina d'arrivo dopo il login (oggi
@@ -133,18 +135,42 @@ ciano, linee, griglia, gradienti, vignettatura, `prefers-reduced-motion`→stati
 header minimale, **hero** (badge/titolo/descrizione/disclaimer) con il solo CTA **Nuova analisi**;
 lo storico resta nel drawer condiviso. Sotto la hero, la sezione **«Cosa puoi fare»** introduce le
 quattro card descrittive. Decoro a candele CSS/SVG e micro-interazioni. **Context:** `context/HOME_CONTEXT.md` ✅.
-**Fuori scope → FU-018…FU-025:** mercati live, calendario, orologio/stato mercati, feature card con dati,
-active-session card, pagine Journal e Trading Live, font Space Grotesk.
+**Estensioni poi completate:** stato indicativo Londra/New York/Tokyo, card ultima sessione e quattro
+FeatureCards descrittive; hero semplificata con un solo CTA «Nuova analisi». Restano fuori dal baseline
+calendario, quotazioni live, Trading Live e font custom. Lo stato Tokyo ha un bug noto sugli orari (M8).
 **Fatto quando:** dopo il login si arriva in Home; i CTA aprono Chat/storico; flussi esistenti intatti; Home
 scura+immersiva anche con toggle chiaro; sfondo animato fluido e non bloccante (statico con reduced-motion);
 responsive senza overflow; disclaimer visibile; `npm run validate` verde e build OK.
 
-## M8 — Blindatura demo & deploy  ⬜  *(deep)*
+## M8 — Blindatura demo & deploy  🟡  *(deep)*
 **Obiettivo:** demo «blindata» per il cliente. **Deliverable:** gestione errori a vista ovunque,
-piano B per l'intervista, QA end-to-end, **deploy**. *(Nessun freno costi — CONTESTO L12; resta solo
-`MAX_SCREENSHOT_PER_ANALISI` per la finestra di contesto, non per i costi.)*
+piano B per l'intervista, QA end-to-end, **deploy**.
+
+**Già implementato:** massimo 5 follow-up per chat (client+server), recinto nel kit, classificatore
+d'ingresso e canary (Strati sicurezza 1/2/4). Sono una base, non blindatura completa.
+
+**Finding aperti dell'audit 2026-07-02:**
+
+- disclaimer assente da Login e Impostazioni;
+- race cambio-chat/stream e race upload/timeframe; retry vision incompleto;
+- limite follow-up aggirabile, storia/ruolo assistant client-authored, niente idempotenza;
+- canary streaming non ritira testo già inviato; niente filtro uscita semantico;
+- niente timeout/abort/rate limit e body da 25 MB prima dell'auth;
+- gestione incompleta di `finishReason`/safety e reject pre-stream;
+- stato mercati Tokyo errato e festività non gestite;
+- schema Supabase non versionato, invite-only e privilegi non coperti da test sufficienti;
+- toolchain dev con vulnerabilità Vite/Vitest; bundle iniziale oltre la soglia Vite;
+- QA browser 375/834/1280, temi e flusso completo ancora da eseguire.
+
+**Scadenza modello:** Gemini 2.5 Flash/Pro verranno disattivati il **2026-10-16**; scegliere e
+validare il successore con TEST VISTA prima del deploy.
+
 **Aperto:** target di deploy — la demo si prova all'intervista in modo controllato (il cliente non riceve
 accesso), quindi può bastare locale o URL privato. **Fatto quando:** percorso utente completo testato e stabile.
+
+**Verifica audit locale (2026-07-01/02, prima del lavoro Journal concorrente):** lint verde, 199 test
+client verdi, 106 test server non-RLS verdi, build riuscita con warning chunk. Le suite RLS remote
+non sono state rieseguite perché l'ambiente non era confermato come test.
 
 ---
 

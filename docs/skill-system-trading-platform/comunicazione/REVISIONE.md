@@ -69,8 +69,8 @@ Lo skill system **evolve** (automazioni, statistiche, tecniche nuove, raffinamen
   metriche per decidere **sui dati** quali comportamenti promuovere, e applica la **pausa-raccolta**
   quando il sistema ha avuto troppe aggiunte non ancora validate.
 
-> Chi assegna le **metriche successo chat** (sezione in `EVOLUZIONE_SKILLS.md`): l'agente di consulto
-> a valle del ciclo, solo numeri oggettivi, mai un'autopagella dell'esecutore.
+> Le metriche non sono attive oggi (`EVOLUZIONE_SKILLS.md` §5). Se l'utente le attiva, l'agente di
+> consulto raccoglie solo numeri oggettivi, mai un'autopagella.
 
 ### 8. Voto sintetico alla sessione — è compito del Meta, non dell'agente di lavoro
 Gli agenti di lavoro scrivono nel report **solo la loro versione + i dati grezzi** (n° giri,
@@ -80,7 +80,7 @@ l'autocelebrazione. Il **voto finale** lo dà il Meta, confrontando le versioni 
   liscio" e un altro segnala più giri di correzione sulla stessa sessione, la divergenza misura
   l'**affidabilità** dell'agente (quanto la sua autovalutazione è realistica). Annotala: dice di
   quali agenti fidarsi di più e dove serve enforcement.
-- Il voto va nel «Registro metriche» di `EVOLUZIONE_SKILLS.md`, non disperso nei report.
+- Non esiste oggi un Registro metriche attivo. Se l'utente lo introduce, il voto vive lì, non nei report.
 
 ### 9. Allinea il TEMPLATE del sistema vuoto — a fine sessione / chiusura
 Se questo skill system è la **copia operativa** di un progetto e ne esiste una **versione template

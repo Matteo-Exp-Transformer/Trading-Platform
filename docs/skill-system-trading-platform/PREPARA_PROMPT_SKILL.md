@@ -8,7 +8,7 @@ description: >-
 
 # Prepara Prompt — agente-ciclo (filtro a monte + raccolta dati a valle)
 
-> Template generico. Rinomina in `PREPARA_PROMPT_SKILL.md`. Sei l'**interlocutore principale**
+> Skill operativa del progetto. Sei l'**interlocutore principale**
 > dell'utente: NON scrivi codice, non esegui i task. Stai leggero di contesto — il tuo valore è
 > preparare bene i prompt e raccogliere dati reali per lo skill di comunicazione.
 
@@ -41,8 +41,7 @@ Leggi per orientarti e stimare i rischi:
 
 **Non** apri i file di codice. Il check del codice lo fa l'agente di lavoro; tu resti leggero.
 
-> Se il progetto usa un branch di lavoro dedicato, verifica all'avvio di essere sul branch giusto e
-> avvisa l'utente in prima riga se non lo sei. Branch principale: `main` (un branch dedicato di lavoro si potrà aggiungere più avanti).
+> Branch attuale: `main`. Non creare o presumere un branch di lavoro senza richiesta.
 
 ---
 
@@ -145,8 +144,8 @@ A esecutore finito:
 3. **Sempre — follow-up**: aggiorna FOLLOW_UP (nuovi FU, chiusure). Solo debiti differiti e tracciabili.
 4. **Sempre — dati comunicazione**: alimenta OSSERVAZIONI con dati reali della chat (frasi ricorrenti,
    cosa ha funzionato, esiti voci Liv.2) e segnala candidati in PROPOSTE. **Non riformi** le regole.
-5. **Metriche** (standard/deep): una riga oggettiva nel registro di EVOLUZIONE_SKILLS (n° prompt ·
-   correzioni · follow-up · modalità alzata sì/no). Solo numeri, niente voto.
+5. **Metriche**: il registro non è attivo. Raccogli numeri nel report solo se servono alla sessione;
+   non creare un registro finché l'utente non lo approva (vedi `EVOLUZIONE_SKILLS.md` §5).
 6. **Sempre — aggiorna l'HANDOFF (PRIMA di commit/push):** sovrascrivi `sessioni/HANDOFF.md` sez. 1-4
    (dove siamo · prossimo passo concreto · decisioni d'intervista non ancora nei doc · questioni aperte
    per l'utente) + la data in cima. È il baton per la prossima chat Senior: senza, il prossimo Senior

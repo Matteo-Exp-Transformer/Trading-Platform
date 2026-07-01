@@ -1,150 +1,88 @@
-# Autenticazione & isolamento utente — file di contesto
+# Autenticazione e isolamento utente — contesto operativo
 
-> Mappa di dettaglio della zona **identità**: login, sessione, profilo utente e — soprattutto —
-> l'**isolamento dei dati per utente (RLS)**. È la zona di **M1**. Zona **deep**: auth + RLS + segreti.
-> Fonte di verità prodotto: `docs/CONTESTO_PRODOTTO.md` (L2, L11) · piano: `docs/PIANO_LAVORO.md` (M1).
->
-> **Trigger di routing:** «login», «auth», «account», «password», «sessione», «profilo utente»,
-> «isolamento», «RLS» → questo file.
-> Aggiornato: 2026-06-30 (intervista M1, 2 giri). Codice da costruire: i path sono **previsti**.
+> Aggiornato: 2026-07-02. Zona deep: Auth, JWT, RLS, profilo e segreti.
+> Decisioni prodotto: `docs/CONTESTO_PRODOTTO.md` L2/L11/L15–L17.
+> Schema e policy: `../aree/DB_SUPABASE_SKILL.md`.
 
----
+## 1. Flusso reale
 
-## 1. Cos'è questa zona
+- Login email+password in `client/src/pages/Login.jsx`.
+- Nessuna UI di registrazione; gli account demo vengono creati manualmente.
+- `AuthProvider.jsx` inizializza la sessione con `getSession`, ascolta `onAuthStateChange`, carica
+  `profiles` in un effetto separato e applica il tema.
+- `ProtectedRoute.jsx` protegge Home, Chat, Impostazioni e ogni nuova pagina autenticata.
+- Login riuscito → `/` (Home); logout dalla Sidebar → sessione chiusa → `/login`.
+- La sessione è persistita/rinnovata da `supabase-js`.
+- Client: URL + anon/publishable key. Service role e chiave Gemini restano server-side.
 
-La **porta d'ingresso** e il muro che tiene separati gli utenti. L'utente fa login con email +
-password; resta loggato finché non preme «Esci». Ogni utente vede **solo** i propri dati. Niente
-registrazione aperta: gli account si creano **a mano** (demo controllata). Il valore qui non è
-visibile (è infrastruttura), ma è un **LOCK**: una falla nell'isolamento è il rischio #4 del prodotto.
+## 2. Decisioni attive
 
-## 2. Decisioni d'intervista (2026-06-30)
+| Tema | Stato voluto |
+|------|--------------|
+| Login | email + password |
+| Account | creati a mano; niente registrazione aperta |
+| Conferma email | disattivata nella demo |
+| Profilo | `profiles`: nome, tema, modello admin-only |
+| Sessione | persistente fino a «Esci» |
+| Recupero password | manuale admin; self-service dopo intervista |
+| Cambio password | Impostazioni, con riverifica della password attuale |
 
-| Tema | Deciso | Note |
-|------|--------|------|
-| Metodo di login | **Email + password** | Niente magic link → nessun SMTP in demo |
-| Creazione account | **A mano dal pannello Supabase** | Nessuna pagina di registrazione (meno superficie). Coerente con L11 |
-| Conferma email | **Disattivata** (auto-confirm) | Email **finte/interne** ammesse (es. `matteo@demo.local`) |
-| Profilo utente | **Email + nome visualizzato** | Serve tabella `profiles` (1 riga/utente) → primo banco di prova RLS |
-| Sessione | **Resta loggato fino a «Esci»** | supabase-js persiste e rinnova il token; pulsante logout |
-| Recupero password | **A mano** (lo reimposta l'admin) | Self-service = **FU-002**, dopo intervista cliente |
-| Validazione email reale | **No in demo** | = **FU-003**, dopo intervista cliente |
-
-## 3. File coinvolti (previsti — M1)
+## 3. File reali
 
 | File | Ruolo |
 |------|-------|
-| `client/src/lib/supabaseClient.js` | Singleton `@supabase/supabase-js` (chiave **anon/publishable**) |
-| `client/src/auth/AuthProvider.jsx` | Stato sessione utente (`onAuthStateChange`), espone user/profilo/logout |
-| `client/src/auth/ProtectedRoute.jsx` | Se non loggato → redirige a `/login` |
-| `client/src/pages/Login.jsx` | Form email+password + disclaimer fisso |
-| `client/src/App.jsx` · `main.jsx` | Router (`react-router-dom`) + rotte pubbliche/protette |
-| `server/src/lib/supabaseAdmin.js` | Client **service_role** (SOLO server): admin + test |
-| `server/test/auth-rls.test.js` | Test d'isolamento (il «fatto quando» di M1) |
-| _migrazione DB_ | `profiles` + RLS + trigger (via MCP Supabase `apply_migration`) |
+| `client/src/lib/supabaseClient.js` | singleton browser con `VITE_SUPABASE_*` |
+| `client/src/auth/AuthProvider.jsx` | sessione, profilo, tema, logout/reload |
+| `client/src/auth/ProtectedRoute.jsx` | redirect non autenticati |
+| `client/src/pages/Login.jsx` | accesso |
+| `client/src/App.jsx` | rotte pubbliche/protette |
+| `server/src/lib/supabaseAdmin.js` | service role per admin/test, non per route utente |
+| `server/src/routes/agent.js` | client per-richiesta vincolato al JWT |
+| `server/test/auth-rls.test.js` | isolamento live `profiles` |
 
-> **Progetto Supabase:** `eezybdmdtlehcvwobhgc` (confermato in intervista, vuoto). Le migrazioni di
-> M1 vanno **solo** qui: in sessione risultano collegati anche altri 2 server Supabase non nostri.
-
-## 4. Invarianti / LOCK locali
+## 4. LOCK
 
 ```
-LOCK  service_role key + chiave Gemini = SOLO server (.env, gitignored). Mai nel client/bundle.
-LOCK  isolamento per utente via RLS = muro di sicurezza. Verificato da test (server/test/auth-rls.test.js).
-RULE  La chiave anon/publishable PUÒ stare nel client (è pubblica per design): è la coppia
-      RLS + anon-key il modello di sicurezza, NON il nascondere la anon-key.
-RULE  Mai usare la service_role nei percorsi di richiesta dell'app per saltare la RLS.
-      Bypass consentito solo in operazioni admin/test esplicite (es. creare utenti di test).
-RULE  Niente registrazione aperta: nessun percorso crea account dall'app (demo).
-RULE  Disclaimer sempre visibile anche in login (RULE globale di prodotto).
-RULE  Test per ogni funzione; `node --check` dopo modifiche JS; niente merge senza test verdi.
+LOCK  service_role e GOOGLE_API_KEY solo server; mai client, log o file tracciati.
+LOCK  dati owner-only tramite RLS; non fidarsi di filtri applicativi come unica barriera.
+RULE  la anon/publishable key è pubblica per design; la sicurezza è RLS + privilegi.
+RULE  niente service_role nelle route utente.
+RULE  niente registrazione aperta nella demo.
+RULE  query profilo fuori dal callback onAuthStateChange.
+RULE  errore profilo non invalida una sessione valida; applica tema default e mostra stato gestito.
+RULE  disclaimer visibile in ogni schermata.
 ```
 
-## 5. Schema DB e provisioning (autorità per l'esecutore M1)
+## 5. Schema/provisioning noto
 
-Tabella minima per il profilo, con RLS «solo il proprietario» e creazione automatica della riga
-alla nascita dell'utente (così il profilo esiste anche se l'account è creato a mano dal pannello).
+`profiles.id` riferisce `auth.users(id) on delete cascade`. Il trigger `handle_new_user` crea la
+riga profilo usando il `display_name` del metadata soltanto come dato visuale, mai per autorizzare.
+RLS limita SELECT/UPDATE all'id dell'utente; i privilegi di colonna impediscono al client di
+scrivere `ai_model`.
 
-```sql
-create table public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  display_name text,
-  created_at timestamptz not null default now()
-);
-alter table public.profiles enable row level security;
+Il SQL non è ancora versionato nella repository: per modifiche usare il workflow/baseline di
+`DB_SUPABASE_SKILL.md`, non copiare vecchi snippet dai report.
 
-create policy "profili: leggi solo il tuo"
-  on public.profiles for select using ( auth.uid() = id );
+## 6. Gap correnti (audit 2026-07-02)
 
-create policy "profili: aggiorna solo il tuo"
-  on public.profiles for update using ( auth.uid() = id ) with check ( auth.uid() = id );
+- **Disclaimer:** `Login.jsx` e `Settings.jsx` non lo rendono, in violazione del LOCK globale.
+- **Bootstrap auth:** reject o hang di `getSession()` non impostano uno stato errore; LoginRoute e
+  ProtectedRoute possono restare vuote senza retry.
+- **Invite-only non verificabile dal repo:** l'assenza della UI signup non prova che
+  `supabase.auth.signUp()` sia disabilitato sul progetto remoto. Manca config versionata/test negativo.
+- **Modello admin-only:** il privilegio è documentato ma manca un test RLS live che provi il rifiuto.
+- **Test remoto:** usa email fisse e non ha un guard sul project ref; non eseguirlo senza conferma
+  dell'ambiente.
 
--- Provisioning automatico: alla creazione di un utente, crea la sua riga profilo.
-create function public.handle_new_user()
-returns trigger language plpgsql security definer set search_path = '' as $$
-begin
-  insert into public.profiles (id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)));
-  return new;
-end; $$;
+## 7. Verifica minima
 
-create trigger on_auth_user_created
-  after insert on auth.users for each row execute function public.handle_new_user();
-```
+- login corretto/errato/rete;
+- sessione persistente e logout;
+- redirect di ogni rotta protetta;
+- errore/hang bootstrap con UI di riprova;
+- due utenti leggono soltanto il proprio profilo;
+- signup pubblico rifiutato;
+- utente non può aggiornare `ai_model`;
+- disclaimer presente su Login e su tutte le pagine.
 
-> **Niente policy di insert/delete per il client:** l'utente non crea né cancella profili; la riga
-> nasce solo dal trigger (`security definer`). Il `display_name` lo imposto nel metadato utente al
-> momento della creazione a mano; modificarlo dall'app = **M6 (Impostazioni)**.
-
-## 6. Modello di sicurezza e segreti (env)
-
-- **Client:** `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` (esposte al bundle — è corretto: la anon
-  key è pubblica). Login e lettura del proprio profilo passano da qui; la RLS fa da muro.
-- **Server:** `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (mai nel client). Per ora serve solo ad
-  admin/test; da M3 il server verificherà il **JWT** dell'utente e agirà **per suo conto** (RLS attiva),
-  senza usare la service_role nei percorsi di richiesta.
-- Il file dei segreti reali è **`.env.local`** (root, gitignored), modellato da `.env.example`
-  (`SUPABASE_URL/ANON/SERVICE` + `VITE_*`). I test lo caricano via `server/test/setup-env.js`
-  (`process.loadEnvFile`). LOCK segreti: mai in un file tracciato.
-- **Account di test** (login UI manuale / per agenti che provano l'app): `test@t.com`, password in
-  `.env.local` (`TEST_USER_EMAIL` / `TEST_USER_PASSWORD`). Creato a mano dal pannello con Auto Confirm —
-  niente registrazione aperta. Login UI verificato funzionante (2026-06-30).
-
-## 7. Sessione, rotte e disclaimer
-
-- **Sessione persistente:** comportamento default di supabase-js (token in `localStorage`, refresh
-  automatico). «Esci» = `signOut()`.
-- **Listener auth:** `onAuthStateChange` aggiorna solo lo stato sessione. Il profilo viene caricato
-  in un effetto React successivo: fare query Supabase direttamente nel callback può bloccare le
-  chiamate successive del client. Un errore profilo non invalida la sessione e applica il tema default.
-- **Rotte:** `react-router-dom`. `/login` pubblica; tutto il resto **protetto** → senza sessione
-  redirige a `/login`. Dopo il login → `/` (per M1 un guscio autenticato minimo: nome+email del
-  profilo + «Esci», a prova che auth/profilo/RLS funzionano). La Chat vera è **M2**.
-- **Disclaimer:** visibile sulla pagina di login + footer fisso già presente (M0).
-
-## 8. Come si verifica M1 (il «fatto quando»)
-
-Test `server/test/auth-rls.test.js` (Vitest, lato server):
-1. Con la **service_role** crea due utenti di test A e B (`email_confirm: true`).
-2. Per ciascuno: client anon → `signInWithPassword` → sessione.
-3. Asserisci: il client di A legge da `profiles` **solo** la riga di A; B **solo** la sua; A non
-   vede la riga di B. → due utenti non vedono i dati l'uno dell'altro.
-4. Pulizia: la service_role cancella gli utenti di test.
-
-## 9. Come estendere senza rompere
-
-- Nuove tabelle utente (chat, messaggi in **M2**) → **stesso schema**: `enable row level security`
-  + policy `auth.uid() = user_id`. Mai una tabella utente senza RLS.
-- Recupero password (**FU-002**) e validazione email reale (**FU-003**): si attivano dopo
-  l'intervista cliente → richiederanno configurare l'invio email (SMTP) e indirizzi veri.
-- Cambio password / nome da loggato = **M6 (Impostazioni)**, non qui.
-- Modifiche a RLS / trigger = **deep**: rileggi questo file e i LOCK §4 prima di toccare.
-
-## 10. Report di sessione collegati
-
-- `_sessioni-lavoro/2026-06-30/Report-M1-auth-rls.md` — esecuzione M1 completa (2026-06-30):
-  DB migrato, Login + AuthProvider + ProtectedRoute + Home, test RLS verde, `npm run validate` 19/19.
-- **Revisione + hardening (2026-06-30):** advisor Supabase ridotti da 5 a 1. Migrazione
-  `m1_hardening_revoke_rpc_and_rls_initplan`: `revoke execute` su `handle_new_user()` da
-  `public/anon/authenticated` (resta chiamabile solo come trigger; service_role intatto) e policy RLS
-  con `(select auth.uid())`. Resta aperto solo «leaked password protection» (interruttore pannello,
-  bassa priorità in demo) → vedi FOLLOW_UP.
+Per test RLS remoti seguire `../aree/TESTING_SKILL.md`.

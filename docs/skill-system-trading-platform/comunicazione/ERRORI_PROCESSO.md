@@ -23,14 +23,16 @@ Ogni errore/difficoltà va classificato in una di queste:
 
 | # | Pattern | Causa tipica | × | Correzione adottata | Stato |
 |---|---------|--------------|---|---------------------|-------|
-| P1 | {{descrizione pattern}} | {{causa}} | {{n}} | {{come si è evitato}} | {{aperto/risolto}} |
+| P1 | Codice completato, context rimasto a «da costruire» o milestone aperta | allineamento documentale rimandato alla chiusura, che non sempre scatta | ricorrente M1–M8 | context aggiornato nello stesso task applicativo, indipendente dal report | regola corretta 02-07-26 |
+| P2 | Suite verde ma flussi concorrenti/errori reali non coperti | test centrati sul render/happy path | più aree | revisione cerca race, retry, loading/error e negative path oltre ai test esistenti | aperto |
+| P3 | Schema Supabase descritto solo nei Markdown/remoto | migrazioni applicate senza file versionati | M1–M6 | baseline locale obbligatorio prima del prossimo task DB | aperto |
+| P4 | File template scambiabili per regole attive | nomi senza suffisso `.template` e placeholder nei documenti vivi | hooks/comunicazione | template marcati esplicitamente e source operative separate | in correzione |
 
 > Quando un pattern si ripete, l'agente Meta valuta se serve una nuova regola nella Bussola o una
 > voce di vocabolario per prevenirlo.
 
 ---
 
-## Log (cronologia append dai report)
+## Log
 
-- 15-06-26 — **Apostrofi italiani in stringhe a singola virgoletta**: costanti esportate con `l'ora` / `un'altra` dentro `'...'` generano 26 errori TypeScript (unterminated string). Correzione: usare `"..."` o template literal per testo italiano con apostrofi. Causa: errore agente.
-- 15-06-26 — **`not.toContain` su classi CSS vs contenuto body**: asserzione `expect(html).not.toContain('info-box')` fallisce perché la classe compare nel `<style>` di `BASE_STYLE` oltre che nel body. Correzione: scegliere token specifici del blocco che si vuole assente (es. `summary-block` invece di `info-box`). Causa: errore agente.
+- 02-07-26 — audit completo: P1–P4 derivati dal confronto fra cronologia Git, codice, test e skill system.

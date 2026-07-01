@@ -13,6 +13,9 @@ Monorepo **npm workspaces**: `client/` (React+Vite, porta **5173**) + `server/` 
 **3001**). In dev il client fa da **proxy** di `/api` verso il server. Segreti in `.env.local` (root,
 gitignored). Windows: shell primaria **PowerShell**.
 
+> Se PowerShell blocca `npm.ps1` per la execution policy, usa gli stessi comandi con `npm.cmd`
+> (`npm.cmd run dev`, `npm.cmd run build`, ecc.).
+
 ## 1. Prerequisiti (una volta)
 
 ```bash
@@ -52,8 +55,8 @@ Confirm*). Per provare l'app usa l'**account demo** le cui credenziali sono in `
 ## 4. Provare una modifica a video (QA manuale)
 
 1. Avvia (`npm run dev`) ed entra con l'account demo.
-2. Vai sulla schermata che hai toccato: **Login · Chat** (form nuova analisi, upload screenshot, bolle,
-   streaming) **· Sidebar/storico · Impostazioni** (tema, cambio password).
+2. Vai sulla schermata che hai toccato: **Login · Home · Chat** (form nuova analisi, upload screenshot,
+   bolle, streaming) **· Sidebar/storico · Impostazioni** (tema, cambio password).
 3. Se il lavoro tocca l'aspetto, provalo su **entrambi i temi** (chiaro/scuro, toggle in Impostazioni)
    e ai viewport **375 / 834 / 1280**.
 4. Verifica sempre che il **disclaimer** resti visibile e leggibile.
@@ -63,13 +66,14 @@ Confirm*). Per provare l'app usa l'**account demo** le cui credenziali sono in `
 ## 5. Prima di dire «fatto»: il gate
 
 ```bash
-npm run validate       # lint + tutti i test (client + server). DEVE essere verde.
+npm run validate       # lint + tutti i test, inclusi quelli RLS sul remoto
 node --check <file.js> # sanity sintattica dopo una modifica JS
 ```
 
-Se `validate` è rosso non è «fatto». I test server RLS colpiscono **Supabase live**: se `.env.local`
-manca delle chiavi Supabase falliscono per ambiente, non per il tuo codice. Dettaglio e struttura dei
-test: **`docs/skill-system-trading-platform/aree/TESTING_SKILL.md`**.
+I test RLS creano e cancellano utenti/righe sul progetto Supabase collegato: esegui `validate` solo
+dopo aver confermato che è l'ambiente di test previsto. In assenza di conferma usa i gate locali
+descritti in **`docs/skill-system-trading-platform/aree/TESTING_SKILL.md`** e dichiara che gli RLS
+non sono stati rieseguiti.
 
 ## 6. Fermare / ripartire
 
@@ -81,5 +85,4 @@ test: **`docs/skill-system-trading-platform/aree/TESTING_SKILL.md`**.
 - **Segreti solo lato server**: `GOOGLE_API_KEY` e `SUPABASE_SERVICE_ROLE_KEY` non finiscono mai nel
   bundle client. Nel client solo le `VITE_*` (anon pubblica per design; la sicurezza è la RLS).
 - **Isolamento per utente (RLS)**: ogni utente vede solo i propri dati. Se provando ne vedi di altri, è un bug grave.
-- **`.env.local` mai committato.** `Esempio/` è solo materiale di riferimento: non fa parte dell'app in esecuzione.
-</content>
+- **`.env.local` mai letto, mostrato o committato.**

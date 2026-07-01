@@ -29,9 +29,12 @@ Operare come adattatore Codex del sistema canonico in
 Mostrare la checklist di apertura prevista da `COMUNICAZIONE_SKILL.md` quando occorre applicare il
 vocabolario o chiedere decisioni prima di lavorare.
 
-## 2. Scegliere un solo profilo
+## 2. Scegliere un profilo per ogni sub-task
 
-Scegliere dal deliverable, non da una parola isolata.
+Scegliere dal deliverable, non da una parola isolata. Se una richiesta produce deliverable diversi
+(es. audit del codice + riallineamento dello skill system), scomporla in sub-task sequenziali:
+**Verifica** raccoglie le evidenze, poi **Meta** aggiorna i documenti. Non mescolare i permessi:
+il passaggio Meta non modifica codice applicativo.
 
 ### Prepara / Senior
 
@@ -66,9 +69,11 @@ Usare per diagnosi, review, debug e test.
 
 Usare per affinare comunicazione o skill system.
 
-1. Leggere soltanto i documenti `comunicazione/` instradati dalla Bussola e le regole organizzative.
-2. Non modificare codice applicativo.
-3. Separare dati grezzi, proposte e regole approvate. Non promuovere una regola senza decisione
+1. Leggere i documenti Meta instradati dalla Bussola e le regole organizzative.
+2. Per allineare context/skill al codice, usare soltanto evidenze già prodotte da un sub-task
+   Verifica oppure eseguire prima quel sub-task; non fare implementazione applicativa sotto profilo Meta.
+3. Non modificare codice applicativo.
+4. Separare dati grezzi, proposte e regole approvate. Non promuovere una regola senza decisione
    esplicita dell'utente.
 
 ## 3. Assegnare la modalità
@@ -101,7 +106,12 @@ autorizzati. Non considerare esistenti path descritti come previsti.
 - Per DB/Supabase verificare progetto e ambiente prima di ogni mutazione; produzione richiede conferma.
 - Per UI verificare anche stati di caricamento, errore, vuoto e comportamento responsive pertinente.
 - Per JavaScript eseguire `node --check` sui file applicabili e il test più vicino; prima della
-  consegna eseguire `npm run validate` quando il rischio e l'ambiente lo consentono.
+  consegna eseguire `npm run validate` quando il rischio e l'ambiente lo consentono. Poiché oggi
+  include test RLS che mutano il Supabase remoto, senza conferma dell'ambiente usare lint, test client,
+  test server non-RLS e build separatamente.
+- Su PowerShell con esecuzione script disabilitata usare `npm.cmd`.
+- Se una modifica applicativa cambia un comportamento documentato, allineare il context nello stesso
+  lavoro prima della consegna; il protocollo di chiusura aggiunge report/log, non rimanda l'allineamento.
 
 ## 6. Comunicare e chiudere
 

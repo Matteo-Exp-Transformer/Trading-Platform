@@ -8,8 +8,9 @@ description: >-
 
 # Bussola — Skill 0 / orientamento agente
 
-> Stack: React + Vite + Tailwind + Zustand (client) · Node.js + Express (server) · Supabase
-> (Postgres + Auth + Storage) · Google **Gemini** (modello con vista) via `providerClient` (switcher).
+> Stack: React + Vite + Tailwind (client; Zustand è una dipendenza scaffold non usata dai flussi
+> correnti) · Node.js + Express (server) · Supabase (Postgres + Auth; niente Storage immagini) ·
+> Google **Gemini** multimodale via `providerClient` (switcher).
 > File master: `CLAUDE.md` (root). Contesto prodotto: `docs/CONTESTO_PRODOTTO.md`. Piano: `docs/PIANO_LAVORO.md`.
 >
 > **Schema di lavoro (fonte di verità):** Senior → intervista → contesto (`context/`, `aree/`) →
@@ -30,13 +31,13 @@ non leggi skill fuori dal tuo profilo.
 
 | Profilo | Tipo di task | Parole-trigger | Carica | Salta |
 |---------|--------------|----------------|--------|-------|
+| **Prepara/Senior** | intervista, piano, prompt | `prepara · prepara prompt · intervista` | `sessioni/HANDOFF.md` per primo + `PREPARA_PROMPT_SKILL.md` | codice |
 | **Esecuzione** | feature, fix, lavoro UI | `esegui · implementa · costruisci · sistema` (vedi VOCABOLARIO) | file di `context/` della zona pertinente | testing/debug/meta |
 | **Verifica** | debug, test, revisione | `verifica · testa · revisiona · debugga` | skill testing + context della zona revisionata | meta |
-| **Meta** | affinamento sistema/comunicazione | `affina · vocabolario · skill system` | solo `comunicazione/` (sottosistema didattico non attivo) | tutte le skill di codice |
+| **Meta** | affinamento sistema/comunicazione | `affina · vocabolario · skill system` | documenti Meta/organizzativi; context solo da evidenze Verifica | codice applicativo |
 
-> I profili non si sovrappongono. Discriminante: **cosa produce il task**. Esecuzione produce
-> codice; Verifica controlla codice già prodotto (sempre coi test); Meta lavora sul sistema
-> documentale e sulla comunicazione, non sul codice.
+> Ogni sub-task ha un solo profilo. Una richiesta composta può eseguire in sequenza **Verifica**
+> (evidenze sul codice) e **Meta** (riallineamento documentale); Meta non modifica l'app.
 
 > ⚠️ **I LOCK battono il profilo.** Le righe marcate **OBBLIGATORIO** e gli invarianti §4
 > valgono sempre, anche in un fix «piccolo».
@@ -67,7 +68,7 @@ di libertà e comportamento) è `comunicazione/VOCABOLARIO.md`.
 ## 0.2 Tabella di routing
 
 Leggi il task e applica questa tabella. Carica il file indicato **prima** di aprire qualsiasi
-file da modificare. I file `*(da creare)*` nascono via intervista nei prossimi giri.
+file da modificare. Se una zona nuova non ha context, si applica la regola anti-buco (§0.3).
 
 | Il task riguarda… | File da caricare |
 |-------------------|------------------|
@@ -78,6 +79,8 @@ file da modificare. I file `*(da creare)*` nascono via intervista nei prossimi g
 | Impostazioni (tema · cambio password · modello AI per-account) | `context/IMPOSTAZIONI_CONTEXT.md` ✅ ⚠️ deep (§6) |
 | Estetica / stile UI (palette slate + accento ciano, sobrio) | `context/ESTETICA_CONTEXT.md` ✅ |
 | Home / landing dopo login (sfondo animato, hero, CTA) | `context/HOME_CONTEXT.md` ✅ (+ `ESTETICA_CONTEXT` per i token) |
+| Journal / diario di trading (voci, esiti, «salva nel journal») | `context/JOURNAL_CONTEXT.md` ✅ (+ `aree/DB_SUPABASE_SKILL.md` per `journal_entries`) |
+| Blindatura agente / dominio / jailbreak / canary / classificatore | `context/SICUREZZA_CONTEXT.md` ✅ + `aree/AGENTE_AI_SKILL.md` ⚠️ LOCK §2 |
 | DB / schema / migrazioni / RLS (Supabase) | `aree/DB_SUPABASE_SKILL.md` ✅ ⚠️ deep (§6) |
 | Test / CI | `aree/TESTING_SKILL.md` |
 | Come rispondere / report / vocabolario | `comunicazione/COMUNICAZIONE_SKILL.md` |
@@ -98,18 +101,18 @@ Se **nessuna riga** della tabella matcha il task, o matchano **più righe in con
 
 ## 1. Mappa del progetto
 
-Demo minimal + estetica beta. Tre luoghi (**Chat** · **Sidebar/Storico** · **Impostazioni**) +
-**Login** come porta d'ingresso. Il codice è ancora da costruire (vedi `docs/PIANO_LAVORO.md`):
-gli entry point sotto sono quelli **previsti**, non ancora verificati.
+Demo funzionante con **Login · Home · Chat · Sidebar/Storico · Impostazioni**. M0–M7-bis sono
+implementate; M8 (hardening, QA, deploy) è in corso.
 
-| Area | Entry point (previsto) | Note |
-|------|------------------------|------|
-| Chat di analisi (cuore) | `client/src/pages/Chat.jsx` + `server/src/agent/*` | Riusa la catena agente; risposta in streaming |
-| Motore agente / kit | `server/src/agent/` + `kit/` | Kit caricato come system prompt, lato server |
-| Auth / account | Supabase Auth + `client/src/pages/Login.jsx` | Isolamento per utente via RLS |
-| Sidebar / storico | `client/src/components/layout/Sidebar.jsx` | Storico chat per utente |
-| Impostazioni | `client/src/pages/Settings.jsx` | Tema · cambio password · scelta modello |
-| Estetica | `client/src/components/layout/AnimatedBackground.jsx` | Da ricostruire (non nell'estratto) |
+| Area | Entry point reale | Note |
+|------|-------------------|------|
+| Routing | `client/src/App.jsx` | `/login`, `/`, `/nuova-analisi`, `/impostazioni` |
+| Home | `client/src/pages/Home.jsx` + `components/home/*` | landing scura, mercati, ultima sessione, card |
+| Chat | `client/src/pages/Chat.jsx` + `components/chat/*` | form, vision, streaming, max 5 follow-up |
+| Motore agente / sicurezza | `server/src/agent/*` + `server/src/routes/agent.js` + `kit/` | kit server-side, classificatore, canary |
+| Auth / dati | `client/src/auth/*` + Supabase | sessione e owner-only via RLS |
+| Sidebar / storico | `client/src/components/layout/*` | drawer condiviso |
+| Impostazioni | `client/src/pages/Settings.jsx` | tema e password; modello admin-only |
 
 ---
 
@@ -120,7 +123,8 @@ LOCK  kit/ (metodo Aware Trader)         — valore distintivo. Solo lato server
                                            Mai citare il nome-metodo proibito (vedi CONTESTO_PRODOTTO).
                                            Si riusa pari-pari, ripulito.
 LOCK  catena agente                      — skillLoader → promptBuilder → providerClient → orchestrator:
-                                           riusare così com'è. Si adatta SOLO providerClient (Gemini + streaming).
+                                           preservare ordine e responsabilità. Formato/chiamata provider SOLO
+                                           in providerClient; estensioni approvate attorno alla catena.
 LOCK  segreti (.env, chiavi AI/Supabase) — chiave Gemini e service key Supabase solo lato server, mai nel
                                            client/bundle. `.env` e `/uploads` gitignored. Nessun segreto nel codice.
 LOCK  isolamento per utente (RLS)        — ogni utente accede SOLO a proprie chat/messaggi/file.
@@ -137,7 +141,8 @@ LOCK  isolamento per utente (RLS)        — ogni utente accede SOLO a proprie c
 ```
 RULE  Leggere INTERO il file da toccare + i file collegati prima di editare.
 RULE  Anti-duplicazione: prima di scrivere un helper, cerca se esiste già. Se compare in 2+ file → estrai.
-RULE  Logger: usa il logger del progetto, mai console.log in codice di produzione.
+RULE  Logging: oggi non esiste un logger condiviso. Non aggiungere nuovi console.* fuori dai punti
+      boot/errore già presenti; introdurre un logger richiede un task esplicito.
 RULE  Vision obbligatoria: il modello deve vedere le immagini (multimodale). Mai degradare a text-only.
 RULE  Disclaimer non rimovibile e sempre visibile: «Strumento di supporto all'analisi tecnica. Non è consulenza finanziaria.»
 RULE  Stile agente (vincolo prodotto, kit 08/09): prosa breve, niente elenchi puntati, niente
@@ -159,8 +164,8 @@ Trading-Platform/                 (repo: freedom-trading-system)
 │   ├── CONTESTO_PRODOTTO.md      fonte di verità del prodotto
 │   ├── PIANO_LAVORO.md           piano a milestone
 │   └── skill-system-trading-platform/   (questo sistema)
-├── client/                       React+Vite+Tailwind+Zustand (scaffold M0 ✅, zone da costruire)
-├── server/                       Node+Express ESM (scaffold M0 ✅, agente da costruire)
+├── client/                       React+Vite+Tailwind, app funzionante
+├── server/                       Node+Express ESM, API e agente funzionanti
 ├── kit/                          metodo Aware Trader (LOCK, lato server)
 ├── _private/                     gitignored, non-obbligatorio per gli agenti
 └── _sessioni-lavoro/             gitignored — report di lavoro datati AAAA-MM-GG (indice in sessioni/SESSION_LOG.md)
@@ -183,6 +188,10 @@ npm run build          # build produzione del client
 node --check <file.js> # check sintassi dopo modifiche JS (solo .js, non .jsx)
 ```
 
+> `validate` include test RLS che creano/cancellano dati sul Supabase remoto. Senza conferma
+> dell'ambiente usare i gate locali di `aree/TESTING_SKILL.md`. Su PowerShell che blocca
+> `npm.ps1`, usare `npm.cmd`.
+
 ---
 
 ## 5. Obbligo inizio e fine sessione
@@ -195,11 +204,11 @@ node --check <file.js> # check sintassi dopo modifiche JS (solo .js, non .jsx)
   comunicazione, checklist di chiusura. **Fonte unica:**
   `comunicazione/CHIUSURA_SESSIONE.md` (Parte A = report; Parte B = commit/push/branch/DB/terminali).
   Lo stile sta in `comunicazione/COMUNICAZIONE_SKILL.md`; il modello in `sessioni/_TEMPLATE_REPORT.md`.
-  Se è installato l'hook `stop` (`hooks/`), a fine chat ti rilancia per completare il report.
+  I file in `hooks/` sono materiale opzionale da adattare: non presumere che un hook sia installato.
 - **Sottosistema didattico:** NON attivo in questo progetto (gli agenti di lavoro non danno lezioni).
 
-> ✅ Codice reale presente (M0–M7 + Home): gli entry point (§1) e i comandi (§4) sono **confermati e
-> verificati**, non più "previsti". Eseguire i comandi **dalla root** (monorepo workspaces).
+> L'allineamento context↔codice avviene nello stesso task applicativo, prima della consegna. Il
+> comando di chiusura aggiunge report/log ma non è il momento in cui si rimanda la documentazione.
 
 ---
 

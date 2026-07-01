@@ -34,8 +34,10 @@ drift e applica la fonte competente sopra.
 ## LOCK permanenti
 
 - `kit/`: metodo Aware Trader, solo lato server; mai esporlo al client.
-- Catena agente prevista `skillLoader → promptBuilder → providerClient → orchestrator`: preservarla;
-  l'adattamento provider riguarda soltanto `providerClient`.
+- Catena agente `skillLoader → promptBuilder → providerClient → orchestrator`: preservarne ordine e
+  responsabilità. Il formato/chiamata del provider vive soltanto in `providerClient`; le estensioni
+  di prodotto già approvate (trascrizione, modello account, guardrail) si innestano attorno alla
+  catena senza spostare lì la logica provider.
 - `.env.local`, chiavi AI e Supabase `service_role`: mai leggere, stampare, committare o portare nel
   client. La chiave anon/publishable Supabase è pubblica per design; la sicurezza dipende dalla RLS.
 - Isolamento utente: ogni dato di prodotto deve restare owner-only tramite RLS e test espliciti.
@@ -56,6 +58,8 @@ se la richiesta viola un invariante senza una decisione esplicita dell'utente.
 - Tutto in italiano: UI, documentazione e comunicazione. Con l'utente parla per effetti e flussi,
   breve e senza gergo non richiesto.
 - Una funzione nuova o modificata richiede almeno un test pertinente. Nessun merge con test rossi.
+- Se il codice cambia un comportamento descritto nello skill system, il relativo context va
+  aggiornato nello stesso lavoro, prima della risposta finale: non dipende dal comando di chiusura.
 - Non fare commit o push senza richiesta esplicita.
 - Non delegare o avviare sub-agent se l'utente non lo chiede esplicitamente.
 
@@ -72,6 +76,7 @@ node --check <file.js>
 
 `npm run validate` esegue lint e test. I test RLS usano Supabase remoto e variabili locali: prima di
 eseguirli verifica l'ambiente; non effettuare mai scritture su produzione senza conferma esplicita.
+Su PowerShell con policy restrittiva usa `npm.cmd` al posto di `npm`.
 
 ## Chiusura
 
