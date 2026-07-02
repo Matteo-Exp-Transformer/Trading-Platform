@@ -3,14 +3,16 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { useStorico } from './useStorico.js';
 
-const { mockListChats, mockUpdateChatTitle } = vi.hoisted(() => ({
+const { mockListChats, mockUpdateChatTitle, mockDeleteChat } = vi.hoisted(() => ({
   mockListChats: vi.fn(),
   mockUpdateChatTitle: vi.fn(),
+  mockDeleteChat: vi.fn(),
 }));
 
 vi.mock('../../lib/chatData.js', () => ({
   listChats: mockListChats,
   updateChatTitle: mockUpdateChatTitle,
+  deleteChat: mockDeleteChat,
 }));
 
 const chats = [
@@ -28,6 +30,7 @@ function Harness() {
       <p>{storico.loading ? 'CARICAMENTO' : 'PRONTO'}</p>
       <p>{storico.error ?? 'NESSUN ERRORE'}</p>
       <p>{storico.renameError ?? 'NESSUN ERRORE RINOMINA'}</p>
+      <p>{storico.deleteError ?? 'NESSUN ERRORE ELIMINAZIONE'}</p>
       <p>{storico.chats.map((chat) => chat.title).join('|')}</p>
       <p>
         ROTTA {location.pathname} CHAT {location.state?.openChatId ?? 'NESSUNA'}
@@ -39,6 +42,7 @@ function Harness() {
       <button type="button" onClick={() => storico.renameChat('c1', 'Titolo aggiornato')}>
         Rinomina c1
       </button>
+      <button type="button" onClick={() => storico.deleteChat('c1')}>Elimina c1</button>
     </>
   );
 }
@@ -59,6 +63,7 @@ beforeEach(() => {
     title: 'Titolo aggiornato',
     updated_at: '2026-07-01T10:00:00Z',
   });
+  mockDeleteChat.mockResolvedValue({ id: 'c1' });
 });
 
 describe('useStorico', () => {
@@ -113,5 +118,32 @@ describe('useStorico', () => {
     await waitFor(() => {
       expect(screen.getByText('Rinomina non riuscita. Riprova.')).toBeInTheDocument();
     });
+  });
+
+  it('rimuove dallo storico una chat eliminata', async () => {
+    renderHookHarness();
+    fireEvent.click(screen.getByRole('button', { name: 'Apri' }));
+    await screen.findByText('Prima analisi|Seconda analisi');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina c1' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Seconda analisi')).toBeInTheDocument();
+    });
+    expect(mockDeleteChat).toHaveBeenCalledWith('c1');
+  });
+
+  it('mantiene la chat e mostra un errore se l’eliminazione fallisce', async () => {
+    mockDeleteChat.mockRejectedValue(new Error('rete'));
+    renderHookHarness();
+    fireEvent.click(screen.getByRole('button', { name: 'Apri' }));
+    await screen.findByText('Prima analisi|Seconda analisi');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina c1' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Eliminazione non riuscita. Riprova.')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Prima analisi|Seconda analisi')).toBeInTheDocument();
   });
 });

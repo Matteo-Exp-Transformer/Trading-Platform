@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Sidebar } from './Sidebar.jsx';
 
@@ -21,6 +21,7 @@ function renderSidebar(props, initialEntries = ['/']) {
         onClose={vi.fn()}
         onSelectChat={vi.fn()}
         onRenameChat={vi.fn()}
+        onDeleteChat={vi.fn().mockResolvedValue(true)}
         onNuovaAnalisi={vi.fn()}
         {...props}
       />
@@ -88,6 +89,12 @@ describe('Sidebar', () => {
     );
   });
 
+  it('mostra Note accanto al Journal e apre /note', () => {
+    renderSidebar({ open: true, chats });
+    expect(screen.getByRole('link', { name: 'Journal' })).toHaveAttribute('href', '/journal');
+    expect(screen.getByRole('link', { name: 'Note' })).toHaveAttribute('href', '/note');
+  });
+
   it('evidenzia la destinazione corrente', () => {
     renderSidebar({ open: true, chats }, ['/impostazioni']);
     expect(screen.getByRole('link', { name: /Impostazioni/i })).toHaveAttribute(
@@ -126,5 +133,43 @@ describe('Sidebar', () => {
     const input = screen.getByDisplayValue('BTC/USD - swing');
     fireEvent.keyDown(input, { key: 'Enter' });
     expect(onRenameChat).not.toHaveBeenCalled();
+  });
+
+  it('elimina una chat dopo conferma e azzera quella aperta', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const onDeleteChat = vi.fn().mockResolvedValue(true);
+    const onNuovaAnalisi = vi.fn();
+    renderSidebar({
+      open: true,
+      chats,
+      currentChatId: 'c1',
+      onDeleteChat,
+      onNuovaAnalisi,
+    });
+
+    fireEvent.click(screen.getAllByLabelText('Elimina chat')[0]);
+
+    await waitFor(() => {
+      expect(onDeleteChat).toHaveBeenCalledWith('c1');
+      expect(onNuovaAnalisi).toHaveBeenCalledOnce();
+    });
+    expect(confirm).toHaveBeenCalledOnce();
+    confirm.mockRestore();
+  });
+
+  it('non elimina una chat se la conferma viene annullata', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const onDeleteChat = vi.fn();
+    renderSidebar({ open: true, chats, onDeleteChat });
+
+    fireEvent.click(screen.getAllByLabelText('Elimina chat')[0]);
+
+    expect(onDeleteChat).not.toHaveBeenCalled();
+    confirm.mockRestore();
+  });
+
+  it('mostra l’errore di eliminazione', () => {
+    renderSidebar({ open: true, chats, deleteError: 'Eliminazione non riuscita. Riprova.' });
+    expect(screen.getByRole('alert')).toHaveTextContent('Eliminazione non riuscita. Riprova.');
   });
 });

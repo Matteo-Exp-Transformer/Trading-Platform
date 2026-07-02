@@ -154,5 +154,39 @@ describe('RLS — isolamento utenti su chats e messages', () => {
       .eq('id', msgA.id)
       .single();
     expect(msgStill.chat_id).toBe(chatA.id);
+
+    // (f) B non può eliminare la chat di A: la policy DELETE la filtra senza errori generici
+    const { data: deletedByB, error: deleteErrB } = await clientB
+      .from('chats')
+      .delete()
+      .eq('id', chatA.id)
+      .select('id');
+    expect(deleteErrB, `delete chat A by B: ${deleteErrB?.message}`).toBeNull();
+    expect(deletedByB).toHaveLength(0);
+    const { data: chatAStill } = await clientA
+      .from('chats')
+      .select('id')
+      .eq('id', chatA.id)
+      .single();
+    expect(chatAStill.id).toBe(chatA.id);
+
+    // (g) A elimina la propria chat e il DB elimina in cascata i suoi messaggi
+    const { data: deletedByA, error: deleteErrA } = await clientA
+      .from('chats')
+      .delete()
+      .eq('id', chatA.id)
+      .select('id')
+      .single();
+    expect(deleteErrA, `delete chat A: ${deleteErrA?.message}`).toBeNull();
+    expect(deletedByA.id).toBe(chatA.id);
+    const { data: messagesAfterDelete, error: messagesAfterDeleteError } = await clientA
+      .from('messages')
+      .select('id')
+      .eq('id', msgA.id);
+    expect(
+      messagesAfterDeleteError,
+      `select message after chat delete: ${messagesAfterDeleteError?.message}`,
+    ).toBeNull();
+    expect(messagesAfterDelete).toHaveLength(0);
   });
 });

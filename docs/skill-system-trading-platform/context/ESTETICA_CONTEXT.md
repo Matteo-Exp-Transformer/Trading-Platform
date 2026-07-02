@@ -56,7 +56,7 @@ freedom: {
 ```
 RULE  Colori di UI tramite token; niente nuovi hardcoded per componente.
 RULE  Testo scuro sui bottoni ciano per contrasto.
-RULE  Chat/Login/Impostazioni seguono il tema profilo.
+RULE  Chat/Login/Impostazioni/Journal/Note seguono il tema profilo.
 RULE  Home forza la palette scura localmente, indipendente dal toggle.
 RULE  Disclaimer leggibile in ogni pagina e tema.
 RULE  Focus visibile, contrasto adeguato, nessun overflow 375/834/1280.
@@ -69,6 +69,8 @@ Eccezioni autorizzate:
 - `AnimatedTradingBackground.jsx` replica `#22d3ee` perché il canvas non usa classi Tailwind;
 - `MarketStatus.jsx` usa verde soltanto per il micro-indicatore “mercato aperto”;
 - la Home ha sfondo animato, mentre il resto dell'app resta statico.
+- Note carica Inter, Poppins, Lora, Merriweather e Roboto Mono da Google Fonts; gli hex della
+  whitelist colorano soltanto il testo creato dall'utente e i relativi swatch, non la UI strutturale.
 
 ## 4. Superfici reali
 
@@ -79,6 +81,8 @@ Eccezioni autorizzate:
 | Chat | header/drawer, form, bolle, composer, footer disclaimer |
 | Sidebar | drawer opaco con navigazione e storico |
 | Impostazioni | tema/password; disclaimer attualmente mancante (bug) |
+| Journal | diario di trading, tema profilo e disclaimer |
+| Note | taccuino, tema profilo, font/colore del contenuto e disclaimer |
 
 ## 5. Verifica
 

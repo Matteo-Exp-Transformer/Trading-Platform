@@ -75,3 +75,16 @@ export async function updateChatTitle(chatId, title) {
   if (error) throw error;
   return data;
 }
+
+export async function deleteChat(chatId) {
+  const userId = await getUserId();
+  const { data, error } = await supabase
+    .from('chats')
+    .delete()
+    .eq('id', chatId)
+    .eq('user_id', userId)
+    .select('id')
+    .single();
+  if (error) throw error;
+  return data;
+}

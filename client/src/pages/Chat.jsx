@@ -226,10 +226,12 @@ export default function Chat() {
         loading={storico.loading}
         error={storico.error}
         renameError={storico.renameError}
+        deleteError={storico.deleteError}
         currentChatId={currentChatId}
         onSelectChat={handleSelectChat}
         onNuovaAnalisi={handleNuovaChatFromSidebar}
         onRenameChat={storico.renameChat}
+        onDeleteChat={storico.deleteChat}
       />
     </div>
   );

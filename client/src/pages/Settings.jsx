@@ -242,9 +242,11 @@ export default function Settings() {
         loading={storico.loading}
         error={storico.error}
         renameError={storico.renameError}
+        deleteError={storico.deleteError}
         onSelectChat={storico.selectChat}
         onNuovaAnalisi={storico.nuovaAnalisi}
         onRenameChat={storico.renameChat}
+        onDeleteChat={storico.deleteChat}
       />
     </div>
   );

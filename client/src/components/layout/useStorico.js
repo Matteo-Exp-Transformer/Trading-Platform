@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listChats, updateChatTitle } from '../../lib/chatData.js';
+import { deleteChat as deleteChatRecord, listChats, updateChatTitle } from '../../lib/chatData.js';
 
 // Stato + logica dello Storico/Sidebar in un solo posto, così ogni pagina autenticata
 // (Home · Chat · Impostazioni) apre la STESSA Sidebar senza duplicare lista o logica.
@@ -14,6 +14,7 @@ export function useStorico() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [renameError, setRenameError] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
 
   const fetchChats = useCallback(async () => {
     setLoading(true);
@@ -29,6 +30,7 @@ export function useStorico() {
 
   const openSidebar = useCallback(() => {
     setRenameError(null);
+    setDeleteError(null);
     setOpen(true);
     fetchChats();
   }, [fetchChats]);
@@ -46,6 +48,18 @@ export function useStorico() {
       );
     } catch {
       setRenameError('Rinomina non riuscita. Riprova.');
+    }
+  }, []);
+
+  const deleteChat = useCallback(async (chatId) => {
+    setDeleteError(null);
+    try {
+      await deleteChatRecord(chatId);
+      setChats((prev) => prev.filter((chat) => chat.id !== chatId));
+      return true;
+    } catch {
+      setDeleteError('Eliminazione non riuscita. Riprova.');
+      return false;
     }
   }, []);
 
@@ -69,10 +83,12 @@ export function useStorico() {
     loading,
     error,
     renameError,
+    deleteError,
     openSidebar,
     closeSidebar,
     fetchChats,
     renameChat,
+    deleteChat,
     selectChat,
     nuovaAnalisi,
   };

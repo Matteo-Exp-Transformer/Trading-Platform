@@ -28,6 +28,7 @@ vi.mock('./lib/supabaseClient.js', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  window.history.pushState({}, '', '/');
   mockGetSession.mockResolvedValue({ data: { session: null } });
   mockSingle.mockResolvedValue({ data: null });
 });
@@ -58,5 +59,18 @@ describe('<App /> — autenticato', () => {
       screen.getByRole('heading', { name: 'Il tuo agente di analisi tecnica' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Cosa puoi fare' })).toBeInTheDocument();
+  });
+
+  it('protegge e rende disponibile la pagina Note su /note', async () => {
+    mockGetSession.mockResolvedValue({
+      data: { session: { user: { id: 'u1', email: 'mario@demo.local' } } },
+    });
+    mockSingle.mockResolvedValue({ data: { id: 'u1', theme: 'dark' } });
+    window.history.pushState({}, '', '/note');
+
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { name: 'Note' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Nuova nota/i })).toBeInTheDocument();
   });
 });

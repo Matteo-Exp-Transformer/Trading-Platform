@@ -1,6 +1,6 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-const { mockGetUser, mockFrom, mockSingle, mockSelect, mockInsert, mockUpdate, mockOrder, mockEq } =
+const { mockGetUser, mockFrom, mockSingle, mockSelect, mockInsert, mockUpdate, mockDelete, mockOrder, mockEq } =
   vi.hoisted(() => ({
     mockGetUser: vi.fn(),
     mockFrom: vi.fn(),
@@ -8,6 +8,7 @@ const { mockGetUser, mockFrom, mockSingle, mockSelect, mockInsert, mockUpdate, m
     mockSelect: vi.fn(),
     mockInsert: vi.fn(),
     mockUpdate: vi.fn(),
+    mockDelete: vi.fn(),
     mockOrder: vi.fn(),
     mockEq: vi.fn(),
   }));
@@ -19,20 +20,34 @@ vi.mock('./supabaseClient.js', () => ({
   },
 }));
 
-import { createChat, addMessage, loadMessages, listChats, updateChatTitle, getChat } from './chatData.js';
+import {
+  createChat,
+  addMessage,
+  loadMessages,
+  listChats,
+  updateChatTitle,
+  deleteChat,
+  getChat,
+} from './chatData.js';
 
 beforeEach(() => {
   vi.clearAllMocks();
   mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null });
 
-  // catena: from().insert().select().single() / from().update().eq().select().single()
+  // catena: insert/update/delete + filtri + select().single()
   mockSingle.mockResolvedValue({ data: { id: 'record-1' }, error: null });
   mockSelect.mockReturnValue({ single: mockSingle, eq: mockEq });
   mockInsert.mockReturnValue({ select: mockSelect });
   mockUpdate.mockReturnValue({ eq: mockEq });
-  mockEq.mockReturnValue({ order: mockOrder, select: mockSelect });
+  mockDelete.mockReturnValue({ eq: mockEq });
+  mockEq.mockReturnValue({ eq: mockEq, order: mockOrder, select: mockSelect });
   mockOrder.mockResolvedValue({ data: [], error: null });
-  mockFrom.mockReturnValue({ insert: mockInsert, select: mockSelect, update: mockUpdate });
+  mockFrom.mockReturnValue({
+    insert: mockInsert,
+    select: mockSelect,
+    update: mockUpdate,
+    delete: mockDelete,
+  });
 });
 
 describe('createChat', () => {
@@ -216,5 +231,25 @@ describe('updateChatTitle', () => {
   it('rilancia se Supabase restituisce errore', async () => {
     mockSingle.mockResolvedValue({ data: null, error: new Error('update fail') });
     await expect(updateChatTitle('chat-1', 'X')).rejects.toThrow('update fail');
+  });
+});
+
+describe('deleteChat', () => {
+  it('elimina soltanto la chat richiesta e appartenente all’utente autenticato', async () => {
+    mockSingle.mockResolvedValue({ data: { id: 'chat-1' }, error: null });
+
+    const deleted = await deleteChat('chat-1');
+
+    expect(mockFrom).toHaveBeenCalledWith('chats');
+    expect(mockDelete).toHaveBeenCalledOnce();
+    expect(mockEq).toHaveBeenNthCalledWith(1, 'id', 'chat-1');
+    expect(mockEq).toHaveBeenNthCalledWith(2, 'user_id', 'user-1');
+    expect(mockSelect).toHaveBeenCalledWith('id');
+    expect(deleted).toEqual({ id: 'chat-1' });
+  });
+
+  it('rilancia se Supabase non elimina la chat', async () => {
+    mockSingle.mockResolvedValue({ data: null, error: new Error('delete fail') });
+    await expect(deleteChat('chat-1')).rejects.toThrow('delete fail');
   });
 });

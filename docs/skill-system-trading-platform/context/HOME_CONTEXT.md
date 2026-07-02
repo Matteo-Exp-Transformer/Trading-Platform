@@ -15,8 +15,8 @@
 L'utente vuole una **porta d'ingresso** all'app: dopo il login non deve trovarsi subito nel form di
 analisi, ma in una **Home moderna e immersiva** che comunichi "piattaforma di trading premium", da cui
 lanciare le azioni. Nasce da un prompt descrittivo (app vecchia, non più disponibile come codice):
-la pagina è poi cresciuta con stato piazze, ultima sessione e card descrittive. Dati di mercato
-live, calendario e funzioni senza backend restano fuori scope.
+la pagina è poi cresciuta con stato piazze, ultima sessione e card di ingresso. Dati di mercato
+live e calendario restano fuori scope; Journal e Note hanno ora una pagina reale.
 
 ## 2. Decisioni d'intervista (2026-07-01)
 
@@ -81,13 +81,15 @@ RULE      Disclaimer sempre visibile e leggibile anche in Home. Test per ogni co
 Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano insieme più avanti:
 
 - **FU-018** MarketStatusBar: ~~stato mercati Londra/New York/Tokyo (aperto/chiuso)~~ **fatto (2026-07-01)** — stato mercati in alto a destra nella Home (vedi §6). **Orologio live** non incluso (utente: solo stato mercati) → eventuale FU futura.
-- **FU-019** MarketOverview: griglia ~9 asset con prezzo/variazione/sparkline. **PARCHEGGIATA (2026-07-01)** — fuori dalla demo per **licenze commerciali**: dati azioni/indici real-time richiedono licenze di display delle borse (costose/per-utente); crypto/forex integrabili solo con piano commerciale a pagamento (CoinGecko ~$35/mese + attribuzione). Regola utente = niente licenze commerciali → non integrata. La card "Monitoraggio mercati" (in FU-021) resta **descrittiva**, senza ticker. Dettaglio in `FOLLOW_UP.md` FU-019.
+- **FU-019** MarketOverview: griglia ~9 asset con prezzo/variazione/sparkline. **PARCHEGGIATA (2026-07-01)** — fuori dalla demo per **licenze commerciali**: dati azioni/indici real-time richiedono licenze di display delle borse (costose/per-utente); crypto/forex integrabili solo con piano commerciale a pagamento (CoinGecko ~$35/mese + attribuzione). Regola utente = niente licenze commerciali → non integrata. La precedente card descrittiva "Monitoraggio mercati" è stata sostituita da "Crea le tue note"; il widget reale `MarketStatus` nell'header resta invariato. Dettaglio in `FOLLOW_UP.md` FU-019.
 - **FU-020** TradingCalendar: calendario mensile con giorno corrente evidenziato. *(Aperta, non in scope demo: decorativa senza dati dietro.)*
-- **FU-021** FeatureCards "panoramica app" (Analisi assistita · Memoria sessioni · Journal · Monitoraggio mercati). **FATTO (2026-07-01)** — sezione introdotta dal titolo **«Cosa puoi fare»**, con 4 card statiche descrittive (nessun link), sotto l'hero (vedi §6). Journal = "in arrivo".
+- **FU-021** FeatureCards "panoramica app". **FATTO (2026-07-01; aggiornato 2026-07-02)** — sezione **«Cosa puoi fare»** con 4 card: Analisi assistita e Memoria sessioni descrittive; Journal e Crea le tue note sono link reali.
 - **FU-022** ActiveSessionCard: card "riapri sessione" (chat più recente dell'utente). **FATTO (2026-07-01)** — dati interni via `listChats()` (RLS), sopra le FeatureCards. **Se non c'è sessione (o loading/errore) → la card non compare** (vedi §6).
 - **FU-023** Pagina **Journal** (funzionalità nuova). **FATTO (2026-07-02)** — pagina `/journal`
   (diario di trading integrato con le analisi). In Home la card *Journal* di `FeatureCards` è ora un
   **link reale** verso `/journal` (non più "in arrivo"). Dettaglio in `context/JOURNAL_CONTEXT.md`.
+- **Pagina Note** **FATTA (2026-07-02)** — taccuino personale su `/note`; la card
+  *Crea le tue note* apre la pagina. Dettaglio in `context/NOTE_CONTEXT.md`.
 - **FU-024** Pagina **Trading Live** (funzionalità nuova).
 - **FU-025** Font **Space Grotesk** per i titoli della Home (opzionale, "premium").
 
@@ -104,11 +106,11 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 | `client/src/components/home/AnimatedTradingBackground.jsx` | Sfondo animato (canvas+rAF, reduced-motion→statico, meno particelle su mobile). | **IMPLEMENTATO** |
 | `client/src/components/home/{Hero,HomeCta}.jsx` | Hero centrata sull’agente di analisi tecnica e unico CTA «Nuova analisi»; storico nel menu laterale. | **IMPLEMENTATO** |
 | `client/src/components/home/ActiveSessionCard.jsx` + `useActiveSession.js` | Card "Riprendi sessione" (FU-022): chat più recente via `listChats()` (RLS); sparisce se nessuna sessione/loading/errore. | **IMPLEMENTATO (FU-022)** |
-| `client/src/components/home/FeatureCards.jsx` | Sezione «Cosa puoi fare» e panoramica app (FU-021): 4 card (icone SVG inline, hover ciano). La card *Journal* è un **link** verso `/journal` (FU-023, 2026-07-02); le altre restano descrittive. | **IMPLEMENTATO (FU-021 · link Journal FU-023)** |
+| `client/src/components/home/FeatureCards.jsx` | Sezione «Cosa puoi fare»: 4 card (icone SVG inline, hover ciano). *Journal* apre `/journal`; *Crea le tue note* apre `/note`; le altre restano descrittive. | **IMPLEMENTATO** |
 | `client/src/lib/dateFormat.js` | `relativeDayLabel()`: etichetta "oggi/ieri/N giorni fa/data breve" per l'ultimo aggiornamento della sessione. | **IMPLEMENTATO (FU-022)** |
 | `client/src/components/home/useMarketStatus.js` | Stato aperto/chiuso di Londra/New York/Tokyo: orari **locali** per piazza via `Intl`+fuso IANA (DST-safe, solo lun–ven), refresh 60s. | **IMPLEMENTATO (FU-018)** |
 | `client/src/components/home/MarketStatus.jsx` | Stato mercati nella Home; pallino **verde** aperto / grigio chiuso. Desktop: inline a destra dell'header. Mobile: riga orizzontale a tutta larghezza **sopra** il nome app. | **IMPLEMENTATO (FU-018)** |
-| `client/src/App.jsx` | Home su `/`, Chat su `/nuova-analisi`, redirect `*` e post-login aggiornati. | **IMPLEMENTATO** |
+| `client/src/App.jsx` | Home su `/`, Chat su `/nuova-analisi`, Journal su `/journal`, Note su `/note`, redirect `*` e post-login aggiornati. | **IMPLEMENTATO** |
 | `client/src/pages/Chat.jsx` | Header/Sidebar condivisi; apre una chat indicata da `location.state.openChatId`. | **IMPLEMENTATO** |
 | `client/src/pages/Settings.jsx` | Header/Sidebar condivisi; nessuna freccia indietro. | **IMPLEMENTATO** |
 | `client/src/index.css` | Utility/keyframes per lo sfondo (riusa i token M7). | **IMPLEMENTATO** |
@@ -135,6 +137,7 @@ Elementi del prompt che richiedono **dati** o **funzioni nuove** — si valutano
 - Lo **sfondo animato** gira fluido dietro ai contenuti, non blocca i click; con `prefers-reduced-motion`
   attivo diventa **statico**; su mobile ha meno particelle e nessun overflow orizzontale.
 - Disclaimer visibile. Accessibilità: focus visibili, contrasto adeguato.
+- La card «Crea le tue note» apre `/note`; il widget `MarketStatus` resta nell'header.
 - **Zero regressioni:** `npm run validate` verde (client+server) e `npm run build` OK.
 
 ## 8. Come estendere senza rompere

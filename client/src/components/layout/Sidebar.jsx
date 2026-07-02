@@ -19,9 +19,10 @@ function navItemClass(active) {
   }`;
 }
 
-function SidebarChatRow({ chat, active, onSelect, onRename }) {
+function SidebarChatRow({ chat, active, onSelect, onRename, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(chat.title);
+  const [deleting, setDeleting] = useState(false);
 
   function startEdit(e) {
     e.stopPropagation();
@@ -33,6 +34,21 @@ function SidebarChatRow({ chat, active, onSelect, onRename }) {
     setEditing(false);
     const trimmed = title.trim();
     if (trimmed && trimmed !== chat.title) onRename(chat.id, trimmed);
+  }
+
+  async function confirmDelete(e) {
+    e.stopPropagation();
+    const confirmed = window.confirm(
+      'Eliminare questa chat e tutti i suoi messaggi? L’azione non può essere annullata.',
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await onDelete(chat.id);
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -62,14 +78,46 @@ function SidebarChatRow({ chat, active, onSelect, onRename }) {
         </div>
       )}
       {!editing && (
-        <button
-          type="button"
-          onClick={startEdit}
-          aria-label="Rinomina chat"
-          className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-muted hover:text-content text-xs shrink-0 transition-opacity"
-        >
-          ✎
-        </button>
+        <div className="flex items-center gap-2 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 transition-opacity">
+          <button
+            type="button"
+            onClick={startEdit}
+            disabled={deleting}
+            aria-label="Rinomina chat"
+            title="Rinomina chat"
+            className="text-muted hover:text-content disabled:opacity-50 text-xs transition-colors"
+          >
+            ✎
+          </button>
+          <button
+            type="button"
+            onClick={confirmDelete}
+            disabled={deleting}
+            aria-label="Elimina chat"
+            title="Elimina chat"
+            className="text-muted hover:text-red-600 dark:hover:text-red-400 disabled:opacity-50 transition-colors"
+          >
+            {deleting ? (
+              <span aria-hidden="true" className="text-xs">…</span>
+            ) : (
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
+              >
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M19 6l-1 14H6L5 6" />
+                <path d="M10 11v5M14 11v5" />
+              </svg>
+            )}
+          </button>
+        </div>
       )}
     </li>
   );
@@ -87,10 +135,12 @@ export function Sidebar({
   loading,
   error,
   renameError,
+  deleteError,
   currentChatId,
   onSelectChat,
   onNuovaAnalisi,
   onRenameChat,
+  onDeleteChat,
 }) {
   const { pathname } = useLocation();
   const { logout } = useAuth();
@@ -142,6 +192,27 @@ export function Sidebar({
           >
             <span aria-hidden="true">▤</span> Journal
           </Link>
+          <Link
+            to="/note"
+            onClick={onClose}
+            aria-current={pathname === '/note' ? 'page' : undefined}
+            className={navItemClass(pathname === '/note')}
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4"
+            >
+              <rect x="6" y="3" width="14" height="18" rx="2" />
+              <path d="M10 3v18M3.5 7H8M3.5 12H8M3.5 17H8" />
+            </svg>
+            Note
+          </Link>
         </nav>
 
         {/* Storico */}
@@ -154,6 +225,11 @@ export function Sidebar({
         {renameError && (
           <p role="alert" className="text-red-600 dark:text-red-400 text-sm text-center px-4 pb-2 shrink-0">
             {renameError}
+          </p>
+        )}
+        {deleteError && (
+          <p role="alert" className="text-red-600 dark:text-red-400 text-sm text-center px-4 pb-2 shrink-0">
+            {deleteError}
           </p>
         )}
 
@@ -175,6 +251,11 @@ export function Sidebar({
                 active={chat.id === currentChatId}
                 onSelect={onSelectChat}
                 onRename={onRenameChat}
+                onDelete={async (chatId) => {
+                  const deleted = await onDeleteChat(chatId);
+                  if (deleted && chatId === currentChatId) onNuovaAnalisi();
+                  return deleted;
+                }}
               />
             ))}
           </ul>

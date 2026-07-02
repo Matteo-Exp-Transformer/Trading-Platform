@@ -7,20 +7,20 @@ description: >-
 
 # DB / Supabase — stato reale e regole
 
-> Aggiornato: 2026-07-02. Tabelle in uso: `profiles`, `chats`, `messages`.
+> Aggiornato: 2026-07-02. Tabelle in uso: `profiles`, `chats`, `messages`, `journal_entries`, `notes`.
 > UI/flusso chat: `context/CHAT_ANALISI_CONTEXT.md`; auth: `context/AUTH_CONTEXT.md`;
-> modello account: `context/IMPOSTAZIONI_CONTEXT.md`.
+> modello account: `context/IMPOSTAZIONI_CONTEXT.md`; taccuino: `context/NOTE_CONTEXT.md`.
 
 ## 1. Stato reale
 
-Il DB remoto contiene lo schema applicativo e le policy usate dalla demo. La repository però non
-contiene ancora `supabase/config.toml` né `supabase/migrations/*.sql`: nomi e contenuti delle
-migrazioni sono descritti soltanto nei documenti/test.
+Il DB remoto contiene lo schema applicativo e le policy usate dalla demo. Dal 2026-07-02 la
+repository contiene `supabase/migrations/20260702001623_m9_notes_rls.sql`, allineata alla migrazione
+remota M9. Manca però ancora il baseline locale/versionato M1–M8 e non esiste `supabase/config.toml`.
 
-Questa è una **lacuna critica di riproducibilità**, non il workflow target. Da repository non è
-possibile ricostruire o revisionare offline tabelle, trigger, grant e policy. Prima della prossima
-modifica DB va creato un baseline versionato del remoto in un task dedicato e verificato; non
-inventare SQL “equivalente” dai context.
+Questa resta una **lacuna critica di riproducibilità**, non il workflow target: la repository può
+revisionare M9, ma non ricostruire da zero lo stato precedente. Prima di ulteriori modifiche DB va
+creato un baseline versionato M1–M8 in un task dedicato e verificato; non inventare SQL
+“equivalente” dai context.
 
 ## 2. Schema applicativo noto
 
@@ -78,6 +78,18 @@ verificano l'owner della **chat padre** quando `chat_id` non è null (stessa reg
 Da verificare sul remoto: indice dedicato `messages(user_id)` per FK/RLS e, prima di introdurla,
 utilità di una FK/unique composita `(chat_id, user_id)` per rendere strutturale la coerenza col padre.
 
+### `notes` (M9, 2026-07-02)
+
+- `id uuid` PK; `user_id uuid not null` → `auth.users(id) on delete cascade`
+- `title text not null default ''`, `content text not null default ''`
+- `color text not null default ''` — hex scelto dalla palette client; vuoto = colore tema
+- `font text not null default ''` — chiave della whitelist client; vuoto = sistema
+- `created_at`, `updated_at timestamptz not null default now()`
+
+Indice `(user_id, updated_at desc)`. Trigger BEFORE UPDATE `set_notes_updated_at` con
+`search_path=''` ed EXECUTE revocato. Policy separate `notes_*_own`, limitate a `authenticated`,
+con ownership `user_id = (select auth.uid())`; UPDATE ha sia USING sia WITH CHECK.
+
 ## 3. Modello di accesso
 
 ```
@@ -105,8 +117,14 @@ impostazioni Data API e i `GRANT`: dal 2026-05-30 l'esposizione automatica non v
 - M8 (2026-07-02): `journal_entries` (FU-023) — tabella + indice + trigger `set_journal_updated_at`,
   RLS ON e policy owner-only `journal_*_own` con parent-check su `chat_id`; hardening `search_path`
   della funzione trigger (`m8_hardening_journal_fn_search_path`). Advisor security puliti.
+- M9 (2026-07-02): `notes` — migration locale/remota
+  `20260702001623_m9_notes_rls`; tabella + indice `(user_id, updated_at desc)`, trigger
+  `set_notes_updated_at`, RLS ON e quattro policy owner-only `notes_*_own`. Advisor security:
+  nessun finding su schema/RLS/funzione Note; resta il warning globale Auth
+  `auth_leaked_password_protection`, fuori scope M9.
 
-Questa lista orienta soltanto; non sostituisce SQL versionato né introspezione del remoto.
+M9 è revisionabile nel file SQL versionato; per M1–M8 questa lista orienta soltanto e non sostituisce
+il baseline né l'introspezione del remoto.
 
 ## 5. Workflow obbligatorio per il prossimo task DB
 
@@ -135,7 +153,8 @@ finding M8 da risolvere con un design server-authoritative; non “correggere”
 ## 7. Test
 
 Le suite `server/test/*-rls.test.js` mutano il progetto remoto: prima di eseguirle serve conferma
-dell'ambiente. I test correnti coprono isolamento profiles/chats/messages e parent ownership, ma
+dell'ambiente. I test correnti coprono isolamento profiles/chats/messages/journal_entries/notes,
+parent ownership e cancellazione chat owner-only (diniego cross-user + cascade sui messaggi), ma
 non coprono ancora:
 
 - `ai_model` non scrivibile dall'utente;
@@ -155,5 +174,6 @@ I test negativi devono distinguere un vero rifiuto RLS da un errore generico: no
 | Login/provisioning/signup | `context/AUTH_CONTEXT.md` |
 | Chat, attachments, follow-up | `context/CHAT_ANALISI_CONTEXT.md` |
 | Modello account/tema | `context/IMPOSTAZIONI_CONTEXT.md` |
+| Note / taccuino | `context/NOTE_CONTEXT.md` |
 | Route/storia agente | `aree/AGENTE_AI_SKILL.md` |
 | Test e ambiente remoto | `aree/TESTING_SKILL.md` |

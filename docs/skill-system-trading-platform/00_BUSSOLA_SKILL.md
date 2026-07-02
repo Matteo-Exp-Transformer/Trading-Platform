@@ -80,6 +80,7 @@ file da modificare. Se una zona nuova non ha context, si applica la regola anti-
 | Estetica / stile UI (palette slate + accento ciano, sobrio) | `context/ESTETICA_CONTEXT.md` ✅ |
 | Home / landing dopo login (sfondo animato, hero, CTA) | `context/HOME_CONTEXT.md` ✅ (+ `ESTETICA_CONTEXT` per i token) |
 | Journal / diario di trading (voci, esiti, «salva nel journal») | `context/JOURNAL_CONTEXT.md` ✅ (+ `aree/DB_SUPABASE_SKILL.md` per `journal_entries`) |
+| Note / taccuino personale (crea, modifica, elimina, font/colore) | `context/NOTE_CONTEXT.md` ✅ (+ `aree/DB_SUPABASE_SKILL.md` per `notes`) |
 | Blindatura agente / dominio / jailbreak / canary / classificatore | `context/SICUREZZA_CONTEXT.md` ✅ + `aree/AGENTE_AI_SKILL.md` ⚠️ LOCK §2 |
 | DB / schema / migrazioni / RLS (Supabase) | `aree/DB_SUPABASE_SKILL.md` ✅ ⚠️ deep (§6) |
 | Test / CI | `aree/TESTING_SKILL.md` |
@@ -101,14 +102,16 @@ Se **nessuna riga** della tabella matcha il task, o matchano **più righe in con
 
 ## 1. Mappa del progetto
 
-Demo funzionante con **Login · Home · Chat · Sidebar/Storico · Impostazioni**. M0–M7-bis sono
-implementate; M8 (hardening, QA, deploy) è in corso.
+Demo funzionante con **Login · Home · Chat · Sidebar/Storico · Journal · Note · Impostazioni**.
+M0–M7-bis sono implementate; M8 (hardening, QA, deploy) è in corso.
 
 | Area | Entry point reale | Note |
 |------|-------------------|------|
-| Routing | `client/src/App.jsx` | `/login`, `/`, `/nuova-analisi`, `/impostazioni` |
+| Routing | `client/src/App.jsx` | `/login`, `/`, `/nuova-analisi`, `/journal`, `/note`, `/impostazioni` |
 | Home | `client/src/pages/Home.jsx` + `components/home/*` | landing scura, mercati, ultima sessione, card |
 | Chat | `client/src/pages/Chat.jsx` + `components/chat/*` | form, vision, streaming, max 5 follow-up |
+| Journal | `client/src/pages/Journal.jsx` + `components/journal/*` | diario owner-only integrato con le analisi |
+| Note | `client/src/pages/Notes.jsx` + `components/notes/*` | taccuino owner-only con font e colore |
 | Motore agente / sicurezza | `server/src/agent/*` + `server/src/routes/agent.js` + `kit/` | kit server-side, classificatore, canary |
 | Auth / dati | `client/src/auth/*` + Supabase | sessione e owner-only via RLS |
 | Sidebar / storico | `client/src/components/layout/*` | drawer condiviso |

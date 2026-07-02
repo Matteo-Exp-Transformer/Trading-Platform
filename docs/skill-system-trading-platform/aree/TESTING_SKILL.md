@@ -29,7 +29,7 @@ description: >-
 
 - **Una funzione = almeno un test** (richiesta utente). Prima di scriverne uno nuovo, **cerca se
   esiste già** un test utile ed **estendilo** invece di duplicare.
-- **Niente merge senza test verdi.** `npm run validate` è il gate completo, ma oggi include due
+- **Niente merge senza test verdi.** `npm run validate` è il gate completo, ma oggi include più
   suite RLS che mutano il Supabase remoto: prima va confermato l'ambiente.
 - **I test RLS live NON toccano dati di produzione utente**: creano e cancellano **utenti/righe usa-e-getta**
   sul progetto Supabase (via `service_role`). Non puntarli a dati reali di clienti; non lasciarli sporchi.

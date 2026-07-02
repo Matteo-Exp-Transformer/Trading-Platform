@@ -21,7 +21,7 @@ describe('FeatureCards', () => {
     expect(within(section).getByRole('heading', { name: 'Analisi assistita' })).toBeInTheDocument();
     expect(within(section).getByRole('heading', { name: 'Memoria sessioni' })).toBeInTheDocument();
     expect(within(section).getByRole('heading', { name: 'Journal' })).toBeInTheDocument();
-    expect(within(section).getByRole('heading', { name: 'Monitoraggio mercati' })).toBeInTheDocument();
+    expect(within(section).getByRole('heading', { name: 'Crea le tue note' })).toBeInTheDocument();
   });
 
   it('la card Journal è un link verso /journal', () => {
@@ -30,9 +30,17 @@ describe('FeatureCards', () => {
     expect(link).toHaveAttribute('href', '/journal');
   });
 
-  it('le altre card restano descrittive: un solo link (Journal)', () => {
+  it('la card Crea le tue note apre /note', () => {
     renderCards();
-    expect(screen.getAllByRole('link')).toHaveLength(1);
+    expect(screen.getByRole('link', { name: /Crea le tue note/i })).toHaveAttribute(
+      'href',
+      '/note',
+    );
+  });
+
+  it('Analisi assistita e Memoria sessioni restano descrittive', () => {
+    renderCards();
+    expect(screen.getAllByRole('link')).toHaveLength(2);
     expect(screen.queryByRole('button')).toBeNull();
   });
 });

@@ -42,17 +42,19 @@ function IconJournal(props) {
   );
 }
 
-function IconMercati(props) {
+function IconNote(props) {
   return (
     <svg {...iconProps} {...props}>
-      <path d="M3 17l6-6 4 4 8-8" />
-      <path d="M15 7h6v6" />
+      <rect x="5" y="3" width="15" height="18" rx="2" />
+      <path d="M9 3v18" />
+      <path d="M3 7h4M3 11h4M3 15h4" />
+      <path d="M12.5 8H17M12.5 12H17M12.5 16H15" />
     </svg>
   );
 }
 
 // Panoramica dell'app (FU-021): 4 card che riassumono cosa fa la piattaforma. Le card con `to`
-// sono navigabili verso una pagina reale (Journal, FU-023); le altre restano descrittive. Nessun
+// sono navigabili verso una pagina reale (Journal e Note); le altre restano descrittive. Nessun
 // dato/licenza di terzi. Le azioni principali stanno nei CTA dell'hero.
 const FEATURES = [
   {
@@ -75,10 +77,11 @@ const FEATURES = [
     to: '/journal',
   },
   {
-    key: 'mercati',
-    title: 'Monitoraggio mercati',
-    desc: 'Tieni d’occhio le sessioni di Londra, New York e Tokyo direttamente dalla Home.',
-    Icon: IconMercati,
+    key: 'note',
+    title: 'Crea le tue note',
+    desc: 'Raccogli idee e promemoria in un taccuino personale, con font e colore a tua scelta.',
+    Icon: IconNote,
+    to: '/note',
   },
 ];
 
